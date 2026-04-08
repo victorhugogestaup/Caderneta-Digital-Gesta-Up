@@ -358,17 +358,39 @@ backend/src/
 ## **FASE 4: POLIMENTO E DEPLOY (Semana 4)**
 *Objetivo: Testes abrangentes, otimização e lançamento*
 
-### **4.1 Progressive Web App**
-- [ ] **Implementar PWA completo**
-  - Manifest.json otimizado
-  - Service worker inteligente
-  - Cache estratégico
-  - Install prompt
-- [ ] **Otimização de performance**
-  - Code splitting por caderneta
-  - Lazy loading
-  - Bundle size <2MB
-  - Compatibilidade Android 6+
+### **4.1 Progressive Web App** ✅ CONCLUÍDO (08/04/2026)
+- [x] **Manifest.json otimizado** (`vite.config.ts`)
+  - 8 tamanhos de ícones (72x72 a 512x512) com purpose `maskable any`
+  - Screenshots para rich install (home.png, form.png)
+  - Metadados: lang pt-BR, categories [business, productivity, utilities]
+  - Descrição expandida com funcionalidades
+  - display: standalone, orientation: portrait
+- [x] **Service worker inteligente** (vite-plugin-pwa)
+  - Register type: `prompt` (usuário controla quando instalar)
+  - Cache estratégico:
+    - Google Fonts: CacheFirst (1 ano)
+    - Imagens: CacheFirst (30 dias, max 50 entries)
+    - Assets locais: Precache automático
+  - skipWaiting: true, clientsClaim: true, cleanupOutdatedCaches: true
+  - Dev mode desabilitado (SW só em produção)
+- [x] **Install Prompt** (`components/InstallPrompt.tsx`)
+  - Detecta evento `beforeinstallprompt`
+  - Banner fixo bottom com ícone e descrição
+  - Botões: "INSTALAR APP" / "AGORA NÃO"
+  - Respeita rejeição do usuário (1 semana antes de mostrar novamente)
+  - Verifica se já está instalado (display-mode: standalone)
+- [x] **Code splitting / Lazy loading** (`App.tsx`)
+  - Todas as 12 páginas de cadernetas carregadas via `React.lazy()`
+  - Suspense com fallback `<PageLoader />` (animação de loading)
+  - Chunks separados:
+    - vendor: react, react-dom, react-router-dom (151KB)
+    - state: redux, toolkit, persist (40KB)
+    - ui: lucide-react
+    - Páginas individuais: ~7KB cada (RodeioPage, etc.)
+  - Terser: drop_console e drop_debugger habilitados
+  - Target: es2015 (compatível Android 6+)
+- [x] **Bundle size**: Total ~322KB precached (muito abaixo do limite 2MB)
+- [x] **Build final**: Múltiplos chunks gerados, PWA com 27 entries
 
 ### **4.2 Testes Abrangentes**
 - [ ] **Testes de conflito**
