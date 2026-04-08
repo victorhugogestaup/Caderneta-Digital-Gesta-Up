@@ -18,11 +18,13 @@ const CURRENT_VERSION = {
 
 versionRouter.get('/version', (req, res) => {
   try {
+    console.log('API /version chamada de:', req.headers.origin)
     res.json({
       success: true,
       data: CURRENT_VERSION
     })
   } catch (error) {
+    console.error('Erro na API /version:', error)
     res.status(500).json({
       success: false,
       error: 'Erro ao obter informações da versão'

@@ -17,18 +17,29 @@ app.use(express.json({ limit: '10mb' }))
 app.use(securityHeaders)
 app.use(requestLogger)
 
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173,http://localhost:5174,https://gestaupcompany.github.io').split(',')
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://gestaupcompany.github.io',
+  'https://gestaupcompany.github.io/Caderneta-Digital-Gesta-Up'
+]
+
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some((o) => origin.startsWith(o.trim()))) {
+  origin: function (origin, callback) {
+    // Permitir requests sem origin (como mobile apps ou curl)
+    if (!origin) return callback(null, true)
+    
+    if (allowedOrigins.some(allowed => origin.startsWith(allowed))) {
       callback(null, true)
     } else {
-      callback(new Error(`Origem não permitida: ${origin}`))
+      console.log('CORS bloqueado para origin:', origin)
+      callback(null, false) // Não permitir, mas não lançar erro
     }
   },
   methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
+  optionsSuccessStatus: 200
 }))
 
 const standardLimiter = rateLimit({
