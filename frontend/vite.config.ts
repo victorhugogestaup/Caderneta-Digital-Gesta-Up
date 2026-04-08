@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { splitVendorChunkPlugin } from 'vite'
 
 export default defineConfig({
+  base: '/Caderneta-Digital-Gesta-Up/',
   plugins: [
     react(),
     splitVendorChunkPlugin(),

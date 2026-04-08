@@ -426,11 +426,17 @@ backend/src/
   - Volume de dados grande
   - Performance sob estresse
 
-### **4.3 Deploy e Monitoramento**
-- [ ] **Configurar produção**
-  - Frontend: Vercel (PWA instalável)
-  - Backend: Railway (Node.js + Redis)
-  - Google Sheets: Configuração por fazenda
+### **4.3 Deploy e Monitoramento** 
+- [x] **Configurar GitHub Pages** (Frontend PWA)
+  - Workflow: `.github/workflows/deploy.yml`
+  - Base path: `/Caderneta-Digital-Gesta-Up/`
+  - Deploy automático no push para master
+  - URL: https://victorhugogestaup.github.io/Caderneta-Digital-Gesta-Up/
+- [x] **Configurar Railway** (Backend)
+  - Workflow: `.github/workflows/backend-deploy.yml`
+  - Deploy automático quando `backend/` muda
+  - URL: https://cadernetas-backend-production.up.railway.app
+- [x] **README.md** com instruções completas
 - [ ] **Implementar monitoramento**
   - Sentry para erros
   - Logs estruturados

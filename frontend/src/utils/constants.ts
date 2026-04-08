@@ -1,4 +1,4 @@
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://cadernetas-backend-production.up.railway.app'
 
 export const CADERNETAS = [
   { id: 'maternidade', label: 'MATERNIDADE', emoji: '🐄', sheetName: 'Maternidade Cria', disponivel: true },
