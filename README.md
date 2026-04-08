@@ -6,7 +6,7 @@ Aplicativo PWA para peões de fazenda registrar dados de produção offline e si
 
 ### **Frontend (PWA)**
 - **GitHub Pages**: Deploy automático via GitHub Actions
-- **URL**: https://victorhugogestaup.github.io/Caderneta-Digital-Gesta-Up/
+- **URL**: https://gestaupcompany.github.io/Caderneta-Digital-Gesta-Up/
 - **PWA**: Instalável via banner no navegador
 
 ### **Backend**

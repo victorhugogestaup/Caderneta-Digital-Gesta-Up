@@ -431,7 +431,7 @@ backend/src/
   - Workflow: `.github/workflows/deploy.yml`
   - Base path: `/Caderneta-Digital-Gesta-Up/`
   - Deploy automático no push para master
-  - URL: https://victorhugogestaup.github.io/Caderneta-Digital-Gesta-Up/
+  - URL: https://gestaupcompany.github.io/Caderneta-Digital-Gesta-Up/
 - [x] **Configurar Railway** (Backend)
   - Workflow: `.github/workflows/backend-deploy.yml`
   - Deploy automático quando `backend/` muda
