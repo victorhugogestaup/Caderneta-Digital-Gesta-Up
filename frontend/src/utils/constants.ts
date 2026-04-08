@@ -1,4 +1,4 @@
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://cadernetas-backend.vercel.app'
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://caderneta-digital-gesta-up.vercel.app'
 
 export const CADERNETAS = [
   { id: 'maternidade', label: 'MATERNIDADE', emoji: '🐄', sheetName: 'Maternidade Cria', disponivel: true },
