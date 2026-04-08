@@ -390,7 +390,25 @@ backend/src/
   - Terser: drop_console e drop_debugger habilitados
   - Target: es2015 (compatível Android 6+)
 - [x] **Bundle size**: Total ~322KB precached (muito abaixo do limite 2MB)
-- [x] **Build final**: Múltiplos chunks gerados, PWA com 27 entries
+- [x] **Build final**: Múltiplos chunks gerados, PWA com 28 entries
+
+### **4.1.x - Auditoria Fase 4.1** ✅ CONCLUÍDA (08/04/2026)
+
+**Bug encontrado e corrigido:**
+
+1. **Ícones PNG do PWA ausentes** (`vite.config.ts`)
+   - **Problema**: Manifest referenciava 8 arquivos PNG (icon-72x72.png a icon-512x512.png) que não existiam em `public/`
+   - **Impacto**: PWA falharia instalação/validação por ícones 404
+   - **Correção**: Substituídos por ícones SVG existentes (`favicon.svg`, `icons.svg`) com múltiplos sizes declarados
+
+**Verificações realizadas:**
+- ✅ Lazy loading funcionando — 12 chunks separados para cadernetas
+- ✅ Suspense com PageLoader como fallback
+- ✅ InstallPrompt detecta `beforeinstallprompt` e respeita rejeição (1 semana)
+- ✅ Build gera múltiplos chunks: vendor (151KB), state (40KB), páginas (~7KB cada)
+- ✅ Bundle total ~322KB (muito abaixo do limite 2MB)
+- ✅ TypeScript compila sem erros (`tsc --noEmit`)
+- ✅ Build final: 28 entries precached, service worker gerado
 
 ### **4.2 Testes Abrangentes**
 - [ ] **Testes de conflito**
