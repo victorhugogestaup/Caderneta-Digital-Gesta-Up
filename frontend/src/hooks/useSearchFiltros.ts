@@ -32,19 +32,23 @@ export function useSearchFiltros(registros: Registro[]) {
     }
 
     // Filtro de período
-    if (filtros.dataInicio) {
+    const isValidDateFormat = (date: string): boolean => /^\d{2}\/\d{2}\/\d{4}$/.test(date)
+
+    if (filtros.dataInicio && isValidDateFormat(filtros.dataInicio)) {
       const [dia, mes, ano] = filtros.dataInicio.split('/')
       const inicio = new Date(`${ano}-${mes}-${dia}`).getTime()
       resultado = resultado.filter((r) => {
+        if (!isValidDateFormat(String(r.data))) return true
         const dataRegistro = new Date(String(r.data).split('/').reverse().join('-')).getTime()
         return dataRegistro >= inicio
       })
     }
 
-    if (filtros.dataFim) {
+    if (filtros.dataFim && isValidDateFormat(filtros.dataFim)) {
       const [dia, mes, ano] = filtros.dataFim.split('/')
       const fim = new Date(`${ano}-${mes}-${dia}`).getTime()
       resultado = resultado.filter((r) => {
+        if (!isValidDateFormat(String(r.data))) return true
         const dataRegistro = new Date(String(r.data).split('/').reverse().join('-')).getTime()
         return dataRegistro <= fim
       })

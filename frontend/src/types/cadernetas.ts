@@ -62,7 +62,7 @@ export interface RegistroRodeio extends Registro {
   procedimentos: string[]
 }
 
-export interface RegistroSuplemantacao extends Registro {
+export interface RegistroSuplementacao extends Registro {
   tratador: string
   pasto: string
   numeroLote: string
