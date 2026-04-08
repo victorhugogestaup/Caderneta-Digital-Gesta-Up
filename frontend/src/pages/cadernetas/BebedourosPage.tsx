@@ -1,0 +1,215 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button, Input, DatePicker, Radio, ValidationMessage } from '../../components/ui'
+import { salvarRegistro } from '../../services/api'
+import { todayBR } from '../../utils/formatDate'
+
+const TIPOS_GADO = [
+  { value: 'Cria', label: 'CRIA', icon: '🍼' },
+  { value: 'Recria', label: 'RECREIA', icon: '🌱' },
+  { value: 'Engorda', label: 'ENGORDA', icon: '🥩' },
+]
+
+const CATEGORIAS = [
+  { value: 'Vaca', label: 'VACA' },
+  { value: 'Touro', label: 'TOURO' },
+  { value: 'Boi', label: 'BOI' },
+  { value: 'Bezerro', label: 'BEZERRO' },
+  { value: 'Garrote', label: 'GARROTE' },
+  { value: 'Novilha', label: 'NOVILHA' },
+]
+
+const LEITURAS_BEBEDOURO = [
+  { value: '1', label: '1', icon: '1️⃣' },
+  { value: '2', label: '2', icon: '2️⃣' },
+  { value: '3', label: '3', icon: '3️⃣' },
+]
+
+interface FormState {
+  data: string
+  responsavel: string
+  pasto: string
+  numeroLote: string
+  gado: string
+  categoria: string
+  leituraBebedouro: string
+  numeroBebedouro: string
+  observacao: string
+}
+
+const makeInitial = (): FormState => ({
+  data: todayBR(),
+  responsavel: '',
+  pasto: '',
+  numeroLote: '',
+  gado: '',
+  categoria: '',
+  leituraBebedouro: '',
+  numeroBebedouro: '',
+  observacao: '',
+})
+
+export default function BebedourosPage() {
+  const navigate = useNavigate()
+  const [form, setForm] = useState<FormState>(makeInitial)
+  const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
+  const [salvando, setSalvando] = useState(false)
+  const [sucesso, setSucesso] = useState(false)
+
+  const set = (field: keyof FormState) => (val: string) =>
+    setForm((prev) => ({ ...prev, [field]: val }))
+
+  const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const getError = (field: string) => errors.find((e) => e.field === field)?.message
+
+  const handleSalvar = async () => {
+    setSalvando(true)
+    setErrors([])
+    setSucesso(false)
+
+    const result = await salvarRegistro('bebedouros', {
+      data: form.data,
+      responsavel: form.responsavel,
+      pasto: form.pasto,
+      numeroLote: form.numeroLote,
+      gado: form.gado,
+      categoria: form.categoria,
+      leituraBebedouro: form.leituraBebedouro ? Number(form.leituraBebedouro) : null,
+      numeroBebedouro: form.numeroBebedouro,
+      observacao: form.observacao,
+    })
+
+    setSalvando(false)
+    if (!result.success && result.errors) {
+      setErrors(result.errors)
+    } else {
+      setSucesso(true)
+      setForm(makeInitial())
+      setTimeout(() => setSucesso(false), 2500)
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      <header className="bg-black text-white flex items-center px-4 py-5">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-yellow-400 font-bold text-xl mr-4 min-h-[48px] px-2"
+        >
+          ← VOLTAR
+        </button>
+        <h1 className="text-xl font-bold flex-1">💧 BEBEDOUROS</h1>
+        <button
+          onClick={() => navigate('/caderneta/bebedouros/lista')}
+          className="text-yellow-400 font-bold text-base min-h-[48px] px-2"
+        >
+          LISTA
+        </button>
+      </header>
+
+      <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
+        {sucesso && (
+          <div className="bg-green-100 border-2 border-green-500 rounded-2xl p-4 text-center">
+            <p className="text-xl font-bold text-green-800">✅ REGISTRO SALVO!</p>
+          </div>
+        )}
+        {errors.length > 0 && <ValidationMessage errors={errors} />}
+
+        {/* Seção 1: Dados Principais */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
+          <DatePicker label="DATA" value={form.data} onChange={set('data')} error={getError('data')} />
+          <Input
+            label="RESPONSÁVEL"
+            placeholder="Nome do responsável"
+            value={form.responsavel}
+            onChange={setInput('responsavel')}
+            error={getError('responsavel')}
+          />
+          <Input
+            label="PASTO"
+            placeholder="Ex: Pasto 12"
+            value={form.pasto}
+            onChange={setInput('pasto')}
+            error={getError('pasto')}
+          />
+          <Input
+            label="NÚMERO DO LOTE"
+            placeholder="Ex: 03"
+            value={form.numeroLote}
+            onChange={setInput('numeroLote')}
+            error={getError('numeroLote')}
+            inputMode="numeric"
+          />
+        </div>
+
+        {/* Seção 2: Classificação */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">2. CLASSIFICAÇÃO DO GADO</h2>
+          <Radio
+            name="gado"
+            label="TIPO DE GADO"
+            options={TIPOS_GADO}
+            value={form.gado}
+            onChange={set('gado')}
+            error={getError('gado')}
+          />
+          <Radio
+            name="categoria"
+            label="CATEGORIA"
+            options={CATEGORIAS}
+            value={form.categoria}
+            onChange={set('categoria')}
+            error={getError('categoria')}
+            direction="vertical"
+          />
+        </div>
+
+        {/* Seção 3: Bebedouro */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">3. BEBEDOURO</h2>
+          <Radio
+            name="leituraBebedouro"
+            label="LEITURA DE BEBEDOURO (1 a 3)"
+            options={LEITURAS_BEBEDOURO}
+            value={form.leituraBebedouro}
+            onChange={set('leituraBebedouro')}
+            error={getError('leituraBebedouro')}
+          />
+          <Input
+            label="NÚMERO DO BEBEDOURO"
+            placeholder="Ex: 5"
+            value={form.numeroBebedouro}
+            onChange={setInput('numeroBebedouro')}
+            error={getError('numeroBebedouro')}
+            inputMode="numeric"
+            type="number"
+            min="0"
+          />
+        </div>
+
+        {/* Seção 4: Observação */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">4. OBSERVAÇÃO</h2>
+          <Input
+            label="OBSERVAÇÃO"
+            placeholder="Detalhes adicionais (opcional)"
+            value={form.observacao}
+            onChange={setInput('observacao')}
+          />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <Button onClick={handleSalvar} variant="success" loading={salvando} icon="💾">
+            SALVAR
+          </Button>
+          <Button onClick={() => setForm(makeInitial())} variant="secondary" icon="🧹">
+            LIMPAR
+          </Button>
+        </div>
+      </main>
+    </div>
+  )
+}

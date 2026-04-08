@@ -78,12 +78,12 @@ export function validatePastagens(data: Record<string, unknown>): ValidationResu
     errors.push({ field: 'numeroLote', message: 'Número do lote é obrigatório' })
   if (!isNonEmptyString(data.pastoSaida))
     errors.push({ field: 'pastoSaida', message: 'Pasto de saída é obrigatório' })
-  if (!isScaleValue(data.avaliacaoSaida, 1, 5))
-    errors.push({ field: 'avaliacaoSaida', message: 'Avaliação de saída deve ser entre 1 e 5' })
+  if (!isScaleValue(data.avaliacaoSaida, 1, 5, true))
+    errors.push({ field: 'avaliacaoSaida', message: 'Avaliação de saída é obrigatória (1 a 5)' })
   if (!isNonEmptyString(data.pastoEntrada))
     errors.push({ field: 'pastoEntrada', message: 'Pasto de entrada é obrigatório' })
-  if (!isScaleValue(data.avaliacaoEntrada, 1, 5))
-    errors.push({ field: 'avaliacaoEntrada', message: 'Avaliação de entrada deve ser entre 1 e 5' })
+  if (!isScaleValue(data.avaliacaoEntrada, 1, 5, true))
+    errors.push({ field: 'avaliacaoEntrada', message: 'Avaliação de entrada é obrigatória (1 a 5)' })
 
   const categorias = ['vaca', 'touro', 'bezerro', 'boiMagro', 'garrote', 'novilha']
   const algumPreenchido = categorias.some(
@@ -112,19 +112,25 @@ export function validateRodeio(data: Record<string, unknown>): ValidationResult 
   if (!algumPreenchido)
     errors.push({ field: 'categorias', message: 'Preencha ao menos uma categoria de animal' })
 
-  const avaliacoesSN = [
-    'escoreGadoIdeal', 'aguaBoaBebedouro', 'pastagemAdequada', 'animaisDoentes',
-    'cercasCochos', 'carrapatosMoscas', 'animaisEntrevados', 'animalMorto',
-  ]
-  avaliacoesSN.forEach((campo) => {
+  const avaliacoesSN: Record<string, string> = {
+    escoreGadoIdeal: 'Escore do gado ideal',
+    aguaBoaBebedouro: 'Água / Bebedouro',
+    pastagemAdequada: 'Pastagem adequada',
+    animaisDoentes: 'Animais doentes',
+    cercasCochos: 'Cercas / Cochos',
+    carrapatosMoscas: 'Carrapatos / Moscas',
+    animaisEntrevados: 'Animais entrevados',
+    animalMorto: 'Animal morto',
+  }
+  Object.entries(avaliacoesSN).forEach(([campo, label]) => {
     if (!isSnBoolean(data[campo]))
-      errors.push({ field: campo, message: `${campo} deve ser S ou N` })
+      errors.push({ field: campo, message: `${label}: selecione SIM ou NÃO` })
   })
 
-  if (!isScaleValue(data.escoreFezes, 1, 5))
-    errors.push({ field: 'escoreFezes', message: 'Escore de fezes deve ser entre 1 e 5' })
-  if (!isScaleValue(data.equipe, 1, 5))
-    errors.push({ field: 'equipe', message: 'Escore da equipe deve ser entre 1 e 5' })
+  if (!isScaleValue(data.escoreFezes, 1, 5, true))
+    errors.push({ field: 'escoreFezes', message: 'Escore de fezes é obrigatório (1 a 5)' })
+  if (!isScaleValue(data.equipe, 1, 5, true))
+    errors.push({ field: 'equipe', message: 'Avaliação da equipe é obrigatória (1 a 5)' })
 
   return { isValid: errors.length === 0, errors }
 }

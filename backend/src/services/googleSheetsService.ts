@@ -20,7 +20,7 @@ function getAuth() {
   })
 }
 
-function extractSpreadsheetId(url: string): string {
+export function extractSpreadsheetId(url: string): string {
   const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
   if (!match) throw new Error('Link da planilha inválido')
   return match[1]

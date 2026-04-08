@@ -1,13 +1,13 @@
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
 
 export const CADERNETAS = [
-  { id: 'maternidade', label: 'MATERNIDADE', emoji: '🐄', sheetName: 'Maternidade Cria' },
-  { id: 'pastagens', label: 'TROCA DE PASTOS', emoji: '🌾', sheetName: 'Troca de Pastos' },
-  { id: 'rodeio', label: 'RODEIO GADO', emoji: '🤠', sheetName: 'Rodeio Gado' },
-  { id: 'suplementacao', label: 'SUPLEMENTAÇÃO', emoji: '🥄', sheetName: 'Suplementação' },
-  { id: 'bebedouros', label: 'BEBEDOUROS', emoji: '💧', sheetName: 'Bebedouros' },
-  { id: 'movimentacao', label: 'MOVIMENTAÇÃO', emoji: '🚚', sheetName: 'Movimentação' },
-] as const
+  { id: 'maternidade', label: 'MATERNIDADE', emoji: '🐄', sheetName: 'Maternidade Cria', disponivel: true },
+  { id: 'pastagens', label: 'TROCA DE PASTOS', emoji: '🌾', sheetName: 'Troca de Pastos', disponivel: true },
+  { id: 'rodeio', label: 'RODEIO GADO', emoji: '🤠', sheetName: 'Rodeio Gado', disponivel: true },
+  { id: 'suplementacao', label: 'SUPLEMENTAÇÃO', emoji: '🥄', sheetName: 'Suplementação', disponivel: true },
+  { id: 'bebedouros', label: 'BEBEDOUROS', emoji: '💧', sheetName: 'Bebedouros', disponivel: true },
+  { id: 'movimentacao', label: 'MOVIMENTAÇÃO', emoji: '🚚', sheetName: 'Movimentação', disponivel: true },
+]
 
 export const CATEGORIAS_ANIMAL = ['Vaca', 'Touro', 'Boi', 'Bezerro', 'Garrote', 'Novilha'] as const
 
