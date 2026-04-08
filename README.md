@@ -12,8 +12,15 @@ Aplicativo PWA para peões de fazenda registrar dados de produção offline e si
 ### **Backend**
 - **Vercel Serverless**: Node.js + Express
 - **URL**: https://cadernetas-backend.vercel.app
-- **Deploy**: Automático quando há mudanças em `backend/`
+- **Deploy**: Automático via Vercel (sem GitHub Actions)
 - **Custo**: 100% gratuito (100k invocações/mês)
+
+#### **Setup Vercel:**
+1. Importe repositório: https://vercel.com/new
+2. Conecte: https://github.com/GestaUpCompany/Caderneta-Digital-Gesta-Up
+3. Root Directory: `backend`
+4. Framework: Other
+5. Deploy
 
 ## **Setup Local**
 
