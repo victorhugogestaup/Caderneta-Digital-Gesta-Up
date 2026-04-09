@@ -6,7 +6,7 @@ import { todayBR } from '../../utils/formatDate'
 
 const TIPOS_GADO = [
   { value: 'Cria', label: 'CRIA', icon: '🍼' },
-  { value: 'Recria', label: 'RECREIA', icon: '🌱' },
+  { value: 'Recria', label: 'RECRIA', icon: '🌱' },
   { value: 'Engorda', label: 'ENGORDA', icon: '🥩' },
 ]
 

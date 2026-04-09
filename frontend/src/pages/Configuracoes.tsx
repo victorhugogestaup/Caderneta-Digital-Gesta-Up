@@ -83,9 +83,9 @@ export default function Configuracoes() {
           variant="ghost" 
           size="sm"
           fullWidth={false}
-          className="mr-3"
+          className="mr-3 text-white hover:text-gray-200"
         >
-          ← VOLTAR
+          VOLTAR
         </Button>
         <h1 className="text-xl font-bold">CONFIGURAÇÕES</h1>
       </header>

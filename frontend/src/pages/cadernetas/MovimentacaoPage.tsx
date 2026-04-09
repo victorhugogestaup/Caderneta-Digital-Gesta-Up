@@ -43,6 +43,7 @@ interface FormState {
   novilha: boolean
   tropa: boolean
   outros: boolean
+  outrosTexto: string
 }
 
 const makeInitial = (): FormState => ({
@@ -63,6 +64,7 @@ const makeInitial = (): FormState => ({
   novilha: false,
   tropa: false,
   outros: false,
+  outrosTexto: '',
 })
 
 export default function MovimentacaoPage() {
@@ -84,10 +86,21 @@ export default function MovimentacaoPage() {
     setErrors([])
     setSucesso(false)
 
-    const categoriasMarcadas: string[] = []
-    CATEGORIAS.forEach(({ campo }) => {
-      if (form[campo as keyof FormState]) categoriasMarcadas.push(campo)
-    })
+    // Montar texto da coluna Tropa com categorias selecionadas + texto de Outros
+    const tropaParts: string[] = []
+    if (form.vaca) tropaParts.push('Vaca')
+    if (form.touro) tropaParts.push('Touro')
+    if (form.boiGordo) tropaParts.push('Boi Gordo')
+    if (form.boiMagro) tropaParts.push('Boi Magro')
+    if (form.garrote) tropaParts.push('Garrote')
+    if (form.bezerro) tropaParts.push('Bezerro')
+    if (form.novilha) tropaParts.push('Novilha')
+    if (form.tropa) tropaParts.push('Tropa')
+    if (form.outros && form.outrosTexto.trim()) {
+      tropaParts.push(form.outrosTexto.trim())
+    }
+    
+    const tropaTexto = tropaParts.join(', ')
 
     const result = await salvarRegistro('movimentacao', {
       data: form.data,
@@ -105,9 +118,9 @@ export default function MovimentacaoPage() {
       garrote: form.garrote ? 'S' : 'N',
       bezerro: form.bezerro ? 'S' : 'N',
       novilha: form.novilha ? 'S' : 'N',
-      tropa: form.tropa ? 'S' : 'N',
-      outros: form.outros ? 'S' : 'N',
-      categoriasMarcadas,
+      tropa: tropaTexto, // Enviar texto combinado em vez de S/N
+      outros: '', // Enviar vazio pois não será mais usado
+      categoriasMarcadas: [],
     })
 
     setSalvando(false)
@@ -215,6 +228,15 @@ export default function MovimentacaoPage() {
               />
             ))}
           </div>
+          {form.outros && (
+            <Input
+              label="OUTROS (descreva a categoria)"
+              placeholder="Ex: Reprodutor, Matriz, etc."
+              value={form.outrosTexto}
+              onChange={(e) => setForm((p) => ({ ...p, outrosTexto: e.target.value }))}
+              error={getError('outrosTexto')}
+            />
+          )}
         </div>
 
         {/* Seção 4: Motivo */}

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Button } from '../components/ui'
 import { CADERNETAS } from '../utils/constants'
 import { useSelector } from 'react-redux'
@@ -7,6 +8,19 @@ import { RootState } from '../store/store'
 export default function Home() {
   const navigate = useNavigate()
   const { configurado, fazenda } = useSelector((state: RootState) => state.config)
+
+  // Verificar primeiro acesso e redirecionar automaticamente
+  useEffect(() => {
+    const primeiroAcesso = localStorage.getItem('primeiro-acesso')
+    
+    if (!primeiroAcesso) {
+      // Marcar que o primeiro acesso foi feito
+      localStorage.setItem('primeiro-acesso', 'true')
+      
+      // Redirecionar automaticamente para configurações
+      navigate('/configuracoes')
+    }
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
