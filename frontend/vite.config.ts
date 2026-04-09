@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'logo-gestaup-app-cadernetadigital.png'],
       manifest: {
-        name: 'Cadernetas Digitais - Gestão Rural',
-        short_name: 'Cadernetas',
+        name: "Gesta'Up Cadernetas Digitais",
+        short_name: "Gesta'Up",
         description: 'Cadernetas de campo para peões de fazenda. Registre dados de maternidade, pastagens, rodeio, suplementação, bebedouros e movimentação offline e sincronize com Google Sheets.',
         theme_color: '#1a3a2a',
         background_color: '#ffffff',

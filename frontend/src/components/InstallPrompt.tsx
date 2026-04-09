@@ -11,6 +11,7 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [showDownloadBanner, setShowDownloadBanner] = useState(false)
 
   useEffect(() => {
     // Verifica se já está instalado
@@ -50,6 +51,7 @@ export default function InstallPrompt() {
 
     if (outcome === 'accepted') {
       setIsInstalled(true)
+      setShowDownloadBanner(true)
     }
 
     setDeferredPrompt(null)
@@ -61,6 +63,27 @@ export default function InstallPrompt() {
     localStorage.setItem('install-prompt-dismissed', Date.now().toString())
   }
 
+  if (showDownloadBanner) {
+    return (
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+          <div className="flex flex-col items-center text-center gap-4">
+            <span className="text-5xl">⬇️</span>
+            <p className="text-gray-900 font-bold text-lg leading-snug">
+              O download será iniciado em breve.
+            </p>
+            <p className="text-gray-600 text-sm">
+              O aplicativo <strong>Gesta'Up Cadernetas Digitais</strong> será instalado automaticamente no seu dispositivo.
+            </p>
+            <Button onClick={() => setShowDownloadBanner(false)} variant="primary" fullWidth>
+              OK
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!showPrompt || isInstalled) return null
 
   return (
@@ -68,7 +91,7 @@ export default function InstallPrompt() {
       <div className="flex items-center gap-3 mb-3">
         <span className="text-3xl">📱</span>
         <div className="flex-1">
-          <p className="text-white font-bold text-lg">Instalar Cadernetas Digitais</p>
+          <p className="text-white font-bold text-lg">Gesta'Up Cadernetas Digitais</p>
           <p className="text-gray-300 text-sm">
             Acesse rapidamente do seu celular, mesmo offline
           </p>
