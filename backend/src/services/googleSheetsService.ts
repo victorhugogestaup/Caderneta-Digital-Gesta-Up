@@ -6,10 +6,23 @@ import fs from 'fs'
 const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_PATH || './config/google-credentials.json'
 
 function getAuth() {
+  // Em produção (Vercel), usa a environment variable
+  const credentialsEnv = process.env.GOOGLE_CREDENTIALS_FILE
+  
+  if (credentialsEnv) {
+    // Produção: ler da environment variable
+    const credentials = JSON.parse(credentialsEnv)
+    return new google.auth.GoogleAuth({
+      credentials,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
+  }
+
+  // Desenvolvimento: ler do arquivo local
   const credentialsPath = path.resolve(CREDENTIALS_PATH)
 
   if (!fs.existsSync(credentialsPath)) {
-    throw new Error('Arquivo de credenciais não encontrado: ' + credentialsPath)
+    throw new Error('Arquivo de credenciais não encontrado: ' + credentialsPath + ' e GOOGLE_CREDENTIALS_FILE não definido')
   }
 
   const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'))
