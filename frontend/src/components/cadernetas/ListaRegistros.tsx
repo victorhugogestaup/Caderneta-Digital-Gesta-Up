@@ -6,6 +6,7 @@ import { listarRegistros, excluirRegistro } from '../../services/api'
 import { useSearchFiltros } from '../../hooks/useSearchFiltros'
 import { exportToCSV, exportToJSON, copyToClipboard } from '../../utils/exportToCSV'
 import { Input, Button } from '../ui'
+import DatePickerIcon from '../ui/DatePickerIcon'
 
 interface ColunaDef {
   campo: string
@@ -75,13 +76,12 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-black text-white flex items-center justify-between px-4 py-4">
+      <header className="bg-black text-white flex items-center px-4 py-4">
         <button
           onClick={() => navigate(-1)}
-          className="text-yellow-400 font-bold text-sm flex items-center gap-2 min-h-[48px] px-3 rounded-2xl hover:bg-white/10 transition-colors"
+          className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
         >
-          <span className="text-xl">←</span>
-          VOLTAR
+          ← VOLTAR
         </button>
         <h1 className="text-base font-bold flex-1 text-center">{titulo}</h1>
         <span className="text-yellow-400 font-bold text-sm">
@@ -128,17 +128,15 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
           <div className="bg-white rounded-2xl p-4 border-2 border-gray-200 flex flex-col gap-3">
             <h3 className="font-bold text-gray-800">🔎 Filtros Avançados</h3>
             <div className="grid grid-cols-2 gap-3">
-              <Input
+              <DatePickerIcon
                 label="Data Início"
-                placeholder="DD/MM/AAAA"
                 value={filtros.dataInicio}
-                onChange={(e) => setDataInicio(e.target.value)}
+                onChange={setDataInicio}
               />
-              <Input
+              <DatePickerIcon
                 label="Data Fim"
-                placeholder="DD/MM/AAAA"
                 value={filtros.dataFim}
-                onChange={(e) => setDataFim(e.target.value)}
+                onChange={setDataFim}
               />
             </div>
             <div>

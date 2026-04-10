@@ -4,7 +4,7 @@ export default function MaternidadeListaPage() {
   return (
     <ListaRegistros
       caderneta="maternidade"
-      titulo="🐄 MATERNIDADE — LISTA"
+      titulo="MATERNIDADE — LISTA"
       rotaForm="/caderneta/maternidade"
       colunas={[
         { campo: 'pasto', label: 'Pasto' },

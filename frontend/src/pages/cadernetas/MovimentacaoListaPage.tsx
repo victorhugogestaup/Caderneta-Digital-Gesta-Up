@@ -4,7 +4,7 @@ export default function MovimentacaoListaPage() {
   return (
     <ListaRegistros
       caderneta="movimentacao"
-      titulo="🚚 MOVIMENTAÇÃO — LISTA"
+      titulo="MOVIMENTAÇÃO — LISTA"
       rotaForm="/caderneta/movimentacao"
       colunas={[
         { campo: 'loteOrigem', label: 'Origem' },

@@ -4,7 +4,7 @@ export default function SuplementacaoListaPage() {
   return (
     <ListaRegistros
       caderneta="suplementacao"
-      titulo="🥄 SUPLEMENTAÇÃO — LISTA"
+      titulo="SUPLEMENTAÇÃO — LISTA"
       rotaForm="/caderneta/suplementacao"
       colunas={[
         { campo: 'tratador', label: 'Tratador' },
