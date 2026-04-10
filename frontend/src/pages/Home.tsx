@@ -37,13 +37,13 @@ export default function Home() {
         {!configurado ? (
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-6 text-center">
             <p className="text-xl font-bold text-yellow-800 mb-4">
-              ? CONFIGURAÇÃO NECESSÁRIA
+              CONFIGURAÇÃO NECESSÁRIA
             </p>
             <p className="text-lg text-gray-700 mb-6">
               Configure a fazenda antes de usar as cadernetas
             </p>
             <Button onClick={() => navigate('/configuracoes')} variant="primary">
-              ? IR PARA CONFIGURAÇÕES
+              IR PARA CONFIGURAÇÕES
             </Button>
           </div>
         ) : (

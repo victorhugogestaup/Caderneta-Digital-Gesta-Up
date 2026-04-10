@@ -1,20 +1,11 @@
-import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import Button from '../components/ui/Button'
 import { Check } from 'lucide-react'
 
 export default function WelcomePage() {
-  const navigate = useNavigate()
-
   // Marcar que o usuário já viu a tela de boas-vindas
   useEffect(() => {
     localStorage.setItem('welcome-seen', 'true')
   }, [])
-
-  const handleStart = () => {
-    console.log('Navigating to home from WelcomePage')
-    navigate('/')
-  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
@@ -67,17 +58,6 @@ export default function WelcomePage() {
             </p>
           </div>
         </div>
-
-        {/* Botão */}
-        <Button 
-          onClick={handleStart}
-          variant="primary"
-          fullWidth
-          icon=""
-          className="max-w-md bg-yellow-400 text-black hover:bg-yellow-300 font-bold text-lg py-4"
-        >
-          COMEÇAR A USAR
-        </Button>
       </div>
 
       {/* Footer */}
