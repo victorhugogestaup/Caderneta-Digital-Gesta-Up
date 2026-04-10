@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, DatePicker, Radio, ValidationMessage } from '../../components/ui'
+import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 
@@ -54,7 +55,7 @@ export default function BebedourosPage() {
   const [form, setForm] = useState<FormState>(makeInitial)
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -67,7 +68,6 @@ export default function BebedourosPage() {
   const handleSalvar = async () => {
     setSalvando(true)
     setErrors([])
-    setSucesso(false)
 
     const result = await salvarRegistro('bebedouros', {
       data: form.data,
@@ -85,10 +85,19 @@ export default function BebedourosPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
-      setSucesso(true)
+      setShowSuccessModal(true)
       setForm(makeInitial())
-      setTimeout(() => setSucesso(false), 2500)
     }
+  }
+
+  const handleNewRecord = () => {
+    setShowSuccessModal(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleExit = () => {
+    setShowSuccessModal(false)
+    navigate('/')
   }
 
   return (
@@ -110,11 +119,6 @@ export default function BebedourosPage() {
       </header>
 
       <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
-        {sucesso && (
-          <div className="bg-green-100 border-2 border-green-500 rounded-2xl p-4 text-center">
-            <p className="text-xl font-bold text-green-800">✅ REGISTRO SALVO!</p>
-          </div>
-        )}
         {errors.length > 0 && <ValidationMessage errors={errors} />}
 
         {/* Seção 1: Dados Principais */}
@@ -210,6 +214,14 @@ export default function BebedourosPage() {
           </Button>
         </div>
       </main>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onNewRecord={handleNewRecord}
+        onExit={handleExit}
+        cadernetaName="Bebedouros"
+      />
     </div>
   )
 }

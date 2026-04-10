@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, DatePicker, Radio, ValidationMessage } from '../../components/ui'
 import CheckboxGroup from '../../components/ui/CheckboxGroup'
+import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 
@@ -74,7 +75,7 @@ export default function MaternidadePage() {
   const [form, setForm] = useState<FormState>(makeInitial)
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -103,7 +104,6 @@ export default function MaternidadePage() {
   const handleSalvar = async () => {
     setSalvando(true)
     setErrors([])
-    setSucesso(false)
 
     // Construir string final de tratamentos
     const tratamentosFinais = form.tratamentos.map(t => 
@@ -129,16 +129,24 @@ export default function MaternidadePage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
-      setSucesso(true)
+      setShowSuccessModal(true)
       setForm(makeInitial())
-      setTimeout(() => setSucesso(false), 2500)
     }
   }
 
   const handleLimpar = () => {
     setForm(makeInitial())
     setErrors([])
-    setSucesso(false)
+  }
+
+  const handleNewRecord = () => {
+    setShowSuccessModal(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleExit = () => {
+    setShowSuccessModal(false)
+    navigate('/')
   }
 
   return (
@@ -164,12 +172,6 @@ export default function MaternidadePage() {
       </header>
 
       <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
-        {sucesso && (
-          <div className="bg-green-100 border-2 border-green-500 rounded-2xl p-4 text-center">
-            <p className="text-xl font-bold text-green-800">✅ REGISTRO SALVO!</p>
-          </div>
-        )}
-
         {errors.length > 0 && <ValidationMessage errors={errors} />}
 
         {/* Seção 1: Dados Principais */}
@@ -295,6 +297,14 @@ export default function MaternidadePage() {
           </Button>
         </div>
       </main>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onNewRecord={handleNewRecord}
+        onExit={handleExit}
+        cadernetaName="Maternidade Cria"
+      />
     </div>
   )
 }

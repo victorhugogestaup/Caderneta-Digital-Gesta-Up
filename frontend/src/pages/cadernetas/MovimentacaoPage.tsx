@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage } from '../../components/ui'
+import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 
@@ -72,7 +73,7 @@ export default function MovimentacaoPage() {
   const [form, setForm] = useState<FormState>(makeInitial)
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -84,7 +85,6 @@ export default function MovimentacaoPage() {
   const handleSalvar = async () => {
     setSalvando(true)
     setErrors([])
-    setSucesso(false)
 
     // Montar dados corretamente
     const tropaValor = form.tropa ? 'S' : 'N'
@@ -115,10 +115,19 @@ export default function MovimentacaoPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
-      setSucesso(true)
+      setShowSuccessModal(true)
       setForm(makeInitial())
-      setTimeout(() => setSucesso(false), 2500)
     }
+  }
+
+  const handleNewRecord = () => {
+    setShowSuccessModal(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleExit = () => {
+    setShowSuccessModal(false)
+    navigate('/')
   }
 
   const algumaCategoria = CATEGORIAS.some(({ campo }) => form[campo as keyof FormState])
@@ -142,11 +151,6 @@ export default function MovimentacaoPage() {
       </header>
 
       <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
-        {sucesso && (
-          <div className="bg-green-100 border-2 border-green-500 rounded-2xl p-4 text-center">
-            <p className="text-xl font-bold text-green-800">✅ REGISTRO SALVO!</p>
-          </div>
-        )}
         {errors.length > 0 && <ValidationMessage errors={errors} />}
 
         {/* Seção 1: Dados Principais */}
@@ -266,6 +270,14 @@ export default function MovimentacaoPage() {
           </Button>
         </div>
       </main>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onNewRecord={handleNewRecord}
+        onExit={handleExit}
+        cadernetaName="Movimentação"
+      />
     </div>
   )
 }
