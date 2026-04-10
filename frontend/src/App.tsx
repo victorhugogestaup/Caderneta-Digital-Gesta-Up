@@ -14,6 +14,7 @@ import { verificarBackupAutomatico } from './services/backupService'
 import { useSelector } from 'react-redux'
 import { RootState } from './store/store'
 import { checkPWARequirements, debugPWA } from './utils/pwaDebug'
+import { preventPullToRefresh, addPullToRefreshCSS } from './utils/preventPullToRefresh'
 
 // Lazy loading das cadernetas
 const MaternidadePage = lazy(() => import('./pages/cadernetas/MaternidadePage'))
@@ -41,6 +42,17 @@ function AppInner() {
       loadConflicts()
     }
   }, [syncStatus, loadConflicts])
+
+  // Prevenir pull-to-refresh em PWAs instalados
+  useEffect(() => {
+    // Adicionar CSS para prevenir pull-to-refresh
+    addPullToRefreshCSS()
+    
+    // Adicionar listeners JavaScript para prevenir pull-to-refresh
+    const cleanup = preventPullToRefresh()
+    
+    return cleanup
+  }, [])
 
   // Backup automático a cada 24 horas
   useEffect(() => {
