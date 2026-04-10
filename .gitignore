@@ -113,3 +113,6 @@ Thumbs.db
 # Google credentials (keep example, ignore real)
 backend/config/google-credentials.json
 !backend/config/google-credentials.example.json
+
+# Export files
+*.csv
