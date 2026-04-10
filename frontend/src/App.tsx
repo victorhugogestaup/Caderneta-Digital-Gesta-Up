@@ -6,6 +6,7 @@ import SyncStatusBar from './components/SyncStatusBar'
 import ConflictModal from './components/ConflictModal'
 import InstallPrompt from './components/InstallPrompt'
 import { UpdateDialog } from './components/UpdateDialog'
+import { PWAUpdateBanner } from './components/PWAUpdateBanner'
 import PageLoader from './components/PageLoader'
 import { useSync } from './hooks/useSync'
 import { useConflicts } from './hooks/useConflicts'
@@ -100,6 +101,7 @@ function AppInner() {
           </Routes>
         </Suspense>
       </div>
+      <PWAUpdateBanner />
       {currentConflict && (
         <ConflictModal
           conflict={currentConflict}
