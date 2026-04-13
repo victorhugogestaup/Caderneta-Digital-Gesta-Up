@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-black text-white text-center py-6 border-b-4 border-yellow-400">
+      <header className="bg-[#1a3a2a] text-white text-center py-6 border-b-4 border-yellow-400">
         <h1 className="text-2xl font-bold">CADERNETAS DIGITAIS</h1>
         {configurado && fazenda && (
           <p className="text-yellow-400 text-base mt-1 font-semibold">{fazenda.toUpperCase()}</p>
@@ -95,7 +95,7 @@ export default function Home() {
       </main>
 
       {/* Footer com ações */}
-      <footer className="p-4 bg-gray-900 flex flex-col gap-3">
+      <footer className="p-4 bg-[#1a3a2a] flex flex-col gap-3">
         <Button onClick={() => navigate('/configuracoes')} variant="ghost" icon="⚙️" className="text-white hover:text-gray-200">
           CONFIGURAÇÕES
         </Button>
