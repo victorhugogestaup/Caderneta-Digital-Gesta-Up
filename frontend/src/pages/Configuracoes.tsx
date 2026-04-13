@@ -77,7 +77,7 @@ export default function Configuracoes() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-black text-white flex items-center px-4 py-5">
+      <header className="bg-[#1a3a2a] text-white flex items-center px-4 py-5">
         <Button 
           onClick={() => navigate('/')} 
           variant="ghost" 

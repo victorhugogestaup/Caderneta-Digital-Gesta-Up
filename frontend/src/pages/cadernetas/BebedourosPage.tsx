@@ -102,7 +102,7 @@ export default function BebedourosPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-black text-white flex items-center px-4 py-4">
+      <header className="bg-[#1a3a2a] text-white flex items-center px-4 py-4">
         <button
           onClick={() => navigate(-1)}
           className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
