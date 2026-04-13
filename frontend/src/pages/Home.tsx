@@ -12,15 +12,25 @@ export default function Home() {
   // Verificar primeiro acesso e redirecionar automaticamente
   useEffect(() => {
     const primeiroAcesso = localStorage.getItem('primeiro-acesso')
-    
+
     if (!primeiroAcesso) {
       // Marcar que o primeiro acesso foi feito
       localStorage.setItem('primeiro-acesso', 'true')
-      
+
       // Redirecionar automaticamente para configurações
       navigate('/configuracoes')
     }
   }, [navigate])
+
+  // Preload das imagens das cadernetas
+  useEffect(() => {
+    CADERNETAS.forEach(caderneta => {
+      if (caderneta.icon) {
+        const img = new Image()
+        img.src = caderneta.icon
+      }
+    })
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -47,15 +57,15 @@ export default function Home() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             {CADERNETAS.map((caderneta) => (
               <button
                 key={caderneta.id}
                 onClick={() => caderneta.disponivel && navigate(`/caderneta/${caderneta.id}`)}
                 disabled={!caderneta.disponivel}
-                className={`caderneta-card relative flex flex-col items-center justify-center gap-3 min-h-[140px] transition-all
+                className={`caderneta-card relative flex flex-col items-center justify-center gap-2 p-4 transition-all
                   ${caderneta.disponivel
-                    ? 'hover:border-yellow-400 hover:shadow-lg'
+                    ? 'hover:scale-105'
                     : 'opacity-50 cursor-not-allowed'
                   }`}
               >
@@ -64,8 +74,19 @@ export default function Home() {
                     EM BREVE
                   </span>
                 )}
-                <span className="text-5xl">{caderneta.emoji}</span>
-                <span className="text-lg font-bold text-center leading-tight text-gray-900">
+                <img
+                  src={caderneta.icon}
+                  alt={caderneta.label}
+                  className="w-40 h-auto object-contain rounded-[32px]"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                    const emoji = target.parentElement?.querySelector('.fallback-emoji') as HTMLElement
+                    if (emoji) emoji.style.display = 'block'
+                  }}
+                />
+                <span className="text-5xl fallback-emoji hidden">{caderneta.emoji}</span>
+                <span className="text-base font-bold text-center leading-tight text-gray-900">
                   {caderneta.label}
                 </span>
               </button>
