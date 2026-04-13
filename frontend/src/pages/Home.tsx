@@ -5,6 +5,14 @@ import { CADERNETAS } from '../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
 
+// Função helper para converter HEX para RGBA com opacidade
+const hexToRgba = (hex: string, alpha: number = 0.25): string => {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export default function Home() {
   const navigate = useNavigate()
   const { configurado, fazenda } = useSelector((state: RootState) => state.config)
@@ -53,7 +61,8 @@ export default function Home() {
                 key={caderneta.id}
                 onClick={() => caderneta.disponivel && navigate(`/caderneta/${caderneta.id}`)}
                 disabled={!caderneta.disponivel}
-                className={`caderneta-card relative flex flex-col items-center justify-center gap-2 p-4 transition-all
+                style={{ backgroundColor: hexToRgba(caderneta.color || '#E5E7EB') }}
+                className={`caderneta-card relative flex flex-col items-center justify-center gap-2 p-4 transition-all rounded-2xl
                   ${caderneta.disponivel
                     ? 'hover:scale-105'
                     : 'opacity-50 cursor-not-allowed'
