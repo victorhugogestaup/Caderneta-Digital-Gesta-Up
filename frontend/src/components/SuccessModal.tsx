@@ -73,7 +73,7 @@ export default function SuccessModal({
             variant="primary"
             fullWidth
             icon=""
-            className="flex-1 bg-yellow-400 text-black hover:bg-yellow-300 font-bold"
+            className="flex-1 bg-[#1a3a2a] text-white hover:bg-[#244a3a] font-bold"
           >
             Novo Registro
           </Button>

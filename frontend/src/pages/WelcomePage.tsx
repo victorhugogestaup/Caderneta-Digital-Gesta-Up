@@ -19,7 +19,7 @@ export default function WelcomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#1a3a2a] text-white flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       {/* Header */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         {/* Logo */}
@@ -44,7 +44,7 @@ export default function WelcomePage() {
         </h1>
 
         {/* Subtítulo */}
-        <p className="text-xl text-gray-200 text-center mb-12">
+        <p className="text-xl text-gray-600 text-center mb-12">
           Gestão rural na palma da mão
         </p>
 
@@ -52,19 +52,19 @@ export default function WelcomePage() {
         <div className="space-y-4 mb-12 max-w-md">
           <div className="flex items-start gap-3">
             <Check className="w-6 h-6 text-yellow-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-200">
+            <p className="text-gray-700">
               Cadernetas digitais para controle completo do seu rebanho
             </p>
           </div>
           <div className="flex items-start gap-3">
             <Check className="w-6 h-6 text-yellow-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-200">
+            <p className="text-gray-700">
               Sincronização automática com Google Sheets
             </p>
           </div>
           <div className="flex items-start gap-3">
             <Check className="w-6 h-6 text-yellow-500 mt-0.5 flex-shrink-0" />
-            <p className="text-gray-200">
+            <p className="text-gray-700">
               Funciona offline, sincroniza quando voltar à internet
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function WelcomePage() {
 
       {/* Footer */}
       <div className="p-6 text-center">
-        <p className="text-gray-300 text-sm">
+        <p className="text-gray-400 text-sm">
           Versão 1.0.0
         </p>
       </div>
