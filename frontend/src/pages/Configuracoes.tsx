@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setConfig, setConfigurado } from '../store/slices/configSlice'
 import { RootState } from '../store/store'
-import { Button, Input, ValidationMessage } from '../components/ui'
+import { Button, Input } from '../components/ui'
+import { BACKEND_URL, DATABASE_URL } from '../utils/constants'
 
 export default function Configuracoes() {
   const navigate = useNavigate()
@@ -12,62 +13,68 @@ export default function Configuracoes() {
 
   const [fazenda, setFazenda] = useState(config.fazenda)
   const [usuario, setUsuario] = useState(config.usuario)
-  const [planilhaUrl, setPlanilhaUrl] = useState(config.planilhaUrl)
-  const [codigoAlterar, setCodigoAlterar] = useState('')
-  const [urlBloqueada, setUrlBloqueada] = useState(!!config.planilhaUrl)
+  const [fazendaNome, setFazendaNome] = useState('')
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [successMsg, setSuccessMsg] = useState('')
+  const [validandoFazenda, setValidandoFazenda] = useState(false)
 
   const validate = (): boolean => {
     const newErrors: { field: string; message: string }[] = []
     if (!fazenda.trim()) {
-      newErrors.push({ field: 'fazenda', message: 'Nome da fazenda é obrigatório' })
+      newErrors.push({ field: 'fazenda', message: 'ID da fazenda é obrigatório' })
     }
     if (!usuario.trim()) {
       newErrors.push({ field: 'usuario', message: 'Seu nome é obrigatório' })
-    }
-    if (!planilhaUrl.trim()) {
-      newErrors.push({ field: 'planilhaUrl', message: 'Link da planilha é obrigatório' })
-    } else if (!planilhaUrl.includes('docs.google.com/spreadsheets')) {
-      newErrors.push({ field: 'planilhaUrl', message: 'Link inválido. Use o link do Google Sheets' })
     }
     setErrors(newErrors)
     return newErrors.length === 0
   }
 
-  // Converter URL de compartilhamento para URL de API
-  const converterUrlParaAPI = (url: string): string => {
-    // Remove parâmetros como /edit?usp=sharing e adiciona /edit
-    const baseUrl = url.split('?')[0]
-    if (baseUrl.endsWith('/edit')) {
-      return baseUrl
+  const validarFazendaNaBase = async (id: string): Promise<{ sucesso: boolean; nome?: string; link?: string }> => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: id }),
+      })
+      if (res.ok) {
+        const json = await res.json() as { success: boolean; farmName?: string; farmSheetUrl?: string }
+        return { sucesso: json.success, nome: json.farmName, link: json.farmSheetUrl }
+      }
+    } catch (error) {
+      console.error('Erro ao validar fazenda:', error)
     }
-    return baseUrl.replace(/\/$/, '') + '/edit'
+    return { sucesso: false }
   }
 
-  const handleDesbloquearUrl = () => {
-    if (codigoAlterar.toUpperCase() === 'ALTERAR') {
-      setUrlBloqueada(false)
-      setCodigoAlterar('')
-      setErrors([])
-    } else {
-      setErrors([{ field: 'codigo', message: 'Digite ALTERAR para desbloquear' }])
-    }
-  }
-
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     setSuccessMsg('')
     if (!validate()) return
 
-    // Converter URL para formato API automaticamente
-    const urlConvertida = converterUrlParaAPI(planilhaUrl.trim())
-    const configData = { fazenda: fazenda.trim(), usuario: usuario.trim(), planilhaUrl: urlConvertida }
+    setValidandoFazenda(true)
+    const validacao = await validarFazendaNaBase(fazenda.trim())
+    setValidandoFazenda(false)
+
+    if (!validacao.sucesso) {
+      setErrors([{ field: 'fazenda', message: 'Verifique o ID digitado ou contate o administrador' }])
+      return
+    }
+
+    // Se validou com sucesso, usa o nome e link retornados da base de dados
+    const nomeFazenda = validacao.nome || fazenda.trim()
+    const linkPlanilha = validacao.link
+
+    if (!linkPlanilha) {
+      setErrors([{ field: 'fazenda', message: 'Link da planilha não encontrado na base de dados. Contate o administrador.' }])
+      return
+    }
+
+    setFazendaNome(nomeFazenda)
+    const configData = { fazenda: nomeFazenda, usuario: usuario.trim(), planilhaUrl: linkPlanilha }
     console.log('Configuracoes: Salvando configurações', configData)
-    console.log('Configuracoes: URL convertida de', planilhaUrl.trim(), 'para', urlConvertida)
-    
+
     dispatch(setConfig(configData))
     dispatch(setConfigurado(true))
-    setUrlBloqueada(true)
     setSuccessMsg('Configurações salvas! Redirecionando...')
     setTimeout(() => navigate('/'), 1500)
   }
@@ -98,21 +105,6 @@ export default function Configuracoes() {
           </div>
         )}
 
-        {/* ValidationMessage para erros */}
-        {errors.length > 0 && <ValidationMessage errors={errors} />}
-
-        {/* Nome da Fazenda */}
-        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200">
-          <Input
-            label="NOME DA FAZENDA"
-            placeholder="Ex: Fazenda Boa Vista"
-            value={fazenda}
-            onChange={(e) => setFazenda(e.target.value)}
-            error={getFieldError('fazenda')}
-            fullWidth
-          />
-        </div>
-
         {/* Seu Nome */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200">
           <Input
@@ -125,40 +117,35 @@ export default function Configuracoes() {
           />
         </div>
 
-        {/* Link da Planilha com proteção ALTERAR */}
+        {/* ID da Fazenda */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200">
-          <label className="section-title block">LINK DA PLANILHA GOOGLE SHEETS</label>
-
-          {urlBloqueada && planilhaUrl ? (
-            <div className="flex flex-col gap-4">
-              <div className="bg-gray-100 rounded-xl p-4 text-gray-700 text-base break-all font-mono">
-                {planilhaUrl.substring(0, 60)}...
-              </div>
-              <p className="text-sm text-gray-500">
-                🔒 Para alterar, digite "ALTERAR" abaixo:
-              </p>
-              <Input
-                placeholder='Digite "ALTERAR" para desbloquear'
-                value={codigoAlterar}
-                onChange={(e) => setCodigoAlterar(e.target.value.toUpperCase())}
-                error={getFieldError('codigo')}
-                fullWidth
-              />
-              <Button onClick={handleDesbloquearUrl} variant="secondary">
-                🔓 DESBLOQUEAR LINK
-              </Button>
-            </div>
-          ) : (
-            <Input
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-              value={planilhaUrl}
-              onChange={(e) => setPlanilhaUrl(e.target.value)}
-              error={getFieldError('planilhaUrl')}
-              helper="Cole o link completo da planilha Google Sheets"
-              fullWidth
-            />
+          <Input
+            label="ID DA FAZENDA"
+            value={fazenda}
+            onChange={(e) => setFazenda(e.target.value)}
+            error={getFieldError('fazenda')}
+            helper="Digite o código da fazenda fornecido pelo administrador"
+            fullWidth
+            disabled={validandoFazenda}
+          />
+          {validandoFazenda && (
+            <p className="text-sm text-gray-500 mt-1">Validando ID na base de dados...</p>
           )}
         </div>
+
+        {/* Nome da Fazenda (autopreenchido) */}
+        {fazendaNome && (
+          <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200">
+            <Input
+              label="NOME DA FAZENDA"
+              value={fazendaNome}
+              error={getFieldError('fazenda')}
+              fullWidth
+              disabled
+              helper="Nome da fazenda recuperado da base de dados"
+            />
+          </div>
+        )}
 
         {/* Botão Salvar */}
         <Button onClick={handleSalvar} variant="success" icon="💾">

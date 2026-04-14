@@ -4,6 +4,30 @@ const BASE = import.meta.env.BASE_URL
 
 export const LOGO_URL = `${BASE}logo-gestaup-app-cadernetadigital.png`
 
+export const DATABASE_URL = 'https://docs.google.com/spreadsheets/d/1HSq-3ihaSnVGIEPBCMdhYjCmFfwyWAQM7zFrkCuGxts/edit'
+
+export function getFarmLogo(farmName: string): string {
+  // Lógica condicional simples para logo baseada no nome da fazenda
+  // Pode ser expandida conforme necessário
+  const lowerName = farmName.toLowerCase()
+
+  if (lowerName.includes('sol nascente')) {
+    return `${BASE}logo-sol-nascente.png`
+  }
+  if (lowerName.includes('vale verde')) {
+    return `${BASE}logo-vale-verde.png`
+  }
+  if (lowerName.includes('boa vista')) {
+    return `${BASE}logo-boa-vista.png`
+  }
+  if (lowerName.includes('são josé') || lowerName.includes('sao jose')) {
+    return `${BASE}logo-sao-jose.png`
+  }
+
+  // Logo padrão se não encontrar match
+  return LOGO_URL
+}
+
 export const CADERNETAS = [
   { id: 'maternidade', label: 'MATERNIDADE', emoji: '🐄', icon: `${BASE}cadernetas/maternidade.png`, color: '#C29267', sheetName: 'Maternidade Cria', disponivel: true },
   { id: 'pastagens', label: 'TROCA DE PASTOS', emoji: '🌾', icon: `${BASE}cadernetas/pastagens.png`, color: '#7D9045', sheetName: 'Troca de Pastos', disponivel: true },

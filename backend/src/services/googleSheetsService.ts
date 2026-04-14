@@ -114,3 +114,54 @@ export async function validateConnection(spreadsheetUrl: string): Promise<boolea
     return false
   }
 }
+
+export async function listSheets(spreadsheetUrl: string): Promise<string[]> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: 'v4', auth })
+  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
+
+  const response = await sheets.spreadsheets.get({ spreadsheetId })
+  const sheetNames = response.data.sheets?.map((sheet) => sheet.properties?.title).filter((title): title is string => title !== undefined) || []
+
+  logger.info(`Abas listadas: ${sheetNames.join(', ')}`)
+  return sheetNames
+}
+
+export async function validateFarm(spreadsheetUrl: string, farmId: string): Promise<{ success: boolean; farmName?: string; farmSheetUrl?: string }> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: 'v4', auth })
+  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
+
+  // Listar todas as abas
+  const response = await sheets.spreadsheets.get({ spreadsheetId })
+  const sheetNames = response.data.sheets?.map((sheet) => sheet.properties?.title).filter((title): title is string => title !== undefined) || []
+
+  // Buscar o ID na célula A2 de cada aba
+  for (const sheetName of sheetNames) {
+    try {
+      const cellResponse = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${sheetName}!A2:C2`,
+      })
+
+      const values = cellResponse.data.values
+      if (values && values.length > 0 && values[0].length > 0) {
+        const idInCell = String(values[0][0]).trim()
+        const nomeInCell = values[0].length > 1 ? String(values[0][1]).trim() : ''
+        const sheetUrlInCell = values[0].length > 2 ? String(values[0][2]).trim() : ''
+
+        // Match exato (case-insensitive)
+        if (idInCell.toLowerCase() === farmId.toLowerCase()) {
+          logger.info(`Fazenda encontrada: ${sheetName}, ID: ${idInCell}, Nome: ${nomeInCell}, Link: ${sheetUrlInCell}`)
+          return { success: true, farmName: nomeInCell || sheetName, farmSheetUrl: sheetUrlInCell || undefined }
+        }
+      }
+    } catch (error) {
+      logger.error(`Erro ao buscar na aba ${sheetName}: ${error}`)
+      // Continua para a próxima aba
+    }
+  }
+
+  logger.warn(`ID ${farmId} não encontrado em nenhuma aba`)
+  return { success: false }
+}

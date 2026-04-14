@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { appendRow, updateRow, getRows, validateConnection } from '../services/googleSheetsService'
+import { appendRow, updateRow, getRows, validateConnection, listSheets, validateFarm } from '../services/googleSheetsService'
 import { logger } from '../utils/logger'
 
 export const sheetsRouter = Router()
@@ -23,6 +23,34 @@ sheetsRouter.post('/validate', async (req: Request, res: Response) => {
     return res.json({ success: true, message: 'Conexão com planilha validada' })
   }
   return res.status(400).json({ success: false, error: 'Não foi possível conectar à planilha' })
+})
+
+sheetsRouter.post('/list-sheets', async (req: Request, res: Response) => {
+  const { planilhaUrl } = req.body
+  if (!planilhaUrl) {
+    return res.status(400).json({ error: 'Link da planilha é obrigatório' })
+  }
+  try {
+    const sheets = await listSheets(planilhaUrl)
+    return res.json({ success: true, sheets })
+  } catch (error) {
+    logger.error(`Erro ao listar abas: ${error}`)
+    return res.status(500).json({ error: 'Erro ao listar abas da planilha' })
+  }
+})
+
+sheetsRouter.post('/validate-farm', async (req: Request, res: Response) => {
+  const { planilhaUrl, farmId } = req.body
+  if (!planilhaUrl || !farmId) {
+    return res.status(400).json({ error: 'planilhaUrl e farmId são obrigatórios' })
+  }
+  try {
+    const result = await validateFarm(planilhaUrl, farmId)
+    return res.json({ success: result.success, farmName: result.farmName, farmSheetUrl: result.farmSheetUrl })
+  } catch (error) {
+    logger.error(`Erro ao validar fazenda: ${error}`)
+    return res.status(500).json({ error: 'Erro ao validar fazenda' })
+  }
 })
 
 sheetsRouter.post('/:caderneta', async (req: Request, res: Response) => {

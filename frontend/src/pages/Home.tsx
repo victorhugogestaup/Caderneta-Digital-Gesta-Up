@@ -30,12 +30,14 @@ export default function Home() {
     }
   }, [navigate])
 
+  const logoUrl = LOGO_URL
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-[#1a3a2a] text-white text-center py-6 border-b-4 border-yellow-400">
         <div className="flex flex-col items-center gap-3">
-          <img src={LOGO_URL} alt="Gesta'Up" className="w-16 h-auto object-contain rounded-[22px]" />
+          <img src={logoUrl} alt="Logo Fazenda" className="w-16 h-auto object-contain rounded-[22px]" />
           <h1 className="text-2xl font-bold">CADERNETAS DIGITAIS</h1>
         </div>
         {configurado && fazenda && (
