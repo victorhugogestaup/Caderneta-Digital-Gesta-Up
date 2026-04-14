@@ -48,6 +48,12 @@ export default function SyncStatusBar() {
       {status === 'error' && errorMessage && (
         <p className="text-xs mt-1 opacity-90">{errorMessage}</p>
       )}
+
+      {status === 'offline' && (
+        <p className="text-[12px] mt-1 opacity-90">
+          Não se preocupe, use o aplicativo à vontade. Nenhum registro será perdido.
+        </p>
+      )}
     </div>
   )
 }

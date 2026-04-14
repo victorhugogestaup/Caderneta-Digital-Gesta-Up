@@ -77,17 +77,17 @@ export default function Configuracoes() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-[#1a3a2a] text-white flex items-center px-4 py-5">
-        <Button 
-          onClick={() => navigate('/')} 
-          variant="ghost" 
-          size="sm"
-          fullWidth={false}
-          className="mr-3 text-white hover:text-gray-200"
+      <header className="bg-[#1a3a2a] text-white flex items-center px-4 py-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
         >
-          VOLTAR
-        </Button>
-        <h1 className="text-xl font-bold">CONFIGURAÇÕES</h1>
+          ← VOLTAR
+        </button>
+        <h1 className="text-base font-bold flex-1 text-center">
+          CONFIGURAÇÕES
+        </h1>
+        <div className="w-[60px]"></div>
       </header>
 
       <main className="flex-1 p-4 flex flex-col gap-5">
