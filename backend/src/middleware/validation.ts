@@ -52,10 +52,16 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     carrapatosMoscas: Joi.string().valid('S', 'N').required(),
     animaisEntreverados: Joi.string().valid('S', 'N').required(),
     animalMorto: Joi.string().valid('S', 'N').required(),
-    animaisTratados: Joi.number().min(0).default(0),
+    animaisTratados: Joi.number().min(0).max(20).default(0),
     escoreFezes: Joi.number().integer().min(1).max(5).required(),
     equipe: Joi.number().integer().min(1).max(5).required(),
-    procedimentos: Joi.array().items(Joi.string()).default([]),
+    // 20 pares de colunas para animais tratados
+    ...Object.fromEntries(
+      Array.from({ length: 20 }, (_, i) => [
+        [`animal${i + 1}Id`, Joi.string().default('')],
+        [`animal${i + 1}Tratamentos`, Joi.string().default('')],
+      ]).flat()
+    ),
   }),
 
   suplementacao: Joi.object({

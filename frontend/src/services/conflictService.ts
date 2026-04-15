@@ -36,7 +36,17 @@ function buildRegistroFromRow(
   const fieldsByCaderneta: Record<CadernetaStore, string[]> = {
     maternidade: ['data', 'pasto', 'pesoCria', 'numeroCria', 'tratamento', 'tipoParto', 'sexo', 'raca', 'numeroMae', 'categoriaMae'],
     pastagens: ['data', 'manejador', 'numeroLote', 'pastoSaida', 'avaliacaoSaida', 'pastoEntrada', 'avaliacaoEntrada', 'vaca', 'touro', 'bezerro', 'boiMagro', 'garrote', 'novilha', 'totalAnimais'],
-    rodeio: ['data', 'pasto', 'numeroLote', 'vaca', 'touro', 'bezerro', 'boi', 'garrote', 'novilha', 'totalCabecas', 'escoreGadoIdeal', 'aguaBoaBebedouro', 'pastagemAdequada', 'animaisDoentes', 'cercasCochos', 'carrapatosMoscas', 'animaisEntreverados', 'animalMorto', 'animaisTratados', 'escoreFezes', 'equipe', 'procedimentos'],
+    rodeio: [
+      'data', 'pasto', 'numeroLote', 'vaca', 'touro', 'bezerro', 'boi', 'garrote', 'novilha',
+      'totalCabecas', 'escoreGadoIdeal', 'aguaBoaBebedouro', 'pastagemAdequada', 'animaisDoentes',
+      'cercasCochos', 'carrapatosMoscas', 'animaisEntreverados', 'animalMorto', 'animaisTratados',
+      'escoreFezes', 'equipe',
+      // 20 pares de colunas para animais tratados
+      ...Array.from({ length: 20 }, (_, i) => [
+        `animal${i + 1}Id`,
+        `animal${i + 1}Tratamentos`,
+      ]).flat(),
+    ],
     suplementacao: ['data', 'tratador', 'pasto', 'numeroLote', 'produto', 'gado', 'vaca', 'touro', 'bezerro', 'boi', 'garrote', 'novilha', 'leitura', 'sacos', 'kg', 'creep'],
     bebedouros: ['data', 'responsavel', 'pasto', 'numeroLote', 'gado', 'categoria', 'leituraBebedouro', 'numeroBebedouro', 'observacao'],
     movimentacao: ['data', 'loteOrigem', 'loteDestino', 'numeroCabecas', 'pesoMedio', 'vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros', 'motivoMovimentacao', 'brincoChip', 'causaObservacao'],

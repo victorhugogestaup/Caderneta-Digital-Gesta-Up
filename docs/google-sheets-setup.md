@@ -112,7 +112,11 @@ R1: Animal Morto
 S1: Animais Tratados
 T1: Escore Fezes
 U1: Equipe
-V1: Procedimentos
+V1: Animal 1 ID
+W1: Animal 1 Tratamentos
+X1: Animal 2 ID
+Y1: Animal 2 Tratamentos
+... (continua até Animal 20 ID e Animal 20 Tratamentos)
 ```
 
 #### **Suplementação**

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Input, DatePicker, Checkbox, Radio, ValidationMessage } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
@@ -57,6 +57,11 @@ type SnFields = {
   animalMorto: string
 }
 
+interface AnimalTratado {
+  id: string
+  tratamentos: string[]
+}
+
 interface FormState extends SnFields {
   data: string
   pasto: string
@@ -68,10 +73,9 @@ interface FormState extends SnFields {
   garrote: string
   novilha: string
   animaisTratados: string
+  animaisTratadosDetalhes: AnimalTratado[]
   escoreFezes: string
   equipe: string
-  procedimentos: string[]
-  procedimentosOutros: string
 }
 
 const makeInitial = (): FormState => ({
@@ -83,10 +87,9 @@ const makeInitial = (): FormState => ({
   animaisDoentes: '', cercasCochos: '', carrapatosMoscas: '',
   animaisEntreverados: '', animalMorto: '',
   animaisTratados: '',
+  animaisTratadosDetalhes: [],
   escoreFezes: '',
   equipe: '',
-  procedimentos: [],
-  procedimentosOutros: '',
 })
 
 const SN_OPTIONS = [
@@ -101,19 +104,58 @@ export default function RodeioPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
 
+  // Gerar cards de animais tratados quando número muda
+  useEffect(() => {
+    const numAnimais = Number(form.animaisTratados) || 0
+    const detalhesAtuais = form.animaisTratadosDetalhes
+    
+    if (numAnimais > detalhesAtuais.length) {
+      // Adicionar novos cards
+      const novosAnimais = Array.from({ length: numAnimais - detalhesAtuais.length }, () => ({
+        id: '',
+        tratamentos: [],
+      }))
+      setForm((prev) => ({
+        ...prev,
+        animaisTratadosDetalhes: [...detalhesAtuais, ...novosAnimais],
+      }))
+    } else if (numAnimais < detalhesAtuais.length) {
+      // Remover cards excedentes
+      setForm((prev) => ({
+        ...prev,
+        animaisTratadosDetalhes: detalhesAtuais.slice(0, numAnimais),
+      }))
+    }
+  }, [form.animaisTratados])
+
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
-  const toggleProcedimento = (proc: string) => {
-    setForm((prev) => ({
-      ...prev,
-      procedimentos: prev.procedimentos.includes(proc)
-        ? prev.procedimentos.filter((p) => p !== proc)
-        : [...prev.procedimentos, proc],
-    }))
+  const updateAnimalId = (index: number, value: string) => {
+    setForm((prev) => {
+      const detalhes = [...prev.animaisTratadosDetalhes]
+      detalhes[index] = { ...detalhes[index], id: value }
+      return { ...prev, animaisTratadosDetalhes: detalhes }
+    })
+  }
+
+  const toggleAnimalTratamento = (animalIndex: number, tratamento: string) => {
+    setForm((prev) => {
+      const detalhes = [...prev.animaisTratadosDetalhes]
+      const tratamentos = detalhes[animalIndex].tratamentos.includes(tratamento)
+        ? detalhes[animalIndex].tratamentos.filter((t) => t !== tratamento)
+        : [...detalhes[animalIndex].tratamentos, tratamento]
+      detalhes[animalIndex] = { ...detalhes[animalIndex], tratamentos }
+      return { ...prev, animaisTratadosDetalhes: detalhes }
+    })
+  }
+
+  const isAnimalCompleto = (index: number) => {
+    const animal = form.animaisTratadosDetalhes[index]
+    return animal.id.trim() !== '' && animal.tratamentos.length > 0
   }
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
@@ -126,11 +168,17 @@ export default function RodeioPage() {
     setSalvando(true)
     setErrors([])
 
-    const procedimentosTexto = form.procedimentos.length > 0
-      ? form.procedimentos.includes('Outros')
-        ? [...form.procedimentos.filter(p => p !== 'Outros'), form.procedimentosOutros].filter(Boolean).join(', ')
-        : form.procedimentos.join(', ')
-      : ''
+    // Gerar 20 pares de colunas para animais tratados
+    const animaisTratadosData: Record<string, string> = {}
+    for (let i = 0; i < 20; i++) {
+      const animal = form.animaisTratadosDetalhes[i]
+      animaisTratadosData[`animal${i + 1}Id`] = animal?.id || ''
+      // Concatenar tratamentos, removendo "Outros: " prefixo se existir
+      const tratamentosLimpos = animal?.tratamentos
+        .map(t => t.replace('Outros: ', ''))
+        .filter(Boolean) || []
+      animaisTratadosData[`animal${i + 1}Tratamentos`] = tratamentosLimpos.join(', ')
+    }
     
     const result = await salvarRegistro('rodeio', {
       data: form.data,
@@ -154,7 +202,7 @@ export default function RodeioPage() {
       animaisTratados: form.animaisTratados ? Number(form.animaisTratados) : 0,
       escoreFezes: form.escoreFezes ? Number(form.escoreFezes) : null,
       equipe: form.equipe ? Number(form.equipe) : null,
-      procedimentos: procedimentosTexto,
+      ...animaisTratadosData,
     })
 
     setSalvando(false)
@@ -299,26 +347,72 @@ export default function RodeioPage() {
             inputMode="numeric"
             type="number"
             min="0"
+            max="20"
           />
-          <div className="flex flex-col gap-3">
-            {PROCEDIMENTOS_OPCOES.map((proc) => (
-              <Checkbox
-                key={proc}
-                label={proc}
-                checked={form.procedimentos.includes(proc)}
-                onChange={() => toggleProcedimento(proc)}
-              />
-            ))}
-          </div>
-          {form.procedimentos.includes('Outros') && (
-            <Input
-              label="DESCREVA OUTROS PROCEDIMENTOS"
-              placeholder="Ex: Aplicação de vitaminas, limpeza de feridas..."
-              value={form.procedimentosOutros}
-              onChange={setInput('procedimentosOutros')}
-              error={getError('procedimentosOutros')}
-            />
+          {form.animaisTratados && Number(form.animaisTratados) > 0 && (
+            <p className="text-base text-gray-600">
+              Registre o ID e os tratamentos para cada animal. Os quadrados vermelhos significam que faltam dados. Quando o quadrado ficar verde, significa que dados suficientes foram preenchidos.
+            </p>
           )}
+          
+          {/* Cards de animais tratados */}
+          {form.animaisTratadosDetalhes.map((animal, index) => (
+            <div
+              key={index}
+              className={`rounded-xl p-4 border-2 ${
+                isAnimalCompleto(index)
+                  ? 'bg-green-100 border-green-300'
+                  : 'bg-red-50 border-red-200'
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🐄</span>
+                <h3 className="text-lg font-bold text-gray-900">
+                  ANIMAL {index + 1}
+                </h3>
+              </div>
+              
+              <Input
+                label="Identificação"
+                placeholder="Ex: Vaca 1, B123, Touro 1..."
+                value={animal.id}
+                onChange={(e) => updateAnimalId(index, e.target.value)}
+                className="mb-3"
+              />
+              
+              <p className="text-sm font-bold text-gray-900 mb-2">Tratamentos:</p>
+              <div className="grid grid-cols-2 gap-2">
+                {PROCEDIMENTOS_OPCOES.map((proc) => (
+                  <Checkbox
+                    key={proc}
+                    label={proc}
+                    checked={animal.tratamentos.includes(proc)}
+                    onChange={() => toggleAnimalTratamento(index, proc)}
+                  />
+                ))}
+              </div>
+              
+              {animal.tratamentos.includes('Outros') && (
+                <Input
+                  label="Descreva outros tratamentos"
+                  placeholder="Ex: Aplicação de vitaminas, limpeza de feridas..."
+                  value={animal.tratamentos.find(t => t.startsWith('Outros:'))?.replace('Outros: ', '') || ''}
+                  onChange={(e) => {
+                    setForm((prev) => {
+                      const detalhes = [...prev.animaisTratadosDetalhes]
+                      const outrosTratamentos = detalhes[index].tratamentos.filter(t => !t.startsWith('Outros:'))
+                      if (e.target.value) {
+                        outrosTratamentos.push(`Outros: ${e.target.value}`)
+                      }
+                      detalhes[index] = { ...detalhes[index], tratamentos: outrosTratamentos }
+                      return { ...prev, animaisTratadosDetalhes: detalhes }
+                    })
+                  }}
+                  className="mt-2"
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         <div className="flex flex-col gap-3">
