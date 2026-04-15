@@ -29,7 +29,7 @@ export default function Radio({
 }: RadioProps) {
   const containerStyles = direction === 'horizontal'
     ? gridCols
-      ? `grid grid-cols-${gridCols} gap-3`
+      ? `grid grid-cols-${gridCols} gap-2`
       : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'
     : 'flex flex-col gap-3'
 
@@ -43,14 +43,15 @@ export default function Radio({
       <div className={containerStyles}>
         {options.map((option) => {
           const isSelected = value === option.value
+          const isCompact = gridCols && gridCols >= 2
           return (
             <label
               key={option.value}
               className={`
-                cursor-pointer rounded-xl border-2 p-3 sm:p-4 
+                cursor-pointer rounded-xl border-2 
                 transition-all active:scale-95
-                flex flex-col items-center justify-center gap-2
-                min-h-[70px] sm:min-h-[80px]
+                flex flex-col items-center justify-center gap-1
+                ${isCompact ? 'p-2 min-h-[50px]' : 'p-3 sm:p-4 min-h-[70px] sm:min-h-[80px]'}
                 ${isSelected 
                   ? 'bg-black text-white border-black' 
                   : 'bg-white text-gray-900 border-gray-300 hover:border-gray-400'

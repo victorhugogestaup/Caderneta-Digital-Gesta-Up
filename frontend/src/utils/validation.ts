@@ -119,7 +119,7 @@ export function validateRodeio(data: Record<string, unknown>): ValidationResult 
     animaisDoentes: 'Animais doentes',
     cercasCochos: 'Cercas / Cochos',
     carrapatosMoscas: 'Carrapatos / Moscas',
-    animaisEntrevados: 'Animais entrevados',
+    animaisEntreverados: 'Animais entreverados',
     animalMorto: 'Animal morto',
   }
   Object.entries(avaliacoesSN).forEach(([campo, label]) => {

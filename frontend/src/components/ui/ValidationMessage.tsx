@@ -41,7 +41,7 @@ const FIELD_NAMES: Record<string, string> = {
   animaisDoentes: 'Animais Doentes',
   cercasCochos: 'Cercas / Cochos',
   carrapatosMoscas: 'Carrapatos / Moscas',
-  animaisEntrevados: 'Animais Entrevados',
+  animaisEntreverados: 'Animais Entreverados',
   animalMorto: 'Animal Morto',
   escoreFezes: 'Escore de Fezes',
   equipe: 'Avaliação Equipe',

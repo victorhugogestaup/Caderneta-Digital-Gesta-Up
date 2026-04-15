@@ -50,7 +50,7 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     animaisDoentes: Joi.string().valid('S', 'N').required(),
     cercasCochos: Joi.string().valid('S', 'N').required(),
     carrapatosMoscas: Joi.string().valid('S', 'N').required(),
-    animaisEntrevados: Joi.string().valid('S', 'N').required(),
+    animaisEntreverados: Joi.string().valid('S', 'N').required(),
     animalMorto: Joi.string().valid('S', 'N').required(),
     animaisTratados: Joi.number().min(0).default(0),
     escoreFezes: Joi.number().integer().min(1).max(5).required(),

@@ -107,7 +107,7 @@ M1: Pastagem Adequada
 N1: Animais Doentes
 O1: Cercas Cochos
 P1: Carrapatos Moscas
-Q1: Animais Entrevados
+Q1: Animais Entreverados
 R1: Animal Morto
 S1: Animais Tratados
 T1: Escore Fezes

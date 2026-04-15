@@ -54,7 +54,7 @@ export interface RegistroRodeio extends Registro {
   animaisDoentes: 'S' | 'N'
   cercasCochos: 'S' | 'N'
   carrapatosMoscas: 'S' | 'N'
-  animaisEntrevados: 'S' | 'N'
+  animaisEntreverados: 'S' | 'N'
   animalMorto: 'S' | 'N'
   animaisTratados: number
   escoreFezes: number | null

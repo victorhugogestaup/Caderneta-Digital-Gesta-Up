@@ -6,11 +6,11 @@ import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 
 const AVALIACOES = [
-  { value: '1', label: '1 — EXCELENTE', icon: '🟢' },
-  { value: '2', label: '2 — ÓTIMO', icon: '🟡' },
-  { value: '3', label: '3 — MÉDIO', icon: '🟠' },
-  { value: '4', label: '4 — RUIM', icon: '🔴' },
-  { value: '5', label: '5 — PÉSSIMO', icon: '⛔' },
+  { value: '1', label: '1', icon: '🔴' },
+  { value: '2', label: '2', icon: '🟢' },
+  { value: '3', label: '3', icon: '🟡' },
+  { value: '4', label: '4', icon: '🟢' },
+  { value: '5', label: '5', icon: '🔴' },
 ]
 
 interface FormState {
@@ -166,7 +166,7 @@ export default function PastagensPage() {
             options={AVALIACOES}
             value={form.avaliacaoSaida}
             onChange={set('avaliacaoSaida')}
-            direction="vertical"
+            gridCols={5}
             error={getError('avaliacaoSaida')}
           />
         </div>
@@ -187,7 +187,7 @@ export default function PastagensPage() {
             options={AVALIACOES}
             value={form.avaliacaoEntrada}
             onChange={set('avaliacaoEntrada')}
-            direction="vertical"
+            gridCols={5}
             error={getError('avaliacaoEntrada')}
           />
         </div>

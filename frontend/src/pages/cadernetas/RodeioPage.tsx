@@ -12,16 +12,24 @@ const AVALIACOES_SN = [
   { campo: 'animaisDoentes', label: 'ANIMAIS DOENTES?' },
   { campo: 'cercasCochos', label: 'CERCAS / COCHOS OK?' },
   { campo: 'carrapatosMoscas', label: 'CARRAPATOS / MOSCAS?' },
-  { campo: 'animaisEntrevados', label: 'ANIMAIS ENTREVADOS?' },
+  { campo: 'animaisEntreverados', label: 'ANIMAIS ENTREVERADOS?' },
   { campo: 'animalMorto', label: 'ANIMAL MORTO?' },
 ]
 
 const ESCALA_5 = [
-  { value: '1', label: '1', icon: '⛔' },
-  { value: '2', label: '2', icon: '🔴' },
-  { value: '3', label: '3', icon: '🟡' },
-  { value: '4', label: '4', icon: '🟢' },
-  { value: '5', label: '5', icon: '🏆' },
+  { value: '1', label: '1', icon: '🔴' },
+  { value: '2', label: '2', icon: '🟡' },
+  { value: '3', label: '3', icon: '🟢' },
+  { value: '4', label: '4', icon: '🟡' },
+  { value: '5', label: '5', icon: '🔴' },
+]
+
+const ESCALA_EQUIPE = [
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: '5' },
 ]
 
 const PROCEDIMENTOS_OPCOES = [
@@ -45,7 +53,7 @@ type SnFields = {
   animaisDoentes: string
   cercasCochos: string
   carrapatosMoscas: string
-  animaisEntrevados: string
+  animaisEntreverados: string
   animalMorto: string
 }
 
@@ -73,7 +81,7 @@ const makeInitial = (): FormState => ({
   vaca: '', touro: '', bezerro: '', boi: '', garrote: '', novilha: '',
   escoreGadoIdeal: '', aguaBoaBebedouro: '', pastagemAdequada: '',
   animaisDoentes: '', cercasCochos: '', carrapatosMoscas: '',
-  animaisEntrevados: '', animalMorto: '',
+  animaisEntreverados: '', animalMorto: '',
   animaisTratados: '',
   escoreFezes: '',
   equipe: '',
@@ -141,7 +149,7 @@ export default function RodeioPage() {
       animaisDoentes: form.animaisDoentes,
       cercasCochos: form.cercasCochos,
       carrapatosMoscas: form.carrapatosMoscas,
-      animaisEntrevados: form.animaisEntrevados,
+      animaisEntreverados: form.animaisEntreverados,
       animalMorto: form.animalMorto,
       animaisTratados: form.animaisTratados ? Number(form.animaisTratados) : 0,
       escoreFezes: form.escoreFezes ? Number(form.escoreFezes) : null,
@@ -252,6 +260,7 @@ export default function RodeioPage() {
               value={form[campo as keyof SnFields]}
               onChange={set(campo as keyof FormState)}
               error={getError(campo)}
+              gridCols={2}
             />
           ))}
         </div>
@@ -259,6 +268,29 @@ export default function RodeioPage() {
         {/* Seção 4: Tratamento e Avaliação */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">4. TRATAMENTO E AVALIAÇÃO</h2>
+          <Radio
+            name="escoreFezes"
+            label="ESCORE DE FEZES (1 a 5)"
+            options={ESCALA_5}
+            value={form.escoreFezes}
+            onChange={set('escoreFezes')}
+            error={getError('escoreFezes')}
+            gridCols={5}
+          />
+          <Radio
+            name="equipe"
+            label="EQUIPE (1 a 5)"
+            options={ESCALA_EQUIPE}
+            value={form.equipe}
+            onChange={set('equipe')}
+            error={getError('equipe')}
+            gridCols={5}
+          />
+        </div>
+
+        {/* Seção 5: Procedimentos */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">5. PROCEDIMENTOS REALIZADOS</h2>
           <Input
             label="ANIMAIS TRATADOS"
             placeholder="0"
@@ -268,27 +300,6 @@ export default function RodeioPage() {
             type="number"
             min="0"
           />
-          <Radio
-            name="escoreFezes"
-            label="ESCORE DE FEZES (1 a 5)"
-            options={ESCALA_5}
-            value={form.escoreFezes}
-            onChange={set('escoreFezes')}
-            error={getError('escoreFezes')}
-          />
-          <Radio
-            name="equipe"
-            label="AVALIAÇÃO DA EQUIPE (1 a 5)"
-            options={ESCALA_5}
-            value={form.equipe}
-            onChange={set('equipe')}
-            error={getError('equipe')}
-          />
-        </div>
-
-        {/* Seção 5: Procedimentos */}
-        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
-          <h2 className="section-title">5. PROCEDIMENTOS REALIZADOS</h2>
           <div className="flex flex-col gap-3">
             {PROCEDIMENTOS_OPCOES.map((proc) => (
               <Checkbox
