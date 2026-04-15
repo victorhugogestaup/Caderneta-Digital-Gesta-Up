@@ -381,7 +381,7 @@ export default function RodeioPage() {
               />
               
               <p className="text-sm font-bold text-gray-900 mb-2">Tratamentos:</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {PROCEDIMENTOS_OPCOES.map((proc) => (
                   <Checkbox
                     key={proc}

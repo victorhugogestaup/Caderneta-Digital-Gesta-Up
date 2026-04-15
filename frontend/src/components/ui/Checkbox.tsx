@@ -33,9 +33,9 @@ export default function Checkbox({ label, error, className = '', ...props }: Che
         </div>
       </div>
       <div className="flex-1 pt-1">
-        <span className="text-lg font-semibold text-gray-900 leading-tight">{label}</span>
+        <span className="text-base sm:text-lg font-semibold text-gray-900 leading-tight break-words">{label}</span>
         {error && (
-          <p className="mt-1 text-base font-semibold text-red-700 flex items-center gap-1">
+          <p className="mt-1 text-sm sm:text-base font-semibold text-red-700 flex items-center gap-1">
             <span>⚠️</span> {error}
           </p>
         )}
