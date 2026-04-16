@@ -4,6 +4,7 @@ import { Button } from '../components/ui'
 import { CADERNETAS, LOGO_URL, getFarmLogo } from '../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
+import { Settings } from 'lucide-react'
 
 // Função helper para converter HEX para RGBA com opacidade
 const hexToRgba = (hex: string, alpha: number = 0.25): string => {
@@ -35,7 +36,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
-      <header className="bg-[#1a3a2a] text-white py-6 border-b-4 border-yellow-400">
+      <header className="bg-[#1a3a2a] text-white py-6 border-b-4 border-yellow-400 relative">
+        <button
+          onClick={() => navigate('/configuracoes')}
+          className="absolute top-4 right-4 text-white hover:text-yellow-400 transition-colors z-10"
+        >
+          <Settings size={24} />
+        </button>
         <div className="flex flex-col items-center gap-3 px-4">
           <div className="flex items-center gap-4">
             <img src={logoUrl} alt="Logo GestaUp" className="w-16 h-auto object-contain rounded-[22px]" />
@@ -103,13 +110,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      {/* Footer com ações */}
-      <footer className="p-4 bg-[#1a3a2a] flex flex-col gap-3">
-        <Button onClick={() => navigate('/configuracoes')} variant="ghost" icon="⚙️" className="text-white hover:text-gray-200">
-          CONFIGURAÇÕES
-        </Button>
-      </footer>
     </div>
   )
 }

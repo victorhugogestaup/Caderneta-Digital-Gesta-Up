@@ -4,6 +4,7 @@ import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage } from '.
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
+import { Settings } from 'lucide-react'
 
 const MOTIVOS = [
   { value: 'Morte', label: 'MORTE', icon: '⚰️' },
@@ -134,22 +135,30 @@ export default function MovimentacaoPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-[#1a3a2a] text-white flex items-center px-4 py-4">
+      <header className="bg-[#1a3a2a] text-white px-4 py-4 relative">
         <button
-          onClick={() => navigate(-1)}
-          className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
+          onClick={() => navigate('/configuracoes')}
+          className="absolute top-4 right-4 text-white hover:text-yellow-400 transition-colors z-10"
         >
-          ← VOLTAR
+          <Settings size={24} />
         </button>
-        <h1 className="text-base font-bold flex-1 text-center">
-          MOVIMENTAÇÃO
-        </h1>
-        <button
-          onClick={() => navigate('/caderneta/movimentacao/lista')}
-          className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
-        >
-          LISTA
-        </button>
+        <div className="flex items-center justify-between gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
+          >
+            ← VOLTAR
+          </button>
+          <div className="flex-1 text-center">
+            <h1 className="text-base font-bold">MOVIMENTAÇÃO</h1>
+          </div>
+          <button
+            onClick={() => navigate('/caderneta/movimentacao/lista')}
+            className="text-yellow-400 font-bold text-sm min-h-[40px] px-3"
+          >
+            LISTA
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
