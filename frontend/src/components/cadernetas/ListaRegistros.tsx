@@ -5,6 +5,7 @@ import { Registro } from '../../types/cadernetas'
 import { CadernetaStore } from '../../services/indexedDB'
 import { listarRegistros, excluirRegistro } from '../../services/api'
 import { useSearchFiltros } from '../../hooks/useSearchFiltros'
+import { generatePDF } from '../../utils/generatePDF'
 import { Input, Button } from '../ui'
 import DatePickerIcon from '../ui/DatePickerIcon'
 import { RootState } from '../../store/store'
@@ -227,6 +228,20 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
     if (registroParaCompartilhar) {
       const texto = formatarRegistroComoTexto(registroParaCompartilhar)
       compartilharWhatsApp(texto)
+      setMostrarModalCompartilhar(false)
+      setRegistroParaCompartilhar(null)
+    }
+  }
+
+  const handleCompartilharPDF = async () => {
+    if (registroParaCompartilhar) {
+      await generatePDF({
+        registro: registroParaCompartilhar,
+        caderneta,
+        titulo,
+        nomeUsuario: usuario || 'Usuário',
+        nomeFazenda: 'Fazenda', // Pode ser obtido do config.fazenda se disponível
+      })
       setMostrarModalCompartilhar(false)
       setRegistroParaCompartilhar(null)
     }
@@ -517,13 +532,12 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                   COMO TEXTO (WhatsApp)
                 </Button>
                 <Button
-                  variant="ghost"
+                  onClick={handleCompartilharPDF}
+                  variant="secondary"
                   fullWidth
                   icon="📄"
-                  disabled
-                  className="opacity-50"
                 >
-                  COMO PDF (Em breve)
+                  COMO PDF
                 </Button>
                 <Button
                   onClick={() => {
