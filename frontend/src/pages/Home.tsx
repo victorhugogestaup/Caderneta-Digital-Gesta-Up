@@ -51,9 +51,9 @@ export default function Home() {
             )}
           </div>
           {configurado && fazenda && (
-            <h1 className="text-2xl font-bold text-[#ecc417]">{fazenda.toUpperCase()}</h1>
+            <h1 className="text-2xl font-bold text-white">{fazenda.toUpperCase()}</h1>
           )}
-          <p className="text-[#3b82f6] text-base font-semibold">CADERNETAS DIGITAIS</p>
+          <p className="text-white text-base font-semibold">CADERNETAS DIGITAIS</p>
         </div>
       </header>
 
