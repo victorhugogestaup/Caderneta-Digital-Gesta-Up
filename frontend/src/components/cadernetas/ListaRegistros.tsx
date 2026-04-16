@@ -5,21 +5,13 @@ import { Registro } from '../../types/cadernetas'
 import { CadernetaStore } from '../../services/indexedDB'
 import { listarRegistros, excluirRegistro } from '../../services/api'
 import { useSearchFiltros } from '../../hooks/useSearchFiltros'
-import { exportToCSV, exportToJSON, copyToClipboard } from '../../utils/exportToCSV'
 import { Input, Button } from '../ui'
 import DatePickerIcon from '../ui/DatePickerIcon'
 import { RootState } from '../../store/store'
 
-interface ColunaDef {
-  campo: string
-  label: string
-  formatador?: (val: unknown) => string
-}
-
 interface Props {
   caderneta: CadernetaStore
   titulo: string
-  colunas: ColunaDef[]
   rotaForm: string
 }
 
@@ -52,7 +44,7 @@ const formatFieldValue = (key: string, value: unknown): string => {
   return String(value)
 }
 
-export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }: Props) {
+export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
   const navigate = useNavigate()
   const { usuario } = useSelector((state: RootState) => state.config)
   const [registros, setRegistros] = useState<Registro[]>([])
@@ -85,8 +77,6 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
     limparFiltros,
     setPeriodoRapido,
     temFiltrosAtivos,
-    totalOriginal,
-    totalFiltrado,
   } = useSearchFiltros(registros)
 
   // Filtragem específica para maternidade

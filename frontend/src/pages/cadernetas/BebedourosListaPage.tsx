@@ -6,14 +6,6 @@ export default function BebedourosListaPage() {
       caderneta="bebedouros"
       titulo="BEBEDOUROS — LISTA"
       rotaForm="/caderneta/bebedouros"
-      colunas={[
-        { campo: 'responsavel', label: 'Responsável' },
-        { campo: 'pasto', label: 'Pasto' },
-        { campo: 'numeroLote', label: 'Lote' },
-        { campo: 'gado', label: 'Gado' },
-        { campo: 'categoria', label: 'Categoria' },
-        { campo: 'leituraBebedouro', label: 'Leitura' },
-      ]}
     />
   )
 }
