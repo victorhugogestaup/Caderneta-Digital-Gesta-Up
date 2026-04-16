@@ -128,7 +128,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
   }
 
   const formatarRegistroComoTexto = (registro: Registro): string => {
-    const nomeUsuario = usuario?.nome || 'Usuário'
+    const nomeUsuario = usuario || 'Usuário'
     let texto = `📋 REGISTRO - ${titulo.toUpperCase()}\n`
     texto += `👤 Usuário: ${nomeUsuario}\n`
     texto += `📅 Data: ${String(registro.data)}\n\n`
