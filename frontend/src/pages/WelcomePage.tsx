@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check } from 'lucide-react'
 
-export default function WelcomePage() {
+export default function Page() {
   const navigate = useNavigate()
   const [isStandalone, setIsStandalone] = useState(false)
 

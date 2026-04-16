@@ -366,7 +366,6 @@ export default function RodeioPage() {
               }`}
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🐄</span>
                 <h3 className="text-lg font-bold text-gray-900">
                   ANIMAL {index + 1}
                 </h3>

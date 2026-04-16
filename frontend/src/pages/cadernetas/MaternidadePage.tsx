@@ -176,7 +176,7 @@ export default function MaternidadePage() {
             LISTA
           </button>
         </div>
-        <div className="flex items-center justify-center gap-8 mt-3">
+        <div className="flex items-center justify-center gap-8 mt-5">
           <img src={LOGO_URL} alt="Gesta'Up" className="w-16 h-auto object-contain rounded-[22px]" />
           <img src={farmLogoUrl} alt="Fazenda" className="h-[58px] w-auto object-contain rounded-[22px]" />
         </div>
