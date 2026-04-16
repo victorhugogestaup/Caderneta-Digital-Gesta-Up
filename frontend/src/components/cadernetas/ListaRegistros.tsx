@@ -55,6 +55,8 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
   const [periodoAtivo, setPeriodoAtivo] = useState<'todos' | 'hoje' | '7dias' | '30dias' | null>(null)
   const [mostrarModalExcluir, setMostrarModalExcluir] = useState(false)
   const [registroParaExcluir, setRegistroParaExcluir] = useState<string | null>(null)
+  const [mostrarModalCompartilhar, setMostrarModalCompartilhar] = useState(false)
+  const [registroParaCompartilhar, setRegistroParaCompartilhar] = useState<Registro | null>(null)
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -123,6 +125,100 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
   const handleSetPeriodoRapido = (periodo: 'todos' | '7dias' | '30dias' | 'hoje') => {
     setPeriodoRapido(periodo)
     setPeriodoAtivo(periodo)
+  }
+
+  const formatarRegistroComoTexto = (registro: Registro): string => {
+    const nomeUsuario = usuario?.nome || 'Usuário'
+    let texto = `📋 REGISTRO - ${titulo.toUpperCase()}\n`
+    texto += `👤 Usuário: ${nomeUsuario}\n`
+    texto += `📅 Data: ${String(registro.data)}\n\n`
+
+    // Mapeamento de campos para emojis e labels amigáveis
+    const campoLabel: Record<string, string> = {
+      pasto: '🏷️ PASTO',
+      numeroCria: '🔢 NÚMERO CRIA',
+      numeroMae: '🔢 NÚMERO MÃE',
+      sexo: '♂️ SEXO',
+      tipoParto: '👶 TIPO DE PARTO',
+      raca: '🐄 RAÇA',
+      tratamento: '💊 TRATAMENTO',
+      pesoCria: '⚖️ PESO CRIA',
+      manejador: '👨 MANEJADOR',
+      numeroLote: '📦 LOTE',
+      pastoSaida: '🚪 PASTO SAÍDA',
+      pastoEntrada: '🚪 PASTO ENTRADA',
+      totalAnimais: '🐄 TOTAL ANIMAIS',
+      tratador: '👨 TRATADOR',
+      produto: '💊 PRODUTO',
+      gado: '🐄 GADO',
+      leitura: '📏 LEITURA',
+      kg: '⚖️ KG',
+      totalCabecas: '🐄 TOTAL CABEÇAS',
+      animaisTratados: '💉 ANIMAIS TRATADOS',
+      animaisDoentes: '🤒 ANIMAIS DOENTES',
+      animalMorto: '☠️ ANIMAL MORTO',
+      loteOrigem: '📦 LOTE ORIGEM',
+      loteDestino: '📦 LOTE DESTINO',
+      numeroCabecas: '🐄 NÚMERO CABEÇAS',
+      pesoMedio: '⚖️ PESO MÉDIO',
+      motivoMovimentacao: '📝 MOTIVO',
+      brincoChip: '🏷️ BRINCO/CHIP',
+      responsavel: '👨 RESPONSÁVEL',
+      categoria: '🏷️ CATEGORIA',
+      leituraBebedouro: '📏 LEITURA BEBEDOURO',
+    }
+
+    Object.entries(registro).forEach(([key, value]) => {
+      if (
+        key !== 'id' &&
+        key !== 'data' &&
+        key !== 'syncStatus' &&
+        key !== 'version' &&
+        key !== 'lastModified' &&
+        value !== null &&
+        value !== undefined &&
+        value !== ''
+      ) {
+        const label = campoLabel[key] || key.toUpperCase()
+        const valorFormatado = formatFieldValue(key, value)
+        texto += `${label}: ${valorFormatado}\n`
+      }
+    })
+
+    return texto
+  }
+
+  const compartilharWhatsApp = async (texto: string) => {
+    const textoCodificado = encodeURIComponent(texto)
+    const url = `https://wa.me/?text=${textoCodificado}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Compartilhar Registro',
+          text: texto,
+        })
+      } catch (err) {
+        // Se o usuário cancelar ou falhar, abre o WhatsApp Web
+        window.open(url, '_blank')
+      }
+    } else {
+      window.open(url, '_blank')
+    }
+  }
+
+  const handleCompartilhar = (registro: Registro) => {
+    setRegistroParaCompartilhar(registro)
+    setMostrarModalCompartilhar(true)
+  }
+
+  const handleCompartilharTexto = () => {
+    if (registroParaCompartilhar) {
+      const texto = formatarRegistroComoTexto(registroParaCompartilhar)
+      compartilharWhatsApp(texto)
+      setMostrarModalCompartilhar(false)
+      setRegistroParaCompartilhar(null)
+    }
   }
 
   return (
@@ -344,6 +440,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                     EXCLUIR
                   </Button>
                   <Button
+                    onClick={() => handleCompartilhar(registro)}
                     variant="ghost"
                     size="sm"
                     icon="🔗"
@@ -381,6 +478,47 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                   fullWidth
                 >
                   EXCLUIR
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de escolha de formato de compartilhamento */}
+        {mostrarModalCompartilhar && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">📤 Compartilhar Registro</h3>
+              <p className="text-base text-gray-700 mb-6">
+                Escolha o formato para compartilhar este registro:
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handleCompartilharTexto}
+                  variant="secondary"
+                  fullWidth
+                  icon="💬"
+                >
+                  COMO TEXTO (WhatsApp)
+                </Button>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  icon="📄"
+                  disabled
+                  className="opacity-50"
+                >
+                  COMO PDF (Em breve)
+                </Button>
+                <Button
+                  onClick={() => {
+                    setMostrarModalCompartilhar(false)
+                    setRegistroParaCompartilhar(null)
+                  }}
+                  variant="ghost"
+                  fullWidth
+                >
+                  CANCELAR
                 </Button>
               </div>
             </div>
