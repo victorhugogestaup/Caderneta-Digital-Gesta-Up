@@ -49,12 +49,12 @@ const makeInitial = (usuario?: string): FormState => ({
 })
 
 const CATEGORIAS: { campo: keyof FormState; label: string }[] = [
-  { campo: 'vaca', label: 'VACA' },
-  { campo: 'touro', label: 'TOURO' },
-  { campo: 'bezerro', label: 'BEZERRO' },
-  { campo: 'boiMagro', label: 'BOI MAGRO' },
-  { campo: 'garrote', label: 'GARROTE' },
-  { campo: 'novilha', label: 'NOVILHA' },
+  { campo: 'vaca', label: 'VACAS' },
+  { campo: 'touro', label: 'TOUROS' },
+  { campo: 'bezerro', label: 'BEZERROS (AS)' },
+  { campo: 'boiMagro', label: 'BOIS MAGROS' },
+  { campo: 'garrote', label: 'GARROTES' },
+  { campo: 'novilha', label: 'NOVILHAS' },
 ]
 
 export default function PastagensPage() {
