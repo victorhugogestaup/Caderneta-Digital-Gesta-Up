@@ -6,6 +6,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   helper?: string
   icon?: ReactNode
   fullWidth?: boolean
+  textSize?: 'sm' | 'base' | 'lg' | 'xl'
 }
 
 export default function Input({
@@ -14,10 +15,12 @@ export default function Input({
   helper,
   icon,
   fullWidth = true,
+  textSize,
   className = '',
   ...props
 }: InputProps) {
-  const baseStyles = 'min-h-[60px] text-lg sm:text-xl px-3 sm:px-4 py-3 bg-white border-2 rounded-xl focus:outline-none transition-colors w-full'
+  const textSizeStyles = textSize === 'sm' ? 'text-sm' : textSize === 'base' ? 'text-base' : textSize === 'lg' ? 'text-lg' : 'text-lg sm:text-xl'
+  const baseStyles = `min-h-[60px] ${textSizeStyles} px-3 sm:px-4 py-3 bg-white border-2 rounded-xl focus:outline-none transition-colors w-full`
   const stateStyles = error
     ? 'border-red-500 focus:border-red-700'
     : 'border-gray-400 focus:border-black'

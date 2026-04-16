@@ -22,8 +22,15 @@ export async function salvarRegistro(
     return { success: false, errors: validation.errors }
   }
 
+  // Capturar hora atual e concatenar com data
+  const agora = new Date()
+  const hora = agora.getHours().toString().padStart(2, '0')
+  const minuto = agora.getMinutes().toString().padStart(2, '0')
+  const dataComHora = `${data.data as string} ${hora}:${minuto}`
+
   const registro = {
     ...data,
+    data: dataComHora,
     id: generateId(),
     version: generateVersion(),
     lastModified: getCurrentTimestamp(),

@@ -43,7 +43,7 @@ const PROCEDIMENTOS_OPCOES = [
 const CATEGORIAS_ANIMAIS: { campo: string; label: string }[] = [
   { campo: 'vaca', label: 'VACAS' },
   { campo: 'touro', label: 'TOUROS' },
-  { campo: 'bezerro', label: 'BEZERROS' },
+  { campo: 'bezerro', label: 'BEZERROS (AS)' },
   { campo: 'boi', label: 'BOIS' },
   { campo: 'garrote', label: 'GARROTES' },
   { campo: 'novilha', label: 'NOVILHAS' },

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Registro } from '../../types/cadernetas'
 import { CadernetaStore } from '../../services/indexedDB'
-import { listarRegistros /*, excluirRegistro */ } from '../../services/api'
+import { listarRegistros, excluirRegistro } from '../../services/api'
 import { useSearchFiltros } from '../../hooks/useSearchFiltros'
 import { exportToCSV, exportToJSON, copyToClipboard } from '../../utils/exportToCSV'
 import { Input, Button } from '../ui'
@@ -57,9 +57,12 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
   const { usuario } = useSelector((state: RootState) => state.config)
   const [registros, setRegistros] = useState<Registro[]>([])
   const [carregando, setCarregando] = useState(true)
-  // const [confirmandoId, setConfirmandoId] = useState<string | null>(null)
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
-  const [mostrarExportar, setMostrarExportar] = useState(false)
+  const [filtroSexo, setFiltroSexo] = useState('')
+  const [filtroTipoParto, setFiltroTipoParto] = useState('')
+  const [periodoAtivo, setPeriodoAtivo] = useState<'todos' | 'hoje' | '7dias' | '30dias' | null>(null)
+  const [mostrarModalExcluir, setMostrarModalExcluir] = useState(false)
+  const [registroParaExcluir, setRegistroParaExcluir] = useState<string | null>(null)
 
   const carregar = useCallback(async () => {
     setCarregando(true)
@@ -80,24 +83,57 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
     setDataFim,
     setOrdenacao,
     limparFiltros,
+    setPeriodoRapido,
     temFiltrosAtivos,
     totalOriginal,
     totalFiltrado,
   } = useSearchFiltros(registros)
 
-  // const handleExcluir = async (id: string) => {
-  //   if (confirmandoId !== id) {
-  //     setConfirmandoId(id)
-  //     return
-  //   }
-  //   await excluirRegistro(caderneta, id)
-  //   setConfirmandoId(null)
-  //   carregar()
-  // }
+  // Filtragem específica para maternidade
+  const registrosFiltradosFinal = useMemo(() => {
+    let resultado = registrosFiltrados
 
-  const handleExportCSV = () => exportToCSV(registrosFiltrados, `${caderneta}_export`, colunas)
-  const handleExportJSON = () => exportToJSON(registrosFiltrados, `${caderneta}_export`)
-  const handleCopy = () => copyToClipboard(registrosFiltrados)
+    if (caderneta === 'maternidade') {
+      if (filtroSexo) {
+        resultado = resultado.filter((r) => r.sexo === filtroSexo)
+      }
+      if (filtroTipoParto) {
+        resultado = resultado.filter((r) => r.tipoParto === filtroTipoParto)
+      }
+    }
+
+    return resultado
+  }, [registrosFiltrados, caderneta, filtroSexo, filtroTipoParto])
+
+  const handleExcluir = (id: string) => {
+    setRegistroParaExcluir(id)
+    setMostrarModalExcluir(true)
+  }
+
+  const confirmarExclusao = async () => {
+    if (registroParaExcluir) {
+      await excluirRegistro(caderneta, registroParaExcluir)
+      setMostrarModalExcluir(false)
+      setRegistroParaExcluir(null)
+      carregar()
+    }
+  }
+
+  // const handleExportCSV = () => exportToCSV(registrosFiltradosFinal, `${caderneta}_export`, colunas)
+  // const handleExportJSON = () => exportToJSON(registrosFiltradosFinal, `${caderneta}_export`)
+  // const handleCopy = () => copyToClipboard(registrosFiltradosFinal)
+
+  const handleLimparFiltrosCompletos = () => {
+    limparFiltros()
+    setFiltroSexo('')
+    setFiltroTipoParto('')
+    setPeriodoAtivo(null)
+  }
+
+  const handleSetPeriodoRapido = (periodo: 'todos' | '7dias' | '30dias' | 'hoje') => {
+    setPeriodoRapido(periodo)
+    setPeriodoAtivo(periodo)
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -110,7 +146,7 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
         </button>
         <h1 className="text-base font-bold flex-1 text-center">{titulo}</h1>
         <span className="text-yellow-400 font-bold text-sm">
-          {totalFiltrado}/{totalOriginal} reg.
+          {registrosFiltradosFinal.length} registros
         </span>
       </header>
 
@@ -122,14 +158,51 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
 
         {/* Busca rápida */}
         <Input
-          placeholder="🔍 Buscar em todos os campos..."
+          placeholder="🔍 Buscar por pasto, número, tratamento..."
           value={filtros.busca}
           onChange={(e) => setBusca(e.target.value)}
           fullWidth
+          textSize="base"
         />
 
+        {/* Botões de período rápido */}
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <Button
+            onClick={() => handleSetPeriodoRapido('todos')}
+            variant={periodoAtivo === 'todos' ? 'secondary' : 'ghost'}
+            size="sm"
+            icon="📅"
+          >
+            TODOS
+          </Button>
+          <Button
+            onClick={() => handleSetPeriodoRapido('hoje')}
+            variant={periodoAtivo === 'hoje' ? 'secondary' : 'ghost'}
+            size="sm"
+            icon="📆"
+          >
+            HOJE
+          </Button>
+          <Button
+            onClick={() => handleSetPeriodoRapido('7dias')}
+            variant={periodoAtivo === '7dias' ? 'secondary' : 'ghost'}
+            size="sm"
+            icon="📅"
+          >
+            7 DIAS
+          </Button>
+          <Button
+            onClick={() => handleSetPeriodoRapido('30dias')}
+            variant={periodoAtivo === '30dias' ? 'secondary' : 'ghost'}
+            size="sm"
+            icon="📅"
+          >
+            30 DIAS
+          </Button>
+        </div>
+
         {/* Botões de filtros e exportar */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <Button
             onClick={() => setMostrarFiltros(!mostrarFiltros)}
             variant={temFiltrosAtivos ? 'secondary' : 'ghost'}
@@ -138,15 +211,18 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
           >
             {temFiltrosAtivos ? 'FILTROS ATIVOS' : 'FILTROS'}
           </Button>
-          <Button
-            onClick={() => setMostrarExportar(!mostrarExportar)}
-            variant="ghost"
-            size="sm"
-            icon="📥"
-          >
-            EXPORTAR
-          </Button>
         </div>
+
+        {temFiltrosAtivos && (
+          <Button
+            onClick={limparFiltros}
+            variant="secondary"
+            size="sm"
+            icon="🧹"
+          >
+            LIMPAR FILTROS
+          </Button>
+        )}
 
         {/* Painel de filtros avançados */}
         {mostrarFiltros && (
@@ -173,33 +249,44 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
               >
                 <option value="data_desc">📅 Data (mais recente)</option>
                 <option value="data_asc">📅 Data (mais antiga)</option>
-                <option value="id_desc">🆔 ID (decrescente)</option>
-                <option value="id_asc">🆔 ID (crescente)</option>
               </select>
             </div>
-            {temFiltrosAtivos && (
-              <Button onClick={limparFiltros} variant="ghost" size="sm">
+
+            {caderneta === 'maternidade' && (
+              <>
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-2">SEXO</label>
+                  <select
+                    value={filtroSexo}
+                    onChange={(e) => setFiltroSexo(e.target.value)}
+                    className="w-full min-h-[60px] text-xl px-4 py-3 bg-white border-2 border-gray-400 rounded-xl"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Macho">Macho ♂️</option>
+                    <option value="Fêmea">Fêmea ♀️</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-2">TIPO DE PARTO</label>
+                  <select
+                    value={filtroTipoParto}
+                    onChange={(e) => setFiltroTipoParto(e.target.value)}
+                    className="w-full min-h-[60px] text-xl px-4 py-3 bg-white border-2 border-gray-400 rounded-xl"
+                  >
+                    <option value="">Todos</option>
+                    <option value="Normal">Normal ✅</option>
+                    <option value="Auxiliado">Auxiliado 🤝</option>
+                    <option value="Cesárea">Cesárea 🏥</option>
+                    <option value="Aborto">Aborto ❌</option>
+                  </select>
+                </div>
+              </>
+            )}
+            {(temFiltrosAtivos || filtroSexo || filtroTipoParto) && (
+              <Button onClick={handleLimparFiltrosCompletos} variant="ghost" size="sm">
                 🧹 LIMPAR FILTROS
               </Button>
             )}
-          </div>
-        )}
-
-        {/* Painel de exportação */}
-        {mostrarExportar && (
-          <div className="bg-white rounded-2xl p-4 border-2 border-gray-200 flex flex-col gap-3">
-            <h3 className="font-bold text-gray-800">📥 Exportar Registros ({totalFiltrado})</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Button onClick={handleExportCSV} variant="secondary" size="sm" icon="📊">
-                CSV (Excel)
-              </Button>
-              <Button onClick={handleExportJSON} variant="secondary" size="sm" icon="🗂️">
-                JSON
-              </Button>
-            </div>
-            <Button onClick={handleCopy} variant="ghost" size="sm" icon="📋">
-              COPIAR TEXTO
-            </Button>
           </div>
         )}
 
@@ -209,7 +296,7 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
             <span className="text-2xl animate-spin">⏳</span>
             <span className="ml-3 text-lg font-semibold text-gray-600">Carregando...</span>
           </div>
-        ) : registrosFiltrados.length === 0 ? (
+        ) : registrosFiltradosFinal.length === 0 ? (
           <div className="bg-white rounded-2xl p-8 text-center border-2 border-gray-200">
             <p className="text-5xl mb-4">📋</p>
             <p className="text-xl font-bold text-gray-700">
@@ -223,7 +310,7 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {registrosFiltrados.map((registro) => (
+            {registrosFiltradosFinal.map((registro) => (
               <div
                 key={registro.id}
                 className="bg-white rounded-2xl p-4 border-2 border-gray-200 shadow-sm"
@@ -259,6 +346,14 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
 
                 <div className="flex gap-2 border-t border-gray-100 pt-3">
                   <Button
+                    onClick={() => handleExcluir(registro.id)}
+                    variant="danger"
+                    size="sm"
+                    icon="🗑️"
+                  >
+                    EXCLUIR
+                  </Button>
+                  <Button
                     variant="ghost"
                     size="sm"
                     icon="🔗"
@@ -268,6 +363,37 @@ export default function ListaRegistros({ caderneta, titulo, colunas, rotaForm }:
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Modal de confirmação de exclusão */}
+        {mostrarModalExcluir && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">⚠️ Confirmar Exclusão</h3>
+              <p className="text-base text-gray-700 mb-6">
+                Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setMostrarModalExcluir(false)
+                    setRegistroParaExcluir(null)
+                  }}
+                  variant="secondary"
+                  fullWidth
+                >
+                  CANCELAR
+                </Button>
+                <Button
+                  onClick={confirmarExclusao}
+                  variant="danger"
+                  fullWidth
+                >
+                  EXCLUIR
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </main>
