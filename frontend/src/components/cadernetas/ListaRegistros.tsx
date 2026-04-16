@@ -67,6 +67,15 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
 
   useEffect(() => {
     carregar()
+
+    // Polling para atualizar syncStatus em tempo real (a cada 5 segundos)
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        carregar()
+      }
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [carregar])
 
   const {
@@ -133,39 +142,41 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
     texto += `👤 Usuário: ${nomeUsuario}\n`
     texto += `📅 Data: ${String(registro.data)}\n\n`
 
-    // Mapeamento de campos para emojis e labels amigáveis
+    // Mapeamento de campos para labels amigáveis
     const campoLabel: Record<string, string> = {
-      pasto: '🏷️ PASTO',
-      numeroCria: '🔢 NÚMERO CRIA',
-      numeroMae: '🔢 NÚMERO MÃE',
-      sexo: '♂️ SEXO',
-      tipoParto: '👶 TIPO DE PARTO',
-      raca: '🐄 RAÇA',
-      tratamento: '💊 TRATAMENTO',
-      pesoCria: '⚖️ PESO CRIA',
-      manejador: '👨 MANEJADOR',
-      numeroLote: '📦 LOTE',
-      pastoSaida: '🚪 PASTO SAÍDA',
-      pastoEntrada: '🚪 PASTO ENTRADA',
-      totalAnimais: '🐄 TOTAL ANIMAIS',
-      tratador: '👨 TRATADOR',
-      produto: '💊 PRODUTO',
-      gado: '🐄 GADO',
-      leitura: '📏 LEITURA',
-      kg: '⚖️ KG',
-      totalCabecas: '🐄 TOTAL CABEÇAS',
-      animaisTratados: '💉 ANIMAIS TRATADOS',
-      animaisDoentes: '🤒 ANIMAIS DOENTES',
-      animalMorto: '☠️ ANIMAL MORTO',
-      loteOrigem: '📦 LOTE ORIGEM',
-      loteDestino: '📦 LOTE DESTINO',
-      numeroCabecas: '🐄 NÚMERO CABEÇAS',
-      pesoMedio: '⚖️ PESO MÉDIO',
-      motivoMovimentacao: '📝 MOTIVO',
-      brincoChip: '🏷️ BRINCO/CHIP',
-      responsavel: '👨 RESPONSÁVEL',
-      categoria: '🏷️ CATEGORIA',
-      leituraBebedouro: '📏 LEITURA BEBEDOURO',
+      pasto: 'PASTO',
+      numeroCria: 'NÚMERO CRIA',
+      numeroMae: 'NÚMERO MÃE',
+      sexo: 'SEXO',
+      tipoParto: 'TIPO DE PARTO',
+      raca: 'RAÇA',
+      tratamento: 'TRATAMENTO',
+      pesoCria: 'PESO CRIA',
+      manejador: 'MANEJADOR',
+      lote: 'LOTE',
+      numeroLote: 'LOTE',
+      pastoSaida: 'PASTO SAÍDA',
+      pastoEntrada: 'PASTO ENTRADA',
+      totalAnimais: 'TOTAL ANIMAIS',
+      tratador: 'TRATADOR',
+      produto: 'PRODUTO',
+      gado: 'GADO',
+      leitura: 'LEITURA',
+      kg: 'KG',
+      totalCabecas: 'TOTAL CABEÇAS',
+      animaisTratados: 'ANIMAIS TRATADOS',
+      animaisDoentes: 'ANIMAIS DOENTES',
+      animalMorto: 'ANIMAL MORTO',
+      loteOrigem: 'LOTE ORIGEM',
+      loteDestino: 'LOTE DESTINO',
+      numeroCabecas: 'NÚMERO CABEÇAS',
+      pesoMedio: 'PESO MÉDIO',
+      motivoMovimentacao: 'MOTIVO',
+      brincoChip: 'BRINCO/CHIP',
+      responsavel: 'RESPONSÁVEL',
+      categoria: 'CATEGORIA',
+      categoriaMae: 'CATEGORIA MÃE',
+      leituraBebedouro: 'LEITURA BEBEDOURO',
     }
 
     Object.entries(registro).forEach(([key, value]) => {
@@ -258,6 +269,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
             variant={periodoAtivo === 'todos' ? 'secondary' : 'ghost'}
             size="sm"
             icon="📅"
+            className="!gap-1"
           >
             TODOS
           </Button>
@@ -266,6 +278,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
             variant={periodoAtivo === 'hoje' ? 'secondary' : 'ghost'}
             size="sm"
             icon="📆"
+            className="!gap-1"
           >
             HOJE
           </Button>
@@ -274,6 +287,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
             variant={periodoAtivo === '7dias' ? 'secondary' : 'ghost'}
             size="sm"
             icon="📅"
+            className="!gap-1"
           >
             7 DIAS
           </Button>
@@ -282,6 +296,7 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
             variant={periodoAtivo === '30dias' ? 'secondary' : 'ghost'}
             size="sm"
             icon="📅"
+            className="!gap-1"
           >
             30 DIAS
           </Button>
