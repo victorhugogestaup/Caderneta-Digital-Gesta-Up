@@ -5,7 +5,6 @@ import { Registro } from '../../types/cadernetas'
 import { CadernetaStore } from '../../services/indexedDB'
 import { listarRegistros, excluirRegistro } from '../../services/api'
 import { useSearchFiltros } from '../../hooks/useSearchFiltros'
-import { generatePDF } from '../../utils/generatePDF'
 import { Input, Button } from '../ui'
 import DatePickerIcon from '../ui/DatePickerIcon'
 import { RootState } from '../../store/store'
@@ -228,20 +227,6 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
     if (registroParaCompartilhar) {
       const texto = formatarRegistroComoTexto(registroParaCompartilhar)
       compartilharWhatsApp(texto)
-      setMostrarModalCompartilhar(false)
-      setRegistroParaCompartilhar(null)
-    }
-  }
-
-  const handleCompartilharPDF = async () => {
-    if (registroParaCompartilhar) {
-      await generatePDF({
-        registro: registroParaCompartilhar,
-        caderneta,
-        titulo,
-        nomeUsuario: usuario || 'Usuário',
-        nomeFazenda: 'Fazenda', // Pode ser obtido do config.fazenda se disponível
-      })
       setMostrarModalCompartilhar(false)
       setRegistroParaCompartilhar(null)
     }
@@ -519,25 +504,14 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl">
               <h3 className="text-xl font-bold text-gray-900 mb-4">📤 Compartilhar Registro</h3>
-              <p className="text-base text-gray-700 mb-6">
-                Escolha o formato para compartilhar este registro:
-              </p>
               <div className="flex flex-col gap-3">
                 <Button
                   onClick={handleCompartilharTexto}
                   variant="secondary"
                   fullWidth
-                  icon="💬"
+                  icon="📋"
                 >
-                  COMO TEXTO (WhatsApp)
-                </Button>
-                <Button
-                  onClick={handleCompartilharPDF}
-                  variant="secondary"
-                  fullWidth
-                  icon="📄"
-                >
-                  COMO PDF
+                  COMPARTILHAR
                 </Button>
                 <Button
                   onClick={() => {
