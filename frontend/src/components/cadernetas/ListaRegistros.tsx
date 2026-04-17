@@ -31,6 +31,9 @@ const formatFieldValue = (key: string, value: unknown): string => {
   const valueStr = String(value)
   if (valueStr === 'S') return 'Sim'
   if (valueStr === 'N') return 'Não'
+  if (key === 'categorias' && Array.isArray(value)) {
+    return value.join(', ')
+  }
   return valueStr
 }
 
@@ -123,9 +126,11 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
     texto += `👤 Usuário: ${nomeUsuario}\n`
     texto += `📅 Data: ${String(registro.data)}\n\n`
 
-    // Separar campos normais e animais tratados
+    // Separar campos normais, animais tratados e categorias
     const camposNormais: [string, unknown][] = []
+    const camposAposPesoMedio: [string, unknown][] = []
     const animaisTratados: Map<number, { id: string; tratamentos: string }> = new Map()
+    const categoriasAnimais: string[] = []
 
     Object.entries(registro).forEach(([key, value]) => {
       if (
@@ -135,42 +140,97 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
         key !== 'version' &&
         key !== 'lastModified' &&
         key !== 'googleRowId' &&
+        key !== 'categoriasMarcadas' &&
         value !== null &&
         value !== undefined &&
         value !== ''
       ) {
-        const match = key.match(/^animal(\d+)(Id|Tratamentos)$/)
-        if (match) {
-          const num = parseInt(match[1])
-          const tipo = match[2]
-          if (!animaisTratados.has(num)) {
-            animaisTratados.set(num, { id: '', tratamentos: '' })
-          }
-          const animal = animaisTratados.get(num)!
-          if (tipo === 'Id') {
-            animal.id = String(value)
+        if (caderneta === 'movimentacao') {
+          // Campos de categoria individual
+          if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa'].includes(key)) {
+            if (value === 'S') {
+              const labelMap: Record<string, string> = {
+                vaca: 'VACA',
+                touro: 'TOURO',
+                boiGordo: 'BOI GORDO',
+                boiMagro: 'BOI MAGRO',
+                garrote: 'GARROTE',
+                bezerro: 'BEZERRO',
+                novilha: 'NOVILHA',
+                tropa: 'TROPA',
+              }
+              categoriasAnimais.push(labelMap[key])
+            }
+          } else if (key === 'outraCategoria') {
+            if (value) {
+              categoriasAnimais.push(String(value))
+            }
+          } else if (['motivoMovimentacao', 'brincoChip', 'causaObservacao'].includes(key)) {
+            camposAposPesoMedio.push([key, value])
           } else {
-            animal.tratamentos = String(value)
+            const match = key.match(/^animal(\d+)(Id|Tratamentos)$/)
+            if (match) {
+              const num = parseInt(match[1])
+              const tipo = match[2]
+              if (!animaisTratados.has(num)) {
+                animaisTratados.set(num, { id: '', tratamentos: '' })
+              }
+              const animal = animaisTratados.get(num)!
+              if (tipo === 'Id') {
+                animal.id = String(value)
+              } else {
+                animal.tratamentos = String(value)
+              }
+            } else {
+              camposNormais.push([key, value])
+            }
           }
         } else {
-          camposNormais.push([key, value])
+          const match = key.match(/^animal(\d+)(Id|Tratamentos)$/)
+          if (match) {
+            const num = parseInt(match[1])
+            const tipo = match[2]
+            if (!animaisTratados.has(num)) {
+              animaisTratados.set(num, { id: '', tratamentos: '' })
+            }
+            const animal = animaisTratados.get(num)!
+            if (tipo === 'Id') {
+              animal.id = String(value)
+            } else {
+              animal.tratamentos = String(value)
+            }
+          } else {
+            camposNormais.push([key, value])
+          }
         }
       }
     })
 
-    // Adicionar campos normais com labels em negrito
+    // Adicionar campos normais com labels em itálico
     camposNormais.forEach(([key, value]) => {
       let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
       const valorFormatado = formatFieldValue(key, value)
-      texto += `**${label}:** ${valorFormatado}\n`
+      texto += `*${label}:* ${valorFormatado}\n`
+    })
+
+    // Adicionar categorias dos animais (movimentação)
+    if (caderneta === 'movimentacao' && categoriasAnimais.length > 0) {
+      texto += `*Categorias dos Animais:* ${categoriasAnimais.join(', ')}\n`
+    }
+
+    // Adicionar campos após peso médio (movimentação)
+    camposAposPesoMedio.forEach(([key, value]) => {
+      let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+      const valorFormatado = formatFieldValue(key, value)
+      texto += `*${label}:* ${valorFormatado}\n`
     })
 
     // Adicionar animais tratados com estrutura especial
     if (animaisTratados.size > 0) {
       texto += '\n'
       animaisTratados.forEach(({ id, tratamentos }) => {
-        texto += `**Animal ${id}**\n`
-        texto += `**Tratamentos:** ${tratamentos}\n\n`
+        texto += `*Animal ${id}*\n`
+        texto += `*Tratamentos:* ${tratamentos}\n\n`
       })
     }
 
@@ -409,33 +469,98 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                       <p className="text-base font-semibold text-gray-900">{usuario}</p>
                     </div>
                   )}
-                  {Object.entries(registro)
-                    .filter(([key, value]) =>
-                      !['id', 'googleRowId', 'version', 'lastModified', 'syncStatus'].includes(key) &&
-                      value !== null &&
-                      value !== undefined &&
-                      value !== ''
-                    )
-                    .map(([key, value]) => {
-                      // Formatar label especial para animais tratados
-                      let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-                      if (key.match(/^animal\d+Id$/)) {
-                        label = `animal ${String(value)}`
-                      } else if (key.match(/^animal\d+Tratamentos$/)) {
-                        label = 'Tratamentos'
-                      }
+                  {(() => {
+                    const camposNormais: [string, unknown][] = []
+                    const campoCausaObs: [string, unknown] | null = null
+                    const categoriasAnimais: string[] = []
 
-                      return (
-                        <div key={key}>
-                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                            {label}
-                          </p>
-                          <p className="text-base font-semibold text-gray-900 break-words whitespace-normal">
-                            {formatFieldValue(key, value)}
-                          </p>
-                        </div>
-                      )
-                    })}
+                    Object.entries(registro).forEach(([key, value]) => {
+                      if (
+                        !['id', 'googleRowId', 'version', 'lastModified', 'syncStatus', 'categoriasMarcadas'].includes(key) &&
+                        value !== null &&
+                        value !== undefined &&
+                        value !== ''
+                      ) {
+                        if (caderneta === 'movimentacao') {
+                          // Campos de categoria individual
+                          if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa'].includes(key)) {
+                            if (value === 'S') {
+                              const labelMap: Record<string, string> = {
+                                vaca: 'VACA',
+                                touro: 'TOURO',
+                                boiGordo: 'BOI GORDO',
+                                boiMagro: 'BOI MAGRO',
+                                garrote: 'GARROTE',
+                                bezerro: 'BEZERRO',
+                                novilha: 'NOVILHA',
+                                tropa: 'TROPA',
+                              }
+                              categoriasAnimais.push(labelMap[key])
+                            }
+                          } else if (key === 'outraCategoria') {
+                            if (value) {
+                              categoriasAnimais.push(String(value))
+                            }
+                          } else if (key === 'causaObservacao') {
+                            // Será adicionado por último
+                          } else {
+                            camposNormais.push([key, value])
+                          }
+                        } else {
+                          if (key === 'causaObservacao') {
+                            // Será adicionado por último
+                          } else {
+                            camposNormais.push([key, value])
+                          }
+                        }
+                      }
+                    })
+
+                    return (
+                      <>
+                        {camposNormais.map(([key, value]) => {
+                          // Formatar label especial para animais tratados
+                          let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+                          if (key.match(/^animal\d+Id$/)) {
+                            label = `animal ${String(value)}`
+                          } else if (key.match(/^animal\d+Tratamentos$/)) {
+                            label = 'Tratamentos'
+                          }
+
+                          return (
+                            <div key={key}>
+                              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                                {label}
+                              </p>
+                              <p className="text-base font-semibold text-gray-900 break-words whitespace-normal">
+                                {formatFieldValue(key, value)}
+                              </p>
+                            </div>
+                          )
+                        })}
+                        {caderneta === 'movimentacao' && categoriasAnimais.length > 0 && (
+                          <div className="col-span-2" key="categoriasAnimais">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                              CATEGORIAS DOS ANIMAIS
+                            </p>
+                            <p className="text-base font-semibold text-gray-900 break-words whitespace-normal">
+                              {categoriasAnimais.join(', ')}
+                            </p>
+                          </div>
+                        )}
+                        {caderneta === 'movimentacao' && registro.causaObservacao && registro.causaObservacao !== '' && (
+                          <div className="col-span-2" key="causaObservacao">
+                            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                              {LABELS_BY_CADERNETA[caderneta]?.['causaObservacao'] || 'CAUSA/OBSERVAÇÃO'}
+                            </p>
+                            <p className="text-base font-semibold text-gray-900 break-words whitespace-normal">
+                              {formatFieldValue('causaObservacao', registro.causaObservacao)}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
                 </div>
 
                 <div className="flex gap-2 border-t border-gray-100 pt-3">

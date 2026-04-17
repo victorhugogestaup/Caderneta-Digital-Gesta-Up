@@ -4,7 +4,7 @@ export default function MovimentacaoListaPage() {
   return (
     <ListaRegistros
       caderneta="movimentacao"
-      titulo="MOVIMENTAÇÃO — LISTA"
+      titulo="MOVIMENTAÇÃO"
       rotaForm="/caderneta/movimentacao"
     />
   )

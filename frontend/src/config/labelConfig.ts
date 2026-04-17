@@ -65,8 +65,9 @@ const SUPLEMENTACAO_LABELS = {
   tratador: 'TRATADOR',
   numeroLote: 'NÚMERO LOTE',
   produto: 'PRODUTO',
-  gado: 'GADO',
-  leitura: 'LEITURA',
+  gado: 'TIPO DE GADO',
+  recria: 'CREEP',
+  leitura: 'LEITURA DO COCHO',
   kg: 'KG',
   sacos: 'SACOS',
 }
