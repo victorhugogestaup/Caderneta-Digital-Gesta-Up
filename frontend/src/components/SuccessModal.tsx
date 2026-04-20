@@ -62,7 +62,7 @@ export default function SuccessModal({
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200"
+        className="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header com ícone de sucesso */}
