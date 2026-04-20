@@ -41,14 +41,10 @@ export function useServiceWorkerUpdate() {
 
   // Dismiss temporário (clicar em Depois no modal)
   const dismissUpdateModal = useCallback(() => {
-    // Ativar service worker em background para evitar tela branca
-    if (updateInfo.waiting) {
-      updateInfo.waiting.postMessage({ type: 'SKIP_WAITING' })
-    }
     setDismissedAt(Date.now())
     setShowUpdateModal(false)
-    // Não mostrar banner - usuário continua usando o app normalmente
-  }, [updateInfo.waiting])
+    // Não ativar service worker - usuário continua usando o app normalmente
+  }, [])
 
   // Dismiss banner (clicar em Agora não no banner)
   const dismissUpdateBanner = useCallback(() => {
