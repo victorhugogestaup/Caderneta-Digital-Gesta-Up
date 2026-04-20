@@ -7,7 +7,6 @@ import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { LOGO_URL, getFarmLogo } from '../../utils/constants'
 import { RootState } from '../../store/store'
-import { Browser } from '@capacitor/browser'
 
 const TRATAMENTOS = [
   { value: 'Colostro', label: 'COLOSTRO', icon: '🍼' },
@@ -207,14 +206,11 @@ export default function MaternidadePage() {
       {/* Botão de PDF POP */}
       <div className="bg-[#1a3a2a] text-white px-4 py-3">
         <button
-          onClick={async () => {
+          onClick={() => {
             const baseUrl = window.location.origin
             const basePath = '/Caderneta-Digital-Gesta-Up'
             const fullUrl = `${baseUrl}${basePath}/docs/POP_Maternidade.pdf`
-            await Browser.open({
-              url: fullUrl,
-              presentationStyle: 'fullscreen'
-            })
+            window.open(fullUrl, '_blank')
           }}
           className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors"
         >
