@@ -259,6 +259,8 @@ export default function MaternidadePage() {
             selectedValues={form.tratamentos}
             onChange={handleTratamentosChange}
             error={getError('tratamentos')}
+            gridCols={2}
+            hideCheckbox={true}
           />
           {form.tratamentos.includes('Outros') && (
             <Input
