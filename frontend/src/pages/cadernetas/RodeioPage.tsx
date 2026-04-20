@@ -120,6 +120,7 @@ export default function RodeioPage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   // Gerar cards de animais tratados quando número muda
   useEffect(() => {
@@ -234,6 +235,40 @@ export default function RodeioPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        data: form.data,
+        pasto: form.pasto,
+        numeroLote: form.numeroLote,
+        vaca: form.vaca ? Number(form.vaca) : 0,
+        touro: form.touro ? Number(form.touro) : 0,
+        bezerro: form.bezerro ? Number(form.bezerro) : 0,
+        boi: form.boi ? Number(form.boi) : 0,
+        garrote: form.garrote ? Number(form.garrote) : 0,
+        novilha: form.novilha ? Number(form.novilha) : 0,
+        totalCabecas: total,
+        escoreGadoIdeal: form.escoreGadoIdeal,
+        escoreGadoIdealObs: form.escoreGadoIdealObs || '',
+        aguaBoaBebedouro: form.aguaBoaBebedouro,
+        aguaBoaBebedouroObs: form.aguaBoaBebedouroObs || '',
+        pastagemAdequada: form.pastagemAdequada,
+        pastagemAdequadaObs: form.pastagemAdequadaObs || '',
+        animaisDoentes: form.animaisDoentes,
+        animaisDoentesObs: form.animaisDoentesObs || '',
+        cercasCochos: form.cercasCochos,
+        cercasCochosObs: form.cercasCochosObs || '',
+        carrapatosMoscas: form.carrapatosMoscas,
+        carrapatosMoscasObs: form.carrapatosMoscasObs || '',
+        animaisEntreverados: form.animaisEntreverados,
+        animaisEntreveradosObs: form.animaisEntreveradosObs || '',
+        animalMorto: form.animalMorto,
+        animalMortoObs: form.animalMortoObs || '',
+        animaisTratados: form.animaisTratados ? Number(form.animaisTratados) : 0,
+        escoreFezes: form.escoreFezes ? Number(form.escoreFezes) : null,
+        equipe: form.equipe ? Number(form.equipe) : null,
+        ...animaisTratadosData,
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial())
     }
@@ -479,6 +514,8 @@ export default function RodeioPage() {
         onNewRecord={handleNewRecord}
         onExit={handleExit}
         cadernetaName="Rodeio Gado"
+        registro={registroSalvo}
+        caderneta="rodeio"
       />
     </div>
   )

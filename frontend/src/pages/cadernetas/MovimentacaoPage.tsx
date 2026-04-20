@@ -78,6 +78,7 @@ export default function MovimentacaoPage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -119,6 +120,28 @@ export default function MovimentacaoPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        data: form.data,
+        loteOrigem: form.loteOrigem,
+        loteDestino: form.loteDestino,
+        numeroCabecas: form.numeroCabecas ? Number(form.numeroCabecas) : 0,
+        pesoMedio: form.pesoMedio ? Number(form.pesoMedio) : null,
+        motivoMovimentacao: form.motivoMovimentacao,
+        brincoChip: form.brincoChip,
+        causaObservacao: form.causaObservacao,
+        vaca: form.vaca ? 'S' : 'N',
+        touro: form.touro ? 'S' : 'N',
+        boiGordo: form.boiGordo ? 'S' : 'N',
+        boiMagro: form.boiMagro ? 'S' : 'N',
+        garrote: form.garrote ? 'S' : 'N',
+        bezerro: form.bezerro ? 'S' : 'N',
+        novilha: form.novilha ? 'S' : 'N',
+        tropa: tropaValor,
+        outraCategoria,
+        categoriasMarcadas: [],
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial())
     }
@@ -300,6 +323,8 @@ export default function MovimentacaoPage() {
         onNewRecord={handleNewRecord}
         onExit={handleExit}
         cadernetaName="Movimentação"
+        registro={registroSalvo}
+        caderneta="movimentacao"
       />
     </div>
   )

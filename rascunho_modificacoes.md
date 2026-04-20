@@ -2,11 +2,11 @@ HOME
 
 1) Na tela inicial, incluir logomarca da fazenda também - FEITO
 
-2) Não colocar boi preto nas imagens. Colocar apenas bois nelore.
+2) Não colocar boi preto nas imagens. Colocar apenas bois nelore - FEITO
 
-3) Trocar imagem rodeio de gado. Sugestões: lote de boi, boi no meio do pasto, peão montado a cavalo andando perto do gado.
+3) Trocar imagem rodeio de gado. Sugestões: lote de boi, boi no meio do pasto, peão montado a cavalo andando perto do gado - FEITO
 
-4) Suplementação: colocar sacaria/saco de ração simples.
+4) Suplementação: colocar sacaria/saco de ração simples - FEITO
 
 PARA TODAS AS CADERNETAS
 

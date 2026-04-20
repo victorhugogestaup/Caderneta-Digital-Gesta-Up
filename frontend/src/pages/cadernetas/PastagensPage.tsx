@@ -65,6 +65,7 @@ export default function PastagensPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [editandoManejador, setEditandoManejador] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -96,6 +97,17 @@ export default function PastagensPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        ...form,
+        vaca: form.vaca ? Number(form.vaca) : 0,
+        touro: form.touro ? Number(form.touro) : 0,
+        bezerro: form.bezerro ? Number(form.bezerro) : 0,
+        boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
+        garrote: form.garrote ? Number(form.garrote) : 0,
+        novilha: form.novilha ? Number(form.novilha) : 0,
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial(usuario))
       setEditandoManejador(false)
@@ -262,6 +274,8 @@ export default function PastagensPage() {
         onNewRecord={handleNewRecord}
         onExit={handleExit}
         cadernetaName="Troca de Pastos"
+        registro={registroSalvo}
+        caderneta="pastagens"
       />
     </div>
   )

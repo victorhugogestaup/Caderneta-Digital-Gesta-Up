@@ -83,6 +83,7 @@ export default function MaternidadePage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   const farmLogoUrl = fazenda ? getFarmLogo(fazenda) : LOGO_URL
 
@@ -139,6 +140,21 @@ export default function MaternidadePage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        data: form.data,
+        pasto: form.pasto,
+        lote: form.lote,
+        pesoCria: form.pesoCria ? Number(form.pesoCria) : null,
+        numeroCria: form.numeroCria,
+        tratamento: tratamentoFinal,
+        tipoParto: form.tipoParto,
+        sexo: form.sexo,
+        raca: racaFinal,
+        numeroMae: form.numeroMae,
+        categoriaMae: form.categoriaMae,
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial())
     }
@@ -337,7 +353,9 @@ export default function MaternidadePage() {
         onClose={() => setShowSuccessModal(false)}
         onNewRecord={handleNewRecord}
         onExit={handleExit}
-        cadernetaName="Maternidade Cria"
+        cadernetaName="Maternidade"
+        registro={registroSalvo}
+        caderneta="maternidade"
       />
     </div>
   )

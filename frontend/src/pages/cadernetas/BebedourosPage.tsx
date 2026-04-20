@@ -61,6 +61,7 @@ export default function BebedourosPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [editandoResponsavel, setEditandoResponsavel] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -90,6 +91,19 @@ export default function BebedourosPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        data: form.data,
+        responsavel: form.responsavel,
+        pasto: form.pasto,
+        numeroLote: form.numeroLote,
+        gado: form.gado,
+        categoria: form.categoria,
+        leituraBebedouro: form.leituraBebedouro ? Number(form.leituraBebedouro) : null,
+        numeroBebedouro: form.numeroBebedouro,
+        observacao: form.observacao,
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial(usuario))
       setEditandoResponsavel(false)
@@ -277,6 +291,8 @@ export default function BebedourosPage() {
         onNewRecord={handleNewRecord}
         onExit={handleExit}
         cadernetaName="Bebedouros"
+        registro={registroSalvo}
+        caderneta="bebedouros"
       />
     </div>
   )

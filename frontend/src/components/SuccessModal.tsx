@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Check, X } from 'lucide-react'
 import Button from './ui/Button'
+import { formatarRegistroComoTexto, compartilharWhatsApp, Registro } from '../utils/shareUtils'
 
 interface SuccessModalProps {
   isOpen: boolean
@@ -8,6 +9,8 @@ interface SuccessModalProps {
   onNewRecord: () => void
   onExit: () => void
   cadernetaName: string
+  registro?: Registro
+  caderneta?: string
 }
 
 export default function SuccessModal({
@@ -15,8 +18,17 @@ export default function SuccessModal({
   onClose,
   onNewRecord,
   onExit,
-  cadernetaName
+  cadernetaName,
+  registro,
+  caderneta
 }: SuccessModalProps) {
+  const handleShare = async () => {
+    if (registro && caderneta) {
+      const texto = formatarRegistroComoTexto(registro, caderneta)
+      await compartilharWhatsApp(texto)
+    }
+  }
+
   // Fechar modal com ESC
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -67,25 +79,38 @@ export default function SuccessModal({
         </div>
 
         {/* Botões de ação */}
-        <div className="flex gap-3">
-          <Button
-            onClick={onNewRecord}
-            variant="primary"
-            fullWidth
-            icon=""
-            className="flex-1 bg-[#1a3a2a] text-white hover:bg-[#2a5a4a] font-bold"
-          >
-            Novo Registro
-          </Button>
-          <Button
-            onClick={onExit}
-            variant="ghost"
-            fullWidth
-            icon=""
-            className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-bold"
-          >
-            Voltar para o início
-          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3">
+            <Button
+              onClick={onNewRecord}
+              variant="primary"
+              fullWidth
+              icon=""
+              className="flex-1 bg-[#1a3a2a] text-white hover:bg-[#2a5a4a] font-bold"
+            >
+              Novo Registro
+            </Button>
+            <Button
+              onClick={onExit}
+              variant="ghost"
+              fullWidth
+              icon=""
+              className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-bold"
+            >
+              Voltar para o início
+            </Button>
+          </div>
+          {registro && caderneta && (
+            <Button
+              onClick={handleShare}
+              variant="secondary"
+              fullWidth
+              icon="🔗"
+              className="font-bold"
+            >
+              COMPARTILHAR
+            </Button>
+          )}
         </div>
 
         {/* Botão de fechar */}

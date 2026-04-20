@@ -67,7 +67,7 @@ export default function SuplementacaoPage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [editandoTratador, setEditandoTratador] = useState(false)
+  const [registroSalvo, setRegistroSalvo] = useState<any>(null)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -108,9 +108,23 @@ export default function SuplementacaoPage() {
     if (!result.success && result.errors) {
       setErrors(result.errors)
     } else {
+      // Armazenar o registro salvo para compartilhamento
+      const dadosRegistro = {
+        data: form.data,
+        tratador: form.tratador,
+        pasto: form.pasto,
+        numeroLote: form.numeroLote,
+        produto: form.produto,
+        gado: form.gado,
+        leitura: form.leitura ? Number(form.leitura) : null,
+        sacos: form.sacos ? Number(form.sacos) : 0,
+        kg: form.kg ? Number(form.kg) : 0,
+        recria: form.recria ? Number(form.recria) : 0,
+        categorias: form.categorias,
+      }
+      setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial(usuario))
-      setEditandoTratador(false)
     }
   }
 
@@ -168,42 +182,14 @@ export default function SuplementacaoPage() {
           )}
           <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={set('data')} error={getError('data')} />
-          <div>
-            <label className="block text-base font-bold text-gray-700 mb-2">TRATADOR</label>
-            {editandoTratador ? (
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Nome do responsável"
-                  value={form.tratador}
-                  onChange={setInput('tratador')}
-                  error={getError('tratador')}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => setEditandoTratador(false)}
-                  variant="success"
-                  icon="✓"
-                  fullWidth={false}
-                  className="min-h-[32px] w-10 px-2"
-                />
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-50 border-2 border-gray-300 rounded-lg px-3 sm:px-4 py-3 min-h-[60px] flex items-center">
-                  <span className="text-base font-semibold text-black">
-                    {form.tratador || 'Não definido'}
-                  </span>
-                </div>
-                <Button
-                  onClick={() => setEditandoTratador(true)}
-                  variant="secondary"
-                  icon="✏️"
-                  fullWidth={false}
-                  className="min-h-[32px] w-10 px-2"
-                />
-              </div>
-            )}
-          </div>
+          <Input
+            label="TRATADOR"
+            placeholder="Nome do responsável"
+            value={form.tratador}
+            onChange={setInput('tratador')}
+            error={getError('tratador')}
+            readOnly
+          />
           <Input
             label="PASTO"
             placeholder="Ex: Pasto 12"
@@ -322,6 +308,8 @@ export default function SuplementacaoPage() {
         onNewRecord={handleNewRecord}
         onExit={handleExit}
         cadernetaName="Suplementação"
+        registro={registroSalvo}
+        caderneta="suplementacao"
       />
     </div>
   )
