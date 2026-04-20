@@ -12,7 +12,7 @@ const PRODUTOS = [
   { value: 'Mineral', label: 'MINERAL', icon: '🥄' },
   { value: 'Proteinado', label: 'PROTEINADO', icon: '🥩' },
   { value: 'Ração', label: 'RAÇÃO', icon: '🌽' },
-  { value: 'Creep', label: 'CREEP', icon: '🍼' },
+  { value: 'Creep', label: 'CREEP', icon: '🥣' },
 ]
 
 const TIPOS_GADO = [
