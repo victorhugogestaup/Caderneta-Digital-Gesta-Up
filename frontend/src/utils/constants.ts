@@ -29,6 +29,9 @@ export function getFarmLogo(farmName: string): string {
   if (lowerName.includes('pioneira')) {
     return `${BASE}logo-pioneira.png`
   }
+  if (lowerName.includes('marcon')) {
+    return `${BASE}logo-marcon.png`
+  }
 
   // Logo padrão se não encontrar match
   return LOGO_URL
