@@ -205,18 +205,15 @@ export default function MaternidadePage() {
 
       {/* Botão de PDF POP */}
       <div className="bg-[#1a3a2a] text-white px-4 py-3">
-        <button
-          onClick={() => {
-            const baseUrl = window.location.origin
-            const basePath = '/Caderneta-Digital-Gesta-Up'
-            const fullUrl = `${baseUrl}${basePath}/docs/POP_Maternidade.pdf`
-            window.open(fullUrl, '_blank')
-          }}
-          className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors"
+        <a
+          href="/Caderneta-Digital-Gesta-Up/docs/POP_Maternidade.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors no-underline"
         >
           <span className="text-xl">📄</span>
           <span>VER POP MATERNIDADE</span>
-        </button>
+        </a>
       </div>
 
       <main className="flex-1 p-4 flex flex-col gap-5 pb-8">
