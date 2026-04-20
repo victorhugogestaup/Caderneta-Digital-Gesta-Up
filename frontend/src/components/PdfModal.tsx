@@ -16,9 +16,10 @@ export default function PdfModal({ isOpen, onClose, pdfUrl }: PdfModalProps) {
     if (isOpen) {
       const openPdf = async () => {
         try {
-          // Construir URL completa
+          // Construir URL completa com base path do Vite
           const baseUrl = window.location.origin
-          const fullUrl = `${baseUrl}${pdfUrl}`
+          const basePath = '/Caderneta-Digital-Gesta-Up'
+          const fullUrl = `${baseUrl}${basePath}${pdfUrl}`
 
           await Browser.open({
             url: fullUrl,
