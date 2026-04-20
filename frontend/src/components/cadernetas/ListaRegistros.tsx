@@ -471,7 +471,6 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                   )}
                   {(() => {
                     const camposNormais: [string, unknown][] = []
-                    const campoCausaObs: [string, unknown] | null = null
                     const categoriasAnimais: string[] = []
 
                     Object.entries(registro).forEach(([key, value]) => {
