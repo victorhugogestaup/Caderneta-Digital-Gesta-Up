@@ -221,37 +221,9 @@ export default function SuplementacaoPage() {
           />
         </div>
 
-        {/* Seção 3: Gado e Categorias */}
+        {/* Seção 3: Leitura e Quantidade */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
-          <h2 className="section-title">3. CLASSIFICAÇÃO DO GADO</h2>
-          <Radio
-            name="gado"
-            label="TIPO DE GADO"
-            options={TIPOS_GADO}
-            value={form.gado}
-            onChange={set('gado')}
-            error={getError('gado')}
-            gridCols={3}
-          />
-          {getError('categorias') && (
-            <p className="text-base font-semibold text-red-700">⚠️ {getError('categorias')}</p>
-          )}
-          <p className="text-lg font-bold text-gray-800">CATEGORIAS:</p>
-          <div className="grid grid-cols-2 gap-3">
-            {CATEGORIAS.map((cat) => (
-              <Checkbox
-                key={cat}
-                label={cat}
-                checked={form.categorias.includes(cat)}
-                onChange={() => toggleCategoria(cat)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Seção 4: Leitura e Quantidade */}
-        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
-          <h2 className="section-title">4. LEITURA E QUANTIDADE</h2>
+          <h2 className="section-title">3. LEITURA E QUANTIDADE</h2>
           <Radio
             name="leitura"
             label="LEITURA DO COCHO (-1 a 3)"
@@ -289,6 +261,34 @@ export default function SuplementacaoPage() {
               type="number"
               min="0"
             />
+          </div>
+        </div>
+
+        {/* Seção 4: Gado e Categorias */}
+        <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
+          <h2 className="section-title">4. CLASSIFICAÇÃO DO GADO</h2>
+          <Radio
+            name="gado"
+            label="TIPO DE GADO"
+            options={TIPOS_GADO}
+            value={form.gado}
+            onChange={set('gado')}
+            error={getError('gado')}
+            gridCols={3}
+          />
+          {getError('categorias') && (
+            <p className="text-base font-semibold text-red-700">⚠️ {getError('categorias')}</p>
+          )}
+          <p className="text-lg font-bold text-gray-800">CATEGORIAS:</p>
+          <div className="grid grid-cols-2 gap-3">
+            {CATEGORIAS.map((cat) => (
+              <Checkbox
+                key={cat}
+                label={cat}
+                checked={form.categorias.includes(cat)}
+                onChange={() => toggleCategoria(cat)}
+              />
+            ))}
           </div>
         </div>
 
