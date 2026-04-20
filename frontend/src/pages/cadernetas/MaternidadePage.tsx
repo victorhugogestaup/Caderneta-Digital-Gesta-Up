@@ -375,7 +375,7 @@ export default function MaternidadePage() {
       <PdfModal
         isOpen={showPdfModal}
         onClose={() => setShowPdfModal(false)}
-        pdfUrl="/Caderneta-Digital-Gesta-Up/docs/POP_Maternidade.pdf"
+        pdfUrl="/docs/POP_Maternidade.pdf"
       />
     </div>
   )

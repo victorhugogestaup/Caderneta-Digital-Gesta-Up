@@ -40,7 +40,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,pdf}'],
         globIgnores: ['**/node_modules/**/*', 'sw.js', 'workbox-*.js'],
         navigateFallback: '/Caderneta-Digital-Gesta-Up/index.html',
         skipWaiting: false,

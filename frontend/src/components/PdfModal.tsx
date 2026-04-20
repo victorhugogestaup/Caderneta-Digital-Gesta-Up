@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
+import { Browser } from '@capacitor/browser'
 
 interface PdfModalProps {
   isOpen: boolean
@@ -9,6 +10,29 @@ interface PdfModalProps {
 
 export default function PdfModal({ isOpen, onClose, pdfUrl }: PdfModalProps) {
   const [error, setError] = useState(false)
+
+  // Abrir PDF no navegador nativo quando modal abre
+  useEffect(() => {
+    if (isOpen) {
+      const openPdf = async () => {
+        try {
+          // Construir URL completa
+          const baseUrl = window.location.origin
+          const fullUrl = `${baseUrl}${pdfUrl}`
+
+          await Browser.open({
+            url: fullUrl,
+            presentationStyle: 'fullscreen'
+          })
+        } catch (err) {
+          console.error('Erro ao abrir PDF:', err)
+          setError(true)
+        }
+      }
+
+      openPdf()
+    }
+  }, [isOpen, pdfUrl])
 
   // Prevenir scroll quando modal está aberto
   useEffect(() => {
@@ -71,12 +95,9 @@ export default function PdfModal({ isOpen, onClose, pdfUrl }: PdfModalProps) {
             </button>
           </div>
         ) : (
-          <iframe
-            src={pdfUrl}
-            className="w-full h-full border-0"
-            title="POP Maternidade"
-            onError={() => setError(true)}
-          />
+          <div className="flex flex-col items-center justify-center h-full text-white">
+            <p className="text-lg mb-4">Abrindo PDF...</p>
+          </div>
         )}
       </div>
     </div>
