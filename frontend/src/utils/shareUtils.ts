@@ -1,4 +1,5 @@
 import { LABELS_BY_CADERNETA } from '../config/labelConfig'
+import { CADERNETAS } from './constants'
 
 export interface Registro {
   id: string
@@ -21,7 +22,18 @@ const formatFieldValue = (key: string, value: unknown): string => {
 }
 
 export const formatarRegistroComoTexto = (registro: Registro, caderneta: string): string => {
-  let texto = `📅 Data: ${String(registro.data)}\n\n`
+  // Obter nome da caderneta
+  const cadernetaInfo = CADERNETAS.find(c => c.id === caderneta)
+  const cadernetaNome = cadernetaInfo?.label || caderneta.toUpperCase()
+
+  // Obter horário atual
+  const agora = new Date()
+  const horas = String(agora.getHours()).padStart(2, '0')
+  const minutos = String(agora.getMinutes()).padStart(2, '0')
+  const horario = `${horas}:${minutos}`
+
+  let texto = `📋 ${cadernetaNome}\n`
+  texto += `📅 Data: ${String(registro.data)} às ${horario}\n\n`
 
   // Separar campos normais, animais tratados e categorias
   const camposNormais: [string, unknown][] = []
