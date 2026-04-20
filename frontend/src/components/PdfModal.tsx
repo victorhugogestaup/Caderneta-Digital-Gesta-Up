@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import ImageGallery from 'react-image-gallery'
-import 'react-image-gallery/styles/css/image-gallery.css'
+import { useEffect } from 'react'
+import { X } from 'lucide-react'
 
 interface PdfModalProps {
   isOpen: boolean
@@ -9,8 +8,6 @@ interface PdfModalProps {
 }
 
 export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
-  const [galleryOpen, setGalleryOpen] = useState(false)
-
   // Prevenir scroll quando modal está aberto
   useEffect(() => {
     if (isOpen) {
@@ -38,27 +35,41 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
 
   if (!isOpen) return null
 
-  const galleryImages = images.map(img => ({
-    original: img,
-    thumbnail: img,
-  }))
-
   return (
     <div 
       className="fixed inset-0 bg-black z-50"
       onClick={onClose}
     >
-      <ImageGallery
-        items={galleryImages}
-        showPlayButton={false}
-        showFullscreenButton={false}
-        showThumbnails={false}
-        showNav={true}
-        showBullets={true}
-        startIndex={0}
-        onClick={() => {}}
-        onScreenChange={() => {}}
-      />
+      {/* Header com botão de fechar */}
+      <div 
+        className="sticky top-0 bg-black/80 p-4 flex justify-end z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="text-white hover:bg-gray-700 rounded-full p-2 transition-colors"
+          aria-label="Fechar"
+        >
+          <X className="w-8 h-8" />
+        </button>
+      </div>
+
+      {/* Imagens em scroll vertical */}
+      <div 
+        className="w-full h-full overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col gap-4 items-center p-4">
+          {images.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`POP Maternidade - Página ${index + 1}`}
+              className="max-w-full h-auto"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
