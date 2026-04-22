@@ -272,9 +272,9 @@ useEffect(() => {
 
 ## Status das Fases
 
-- [ ] Fase 1: Backend - googleSheetsService.ts
-- [ ] Fase 2: Backend - suplementacaoController.ts
-- [ ] Fase 3: Frontend - Estados
-- [ ] Fase 4: Frontend - useEffect
-- [ ] Fase 5: Frontend - UI
-- [ ] Fase 6: Planilha Base de Dados
+- [x] Fase 1: Backend - googleSheetsService.ts
+- [x] Fase 2: Backend - suplementacaoController.ts
+- [x] Fase 3: Frontend - Estados
+- [x] Fase 4: Frontend - useEffect
+- [x] Fase 5: Frontend - UI
+- [x] Fase 6: Planilha Base de Dados (ação manual do usuário)

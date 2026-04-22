@@ -67,21 +67,21 @@ export default function SuplementacaoPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
-  const [subtipos, setSubtipos] = useState<string[]>([])
-  const [subtipo, setSubtipo] = useState('')
+  const [suplementos, setSuplementos] = useState<string[]>([])
+  const [suplemento, setSuplemento] = useState('')
   const [quantidadeCreep, setQuantidadeCreep] = useState('')
   const [kgDeposito, setKgDeposito] = useState('')
-  const [carregandoSubtipos, setCarregandoSubtipos] = useState(false)
+  const [carregandoSuplementos, setCarregandoSuplementos] = useState(false)
   const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
 
-  // Carregar subtipos quando tipo principal muda (exceto Creep)
+  // Carregar suplementos quando tipo principal muda (exceto Creep)
   useEffect(() => {
-    const carregarSubtipos = async () => {
+    const carregarSuplementos = async () => {
       if (!form.produto || form.produto === 'Creep') {
-        setSubtipos([])
-        setSubtipo('')
+        setSuplementos([])
+        setSuplemento('')
         return
       }
 
@@ -89,23 +89,28 @@ export default function SuplementacaoPage() {
         return
       }
 
-      setCarregandoSubtipos(true)
+      setCarregandoSuplementos(true)
       try {
         const response = await fetch(`${BACKEND_URL}/api/suplementacao/subtipos?fazenda=${fazenda}&tipo=${form.produto}`)
         const data = await response.json()
         if (data.success) {
-          setSubtipos(data.subtipos)
-          setSubtipo('')
+          setSuplementos(data.subtipos || [])
+          setSuplemento('')
         }
       } catch (error) {
-        console.error('Erro ao carregar subtipos:', error)
-        setSubtipos([])
+        console.error('Erro ao carregar suplementos:', error)
+        setSuplementos([])
       } finally {
-        setCarregandoSubtipos(false)
+        setCarregandoSuplementos(false)
       }
     }
 
-    carregarSubtipos()
+    carregarSuplementos()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarSuplementos, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
   }, [form.produto, fazenda])
 
   // Carregar pastos e lotes quando fazenda mudar
@@ -130,6 +135,11 @@ export default function SuplementacaoPage() {
     }
 
     carregarPastosELotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
   }, [fazenda])
 
   const set = (field: keyof FormState) => (val: string) =>
@@ -153,8 +163,8 @@ export default function SuplementacaoPage() {
     setSalvando(true)
     setErrors([])
 
-    // Se tipo é Creep: salvar quantidade, senão salvar subtipo
-    const subtipoQtd = form.produto === 'Creep' ? quantidadeCreep : subtipo
+    // Se tipo é Creep: salvar quantidade, senão salvar suplemento
+    const suplementoQtd = form.produto === 'Creep' ? quantidadeCreep : suplemento
 
     const result = await salvarRegistro('suplementacao', {
       data: form.data,
@@ -162,7 +172,7 @@ export default function SuplementacaoPage() {
       pasto: form.pasto,
       numeroLote: form.numeroLote,
       produto: form.produto,
-      subtipoQtd,
+      suplementoQtd,
       gado: form.gado,
       leitura: form.leitura ? Number(form.leitura) : null,
       kgCocho: form.kgCocho ? Number(form.kgCocho) : 0,
@@ -181,7 +191,7 @@ export default function SuplementacaoPage() {
         pasto: form.pasto,
         numeroLote: form.numeroLote,
         produto: form.produto,
-        subtipoQtd,
+        suplementoQtd,
         gado: form.gado,
         leitura: form.leitura ? Number(form.leitura) : null,
         kgCocho: form.kgCocho ? Number(form.kgCocho) : 0,
@@ -191,7 +201,7 @@ export default function SuplementacaoPage() {
       setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial(usuario))
-      setSubtipo('')
+      setSuplemento('')
       setQuantidadeCreep('')
       setKgDeposito('')
     }
@@ -266,12 +276,11 @@ export default function SuplementacaoPage() {
               onChange={(e) => set('pasto')(e.target.value)}
               error={getError('pasto')}
               options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
-              placeholder="Selecione o pasto..."
             />
           ) : (
             <Input
               label="PASTO"
-              placeholder="Ex: Pasto 12"
+              placeholder="Carregando..."
               value={form.pasto}
               onChange={setInput('pasto')}
               error={getError('pasto')}
@@ -287,12 +296,11 @@ export default function SuplementacaoPage() {
               onChange={(e) => set('numeroLote')(e.target.value)}
               error={getError('numeroLote')}
               options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
-              placeholder="Selecione o lote..."
             />
           ) : (
             <Input
               label="NÚMERO DO LOTE"
-              placeholder="Ex: 03"
+              placeholder="Carregando..."
               value={form.numeroLote}
               onChange={setInput('numeroLote')}
               error={getError('numeroLote')}
@@ -314,29 +322,29 @@ export default function SuplementacaoPage() {
             gridCols={2}
           />
 
-          {/* Lista suspensa para subtipo (Mineral/Proteinado/Ração) */}
+          {/* Lista suspensa para suplemento (Mineral/Proteinado/Ração) */}
           {form.produto && form.produto !== 'Creep' && (
             <div className="mt-2">
-              {carregandoSubtipos ? (
+              {carregandoSuplementos ? (
                 <p className="text-gray-500">Carregando suplementos...</p>
-              ) : subtipos.length > 0 ? (
+              ) : suplementos.length > 0 ? (
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-bold text-gray-700">Suplemento:</label>
                   <select
-                    value={subtipo}
-                    onChange={(e) => setSubtipo(e.target.value)}
+                    value={suplemento}
+                    onChange={(e) => setSuplemento(e.target.value)}
                     className="w-full p-3 border-2 border-gray-300 rounded-xl text-lg focus:border-[#3b82f6] focus:outline-none"
                   >
                     <option value="">Selecione o suplemento...</option>
-                    {subtipos.map((sub) => (
-                      <option key={sub} value={sub}>
-                        {sub}
+                    {suplementos.map((sup) => (
+                      <option key={sup} value={sup}>
+                        {sup}
                       </option>
                     ))}
                   </select>
                 </div>
               ) : (
-                <p className="text-gray-500">Nenhum subtipo disponível</p>
+                <p className="text-gray-500">Nenhum suplemento disponível</p>
               )}
             </div>
           )}

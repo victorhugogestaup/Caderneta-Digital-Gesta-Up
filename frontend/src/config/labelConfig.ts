@@ -71,7 +71,7 @@ const SUPLEMENTACAO_LABELS = {
   kgCocho: 'KG no cocho',
   kgDeposito: 'KG no depósito',
   sacos: 'SACOS',
-  subtipoQtd: 'SUBTIPO/QTD',
+  suplementoQtd: 'SUPLEMENTO/QTD',
 }
 
 const BEBEDOUROS_LABELS = {
