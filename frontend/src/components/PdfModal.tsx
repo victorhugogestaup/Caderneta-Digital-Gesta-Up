@@ -9,6 +9,9 @@ interface PdfModalProps {
 
 export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
   const [zoom, setZoom] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Prevenir scroll quando modal está aberto
@@ -36,10 +39,11 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  // Reset zoom quando modal fecha
+  // Reset zoom e posição quando modal fecha
   useEffect(() => {
     if (!isOpen) {
       setZoom(1)
+      setPosition({ x: 0, y: 0 })
     }
   }, [isOpen])
 
@@ -54,6 +58,13 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
       )
       ;(e.currentTarget as HTMLElement).dataset.initialDistance = distance.toString()
       ;(e.currentTarget as HTMLElement).dataset.initialZoom = zoom.toString()
+    } else if (e.touches.length === 1 && zoom > 1) {
+      // Iniciar arraste (pan) quando há zoom
+      setIsDragging(true)
+      setDragStart({
+        x: e.touches[0].clientX - position.x,
+        y: e.touches[0].clientY - position.y,
+      })
     }
   }
 
@@ -73,6 +84,11 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
         const scale = Math.min(Math.max(distance / initialDistance * initialZoom, 0.5), 4)
         setZoom(scale)
       }
+    } else if (e.touches.length === 1 && isDragging && zoom > 1) {
+      e.preventDefault()
+      const newX = e.touches[0].clientX - dragStart.x
+      const newY = e.touches[0].clientY - dragStart.y
+      setPosition({ x: newX, y: newY })
     }
   }
 
@@ -81,6 +97,30 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
       delete (e.currentTarget as HTMLElement).dataset.initialDistance
       delete (e.currentTarget as HTMLElement).dataset.initialZoom
     }
+    setIsDragging(false)
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true)
+      setDragStart({
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      })
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoom > 1) {
+      e.preventDefault()
+      const newX = e.clientX - dragStart.x
+      const newY = e.clientY - dragStart.y
+      setPosition({ x: newX, y: newY })
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
   }
 
   const handleWheel = (e: React.WheelEvent) => {
@@ -93,6 +133,7 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
 
   const handleDoubleClick = () => {
     setZoom(prev => prev === 1 ? 2 : 1)
+    setPosition({ x: 0, y: 0 })
   }
 
   if (!isOpen) return null
@@ -125,40 +166,50 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
 
       {/* Aviso de gesto */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-black/50 text-white/70 px-3 py-1 rounded-full text-xs">
-        Faça o gesto de pinça com os dedos para dar zoom
+        Pinça para zoom • Arraste para mover • Double-click para reset
       </div>
 
-      {/* Container com zoom global */}
+      {/* Container com zoom global e pan */}
       <div
         ref={containerRef}
-        className="w-full h-full overflow-auto"
+        className="w-full h-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
         onDoubleClick={handleDoubleClick}
         style={{
           overscrollBehavior: 'contain',
-          transform: `scale(${zoom})`,
-          transformOrigin: 'top center',
-          transition: 'transform 0.1s ease',
+          cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
         }}
       >
-        <div className="flex flex-col gap-4 items-center p-4 pb-32">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className="w-full flex justify-center animate-in zoom-in duration-300"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <img
-                src={image}
-                alt={`POP Maternidade - Página ${index + 1}`}
-                className="max-w-full h-auto"
-              />
-            </div>
-          ))}
+        <div
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+            transformOrigin: 'top center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease',
+          }}
+        >
+          <div className="flex flex-col gap-4 items-center p-4 pb-32">
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className="w-full flex justify-center animate-in zoom-in duration-300"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <img
+                  src={image}
+                  alt={`POP Maternidade - Página ${index + 1}`}
+                  className="max-w-full h-auto"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
