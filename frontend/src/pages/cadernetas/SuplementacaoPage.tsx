@@ -253,7 +253,7 @@ export default function SuplementacaoPage() {
             value={form.produto}
             onChange={set('produto')}
             error={getError('produto')}
-            gridCols={4}
+            gridCols={2}
           />
 
           {/* Lista suspensa para subtipo (Mineral/Proteinado/Ração) */}
