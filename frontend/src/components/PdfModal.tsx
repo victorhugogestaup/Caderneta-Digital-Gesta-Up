@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { X } from 'lucide-react'
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch'
 
 interface PdfModalProps {
   isOpen: boolean
@@ -36,12 +37,12 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
   if (!isOpen) return null
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black z-50 animate-in fade-in duration-300"
       onClick={onClose}
     >
       {/* Header com botão de fechar */}
-      <div 
+      <div
         className="absolute top-0 right-0 p-4 z-20"
         onClick={(e) => e.stopPropagation()}
       >
@@ -54,21 +55,31 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
         </button>
       </div>
 
-      {/* Imagens em scroll vertical */}
-      <div 
+      {/* Imagens com zoom e pan */}
+      <div
         className="w-full h-full overflow-y-auto scroll-smooth"
         onClick={(e) => e.stopPropagation()}
-        style={{ touchAction: 'pan-y' }}
       >
         <div className="flex flex-col gap-4 items-center p-4">
           {images.map((image, index) => (
-            <img
-              key={index}
-              src={image}
-              alt={`POP Maternidade - Página ${index + 1}`}
-              className="max-w-full h-auto animate-in zoom-in duration-300"
-              style={{ animationDelay: `${index * 100}ms` }}
-            />
+            <div key={index} className="w-full flex justify-center animate-in zoom-in duration-300" style={{ animationDelay: `${index * 100}ms` }}>
+              <TransformWrapper
+                initialScale={1}
+                minScale={0.5}
+                maxScale={4}
+                wheel={{ step: 0.1 }}
+                doubleClick={{ step: 0.8 }}
+              >
+                <TransformComponent>
+                  <img
+                    src={image}
+                    alt={`POP Maternidade - Página ${index + 1}`}
+                    className="max-w-full h-auto"
+                    style={{ maxWidth: '100%', maxHeight: '100%' }}
+                  />
+                </TransformComponent>
+              </TransformWrapper>
+            </div>
           ))}
         </div>
       </div>
