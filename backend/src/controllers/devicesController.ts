@@ -143,7 +143,8 @@ devicesRouter.get('/analytics', async (req: Request, res: Response) => {
       .map(row => row[2]) // Hora
       .filter(h => h)
       .map(h => {
-        const match = h.match(/(\d{1,2}):/)
+        const hStr = String(h)
+        const match = hStr.match(/(\d{1,2}):/)
         return match ? parseInt(match[1]) : null
       })
       .filter(h => h !== null)
@@ -165,7 +166,8 @@ devicesRouter.get('/analytics', async (req: Request, res: Response) => {
       .filter(d => d)
     
     const dayCounts = dates.reduce((acc: Record<string, number>, date) => {
-      const dateObj = new Date(date.split('/').reverse().join('-'))
+      const dateStr = String(date)
+      const dateObj = new Date(dateStr.split('/').reverse().join('-'))
       const dayName = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' })
       acc[dayName] = (acc[dayName] || 0) + 1
       return acc
@@ -177,7 +179,7 @@ devicesRouter.get('/analytics', async (req: Request, res: Response) => {
     const sessionDates = data
       .map(row => row[8]) // Última abertura
       .filter(d => d)
-      .map(d => new Date(d.split('/').reverse().join('-')).getTime())
+      .map(d => new Date(String(d).split('/').reverse().join('-')).getTime())
       .sort((a, b) => a - b)
 
     let avgSessionInterval = null

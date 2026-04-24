@@ -5,10 +5,9 @@ import { Button, Input, DatePicker, Radio, ValidationMessage, Select } from '../
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
-import { loadCadastroData, CadastroData } from '../../services/cadastroData'
+import { loadCadastroData } from '../../services/cadastroData'
 
 const AVALIACOES = [
   { value: '1', label: '1', icon: '🔴' },

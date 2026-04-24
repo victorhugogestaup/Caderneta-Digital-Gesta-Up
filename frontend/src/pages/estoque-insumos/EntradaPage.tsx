@@ -5,6 +5,8 @@ import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
 import { Input, Select, DatePicker, Button } from '../../components/ui'
 import { loadCadastroData, CadastroData } from '../../services/cadastroData'
+import { BACKEND_URL } from '../../utils/constants'
+import { DATABASE_URL } from '../../utils/constants'
 
 interface FormData {
   dataEntrada: string
@@ -31,7 +33,7 @@ export default function EntradaPage() {
   const [isHorarioManual, setIsHorarioManual] = useState(false)
 
   const [form, setForm] = useState<FormData>({
-    dataEntrada: '',
+    dataEntrada: new Date().toLocaleDateString('pt-BR'),
     horario: '',
     produto: '',
     quantidade: '',
@@ -106,7 +108,7 @@ export default function EntradaPage() {
       const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Checklist' }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, linkPosition: 2 }),
       })
 
       const validateData = await validateRes.json()

@@ -7,7 +7,7 @@ import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 export default function CadastroPage() {
   const navigate = useNavigate()
-  const { fazenda, fazendaId, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [data, setData] = useState<CadastroData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

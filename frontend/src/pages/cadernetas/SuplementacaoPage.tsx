@@ -8,7 +8,7 @@ import { todayBR } from '../../utils/formatDate'
 import { BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
-import { loadCadastroData, CadastroData } from '../../services/cadastroData'
+import { loadCadastroData } from '../../services/cadastroData'
 
 const PRODUTOS = [
   { value: 'Mineral', label: 'MINERAL', icon: '' },

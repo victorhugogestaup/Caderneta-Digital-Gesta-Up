@@ -5,7 +5,7 @@ import fs from 'fs'
 
 const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_PATH || './config/google-credentials.json'
 
-function getAuth() {
+export function getAuth() {
   // Em produção (Vercel), usa a environment variable
   const credentialsEnv = process.env.GOOGLE_CREDENTIALS_FILE
   
@@ -65,6 +65,29 @@ export function extractLinkByPrefix(cellValue: string, prefix: string): string |
   }
 
   return null
+}
+
+/**
+ * Extrai link por posição da coluna C
+ * @param columnCValues Valores da coluna C (array de arrays)
+ * @param position Posição do link (1 = Caderneta/C2, 2 = Checklist/C3, 3 = Cadastro/C4)
+ * @returns Link extraído ou null se não encontrado
+ */
+export function extractLinkByPosition(columnCValues: (string | number | null)[][], position: number): string | null {
+  if (!columnCValues || columnCValues.length === 0) return null
+  
+  // Posição 1 = C2 (índice 0), Posição 2 = C3 (índice 1), Posição 3 = C4 (índice 2)
+  const rowIndex = position - 1
+  
+  if (rowIndex >= columnCValues.length) return null
+  
+  const row = columnCValues[rowIndex]
+  if (!row || row.length === 0) return null
+  
+  const cellValue = String(row[0]).trim()
+  if (!cellValue || cellValue === '') return null
+  
+  return cellValue
 }
 
 export async function appendRow(
@@ -178,7 +201,7 @@ export async function listSheets(spreadsheetUrl: string): Promise<string[]> {
   return sheetNames
 }
 
-export async function validateFarm(spreadsheetUrl: string, farmId: string, prefix: string = 'Caderneta'): Promise<{ success: boolean; farmName?: string; farmSheetUrl?: string }> {
+export async function validateFarm(spreadsheetUrl: string, farmId: string, linkPosition: number = 1): Promise<{ success: boolean; farmName?: string; farmSheetUrl?: string }> {
   const auth = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
   const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
@@ -192,44 +215,30 @@ export async function validateFarm(spreadsheetUrl: string, farmId: string, prefi
     try {
       const cellResponse = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${sheetName}!A2:C2`,
+        range: `${sheetName}!A2:C4`,
       })
 
       const values = cellResponse.data.values
       if (values && values.length > 0 && values[0].length > 0) {
         const idInCell = String(values[0][0]).trim()
         const nomeInCell = values[0].length > 1 ? String(values[0][1]).trim() : ''
-        const sheetUrlInCell = values[0].length > 2 ? String(values[0][2]).trim() : ''
 
         // Match exato (case-insensitive)
         if (idInCell.toLowerCase() === farmId.toLowerCase()) {
-          // Extrair link por prefixo da célula atual
-          let extractedUrl = extractLinkByPrefix(sheetUrlInCell, prefix)
-
-          // Se não encontrou o prefixo na célula atual, procurar nas linhas abaixo na coluna C
-          if (!extractedUrl && (prefix === 'Checklist' || prefix === 'Cadastro')) {
-            logger.info(`Prefixo '${prefix}' não encontrado na linha 2, procurando nas linhas abaixo...`)
-            const columnCResponse = await sheets.spreadsheets.values.get({
-              spreadsheetId,
-              range: `${sheetName}!C3:C100`,
-            })
-
-            const columnCValues = columnCResponse.data.values
-            if (columnCValues) {
-              for (const row of columnCValues) {
-                if (row.length > 0 && row[0]) {
-                  const cellValue = String(row[0]).trim()
-                  extractedUrl = extractLinkByPrefix(cellValue, prefix)
-                  if (extractedUrl) {
-                    logger.info(`Prefixo '${prefix}' encontrado na linha abaixo: ${extractedUrl}`)
-                    break
-                  }
-                }
-              }
+          // Extrair coluna C (C2, C3, C4)
+          const columnCValues: (string | number | null)[][] = []
+          for (let i = 0; i < values.length && i < 3; i++) {
+            if (values[i].length > 2) {
+              columnCValues.push([values[i][2]])
+            } else {
+              columnCValues.push([''])
             }
           }
 
-          logger.info(`Fazenda encontrada: ${sheetName}, ID: ${idInCell}, Nome: ${nomeInCell}, Link: ${extractedUrl}`)
+          // Extrair link por posição
+          const extractedUrl = extractLinkByPosition(columnCValues, linkPosition)
+
+          logger.info(`Fazenda encontrada: ${sheetName}, ID: ${idInCell}, Nome: ${nomeInCell}, Link (posição ${linkPosition}): ${extractedUrl}`)
           return { success: true, farmName: nomeInCell || sheetName, farmSheetUrl: extractedUrl || undefined }
         }
       }
@@ -248,65 +257,79 @@ export async function getSubtiposDaFazenda(
   farmId: string,
   tipo: string
 ): Promise<string[]> {
+  // Primeiro, encontrar a fazenda e extrair o link da planilha de cadastro (posição 3)
+  const farmResult = await validateFarm(spreadsheetUrl, farmId, 3)
+  
+  if (!farmResult.success || !farmResult.farmSheetUrl) {
+    logger.warn(`Não foi possível encontrar a planilha de cadastro para a fazenda ${farmId}`)
+    return []
+  }
+
+  const cadastroSheetUrl = farmResult.farmSheetUrl
+  logger.info(`Planilha de cadastro encontrada: ${cadastroSheetUrl}`)
+
   const auth = getAuth()
   const sheets = google.sheets({ version: 'v4', auth })
-  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
+  const cadastroSheetId = extractSpreadsheetId(cadastroSheetUrl)
 
-  // Listar todas as abas
-  const response = await sheets.spreadsheets.get({ spreadsheetId })
-  const sheetNames = response.data.sheets?.map((sheet) => sheet.properties?.title).filter((title): title is string => title !== undefined) || []
-
-  // Mapear tipo para coluna (0-indexed)
+  // Mapear tipo para coluna (0-indexed) na planilha de cadastro
+  // Estrutura: PASTO(0), LOTE(1), MINERAL(2), PROTEINADO(3), RACAO(4), INSUMOS(5), DIETAS(6), FORNECEDORES(7), FUNCIONÁRIOS(8)
   const colunasPorTipo: Record<string, number> = {
-    'Mineral': 3,      // Coluna D (índice 3)
-    'Proteinado': 4,  // Coluna E (índice 4)
-    'Ração': 5,       // Coluna F (índice 5)
+    'Pasto': 0,
+    'Lote': 1,
+    'Mineral': 2,
+    'Proteinado': 3,
+    'Ração': 4,
+    'Insumos': 5,
+    'Dietas': 6,
+    'Fornecedores': 7,
+    'Funcionários': 8,
   }
 
   const colunaIndex = colunasPorTipo[tipo]
   if (colunaIndex === undefined) {
-    logger.warn(`Tipo '${tipo}' não mapeado para coluna`)
+    logger.warn(`Tipo '${tipo}' não mapeado para coluna na planilha de cadastro`)
     return []
   }
 
-  // Converter índice de coluna para letra (0=A, 1=B, 3=D, etc.)
+  // Converter índice de coluna para letra (0=A, 1=B, 2=C, etc.)
   const colunaLetra = String.fromCharCode(65 + colunaIndex)
 
-  // Buscar a coluna específica (D, E ou F) a partir da linha 2
-  for (const sheetName of sheetNames) {
-    try {
-      // Buscar a coluna específica a partir da linha 2 (pular cabeçalho na linha 1)
-      const range = `${sheetName}!${colunaLetra}2:${colunaLetra}1000`
-      const cellResponse = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range,
-      })
+  try {
+    // Buscar a coluna específica a partir da linha 2 (pular cabeçalho na linha 1)
+    const range = `A2:Z1000`
+    const cellResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: cadastroSheetId,
+      range,
+    })
 
-      const values = cellResponse.data.values
-      if (!values || values.length === 0) {
-        continue
-      }
+    const values = cellResponse.data.values
+    if (!values || values.length === 0) {
+      logger.warn(`Nenhum dado encontrado na planilha de cadastro`)
+      return []
+    }
 
-      // Ler todos os valores não vazios da coluna
-      const subtipos: string[] = []
-      for (let i = 0; i < values.length; i++) {
-        const row = values[i]
-        const valor = row.length > 0 ? String(row[0]).trim() : ''
+    // Ler todos os valores não vazios da coluna específica
+    const subtipos: string[] = []
+    for (let i = 0; i < values.length; i++) {
+      const row = values[i]
+      if (colunaIndex < row.length) {
+        const valor = String(row[colunaIndex]).trim()
         if (valor && valor !== '') {
           subtipos.push(valor)
         }
       }
-
-      if (subtipos.length > 0) {
-        logger.info(`Subtipos encontrados para ${tipo} na aba ${sheetName}: ${subtipos.join(', ')}`)
-        return subtipos
-      }
-    } catch (error) {
-      logger.error(`Erro ao buscar subtipos na aba ${sheetName}: ${error}`)
-      // Continua para a próxima aba
     }
-  }
 
-  logger.warn(`Nenhum subtipo encontrado para tipo ${tipo}`)
-  return []
+    if (subtipos.length > 0) {
+      logger.info(`Subtipos encontrados para ${tipo} na planilha de cadastro: ${subtipos.join(', ')}`)
+      return subtipos
+    }
+
+    logger.warn(`Nenhum subtipo encontrado para tipo ${tipo} na planilha de cadastro`)
+    return []
+  } catch (error) {
+    logger.error(`Erro ao buscar subtipos na planilha de cadastro: ${error}`)
+    return []
+  }
 }

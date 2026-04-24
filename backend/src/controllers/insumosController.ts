@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { validateFarm, getRows, appendRow, getNextId } from '../services/googleSheetsService'
+import { getRows, appendRow, getNextId } from '../services/googleSheetsService'
 import { logger } from '../utils/logger'
 
 export const insumosRouter = Router()

@@ -31,12 +31,12 @@ export default function Configuracoes() {
     return newErrors.length === 0
   }
 
-  const validarFazendaNaBase = async (id: string, prefix: string = 'Caderneta'): Promise<{ sucesso: boolean; nome?: string; link?: string }> => {
+  const validarFazendaNaBase = async (id: string, linkPosition: number = 1): Promise<{ sucesso: boolean; nome?: string; link?: string }> => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: id, prefix }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: id, linkPosition }),
       })
       if (res.ok) {
         const json = await res.json() as { success: boolean; farmName?: string; farmSheetUrl?: string }
@@ -54,11 +54,11 @@ export default function Configuracoes() {
 
     setValidandoFazenda(true)
 
-    // Validar com prefixo 'Caderneta' para obter URL da planilha da caderneta
-    const validacaoCaderneta = await validarFazendaNaBase(fazenda.trim(), 'Caderneta')
+    // Validar com posição 1 para obter URL da planilha da caderneta
+    const validacaoCaderneta = await validarFazendaNaBase(fazenda.trim(), 1)
 
-    // Validar com prefixo 'Cadastro' para obter URL da planilha de cadastro
-    const validacaoCadastro = await validarFazendaNaBase(fazenda.trim(), 'Cadastro')
+    // Validar com posição 3 para obter URL da planilha de cadastro
+    const validacaoCadastro = await validarFazendaNaBase(fazenda.trim(), 3)
 
     setValidandoFazenda(false)
 

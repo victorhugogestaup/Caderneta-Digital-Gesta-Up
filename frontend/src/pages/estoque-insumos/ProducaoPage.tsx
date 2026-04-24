@@ -5,6 +5,8 @@ import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
 import { Input, Select, DatePicker, Button } from '../../components/ui'
 import { loadCadastroData, CadastroData } from '../../services/cadastroData'
+import { BACKEND_URL } from '../../utils/constants'
+import { DATABASE_URL } from '../../utils/constants'
 
 // Mapeamento dieta → insumos (será definido na planilha base)
 // Por enquanto, usando um mapeamento estático como exemplo
@@ -31,7 +33,7 @@ export default function ProducaoPage() {
   const [success, setSuccess] = useState(false)
 
   const [form, setForm] = useState<FormData>({
-    dataProducao: '',
+    dataProducao: new Date().toLocaleDateString('pt-BR'),
     dietaProduzida: '',
     destinoProducao: '',
     totalProduzido: '',
@@ -103,7 +105,7 @@ export default function ProducaoPage() {
       const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Checklist' }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, linkPosition: 2 }),
       })
 
       const validateData = await validateRes.json()
