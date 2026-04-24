@@ -1,21 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { Button, Input, DatePicker, Radio, CheckboxGroup, ValidationMessage } from '../../components/ui'
+import { Button, Input, DatePicker, Radio, CheckboxGroup, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import PdfModal from '../../components/PdfModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { LOGO_URL, getFarmLogo } from '../../utils/constants'
+import { LOGO_URL, getFarmLogo, BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 
 const TRATAMENTOS = [
-  { value: 'Colostro', label: 'COLOSTRO', icon: '🍼' },
-  { value: 'Antibiótico', label: 'ANTIBIÓTICO', icon: '💉' },
-  { value: 'Probiótico', label: 'PROBIÓTICO', icon: '💊' },
-  { value: 'Soro', label: 'SORO', icon: '🧪' },
-  { value: 'Vermífugo', label: 'VERMÍFUGO', icon: '🪱' },
-  { value: 'Outros', label: 'OUTROS', icon: '➕' },
+  { value: 'Colostro', label: 'COLOSTRO'},
+  { value: 'Cura Umbigo', label: 'CURA UMBIGO'},
+  { value: 'Tatuagem', label: 'TATUAGEM'},
+  { value: 'Furo Orelhas', label: 'FURO ORELHAS'},
+  { value: 'Unguento', label: 'UNGUENTO'},
+  { value: 'Repelente', label: 'REPELENTE'},
+  { value: 'Vermífugo', label: 'VERMÍFUGO'},
+  { value: 'Antibiótico', label: 'ANTIBIÓTICO'},
+  { value: 'Probiótico', label: 'PROBIÓTICO'},
+  { value: 'Pesagem', label: 'PESAGEM' },
+  { value: 'Outros', label: 'OUTROS'},
 ]
 
 const TIPOS_PARTO = [
@@ -85,6 +90,9 @@ export default function MaternidadePage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [showPdfModal, setShowPdfModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
+  const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
 
   const farmLogoUrl = fazenda ? getFarmLogo(fazenda) : LOGO_URL
 
@@ -111,6 +119,35 @@ export default function MaternidadePage() {
   }
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
+
+  // Carregar pastos e lotes quando fazenda mudar
+  useEffect(() => {
+    async function carregarPastosELotes() {
+      if (!fazenda) return
+
+      setCarregandoPastosLotes(true)
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
+        const data = await response.json()
+
+        if (data.success) {
+          setPastosDisponiveis(data.pastos || [])
+          setLotesDisponiveis(data.lotes || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pastos e lotes:', error)
+      } finally {
+        setCarregandoPastosLotes(false)
+      }
+    }
+
+    carregarPastosELotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
+  }, [fazenda])
 
   const handleSalvar = async () => {
     setSalvando(true)
@@ -229,42 +266,52 @@ export default function MaternidadePage() {
           )}
           <h2 className="text-lg font-black text-gray-900 tracking-tight">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={set('data')} error={getError('data')} />
-          <Input
-            label="PASTO"
-            placeholder="Ex: 15"
-            value={form.pasto}
-            onChange={setInputEvent('pasto')}
-            error={getError('pasto')}
-            inputMode="text"
-          />
-          <Input
-            label="LOTE"
-            placeholder="Ex: 10"
-            value={form.lote}
-            onChange={setInputEvent('lote')}
-            error={getError('lote')}
-            inputMode="text"
-          />
-          <Input
-            label="PESO DA CRIA (kg)"
-            placeholder="Ex: 32"
-            value={form.pesoCria}
-            onChange={setInputEvent('pesoCria')}
-            inputMode="decimal"
-            type="number"
-          />
+          <div className="grid grid-cols-2 gap-3">
+            {pastosDisponiveis.length > 0 ? (
+              <Select
+                label="PASTO"
+                value={form.pasto}
+                onChange={(e) => set('pasto')(e.target.value)}
+                error={getError('pasto')}
+                options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+              />
+            ) : (
+              <Input
+                label="PASTO"
+                placeholder="Carregando..."
+                value={form.pasto}
+                onChange={setInputEvent('pasto')}
+                error={getError('pasto')}
+                inputMode="text"
+              />
+            )}
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="LOTE"
+                value={form.lote}
+                onChange={(e) => set('lote')(e.target.value)}
+                error={getError('lote')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="LOTE"
+                placeholder="Carregando..."
+                value={form.lote}
+                onChange={setInputEvent('lote')}
+                error={getError('lote')}
+                inputMode="text"
+              />
+            )}
+          </div>
+          {carregandoPastosLotes && (
+            <div className="text-sm text-gray-500">Carregando pastos e lotes...</div>
+          )}
         </div>
 
         {/* Seção 2: Identificação */}
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
           <h2 className="text-lg font-black text-gray-900 tracking-tight">2. IDENTIFICAÇÃO</h2>
-          <Input
-            label="NÚMERO DA CRIA"
-            placeholder="Ex: 2023-145"
-            value={form.numeroCria}
-            onChange={setInputEvent('numeroCria')}
-            error={getError('numeroCria')}
-          />
           <CheckboxGroup
             label="TRATAMENTO"
             options={TRATAMENTOS}
@@ -283,6 +330,21 @@ export default function MaternidadePage() {
               error={getError('tratamentoOutros')}
             />
           )}
+          <Input
+            label="NÚMERO DA CRIA"
+            placeholder="Ex: 2023-145"
+            value={form.numeroCria}
+            onChange={setInputEvent('numeroCria')}
+            error={getError('numeroCria')}
+          />
+          <Input
+            label="PESO DA CRIA (kg)"
+            placeholder="Ex: 32"
+            value={form.pesoCria}
+            onChange={setInputEvent('pesoCria')}
+            inputMode="decimal"
+            type="number"
+          />
         </div>
 
         {/* Seção 3: Parto */}

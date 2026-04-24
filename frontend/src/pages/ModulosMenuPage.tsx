@@ -19,12 +19,6 @@ export default function ModulosMenuPage() {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-[#1a3a2a] text-white py-6 border-b-4 border-yellow-400 relative">
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-0 left-4 flex items-center justify-center text-white hover:text-yellow-400 transition-colors z-10"
-        >
-          <span className="text-2xl">←</span>
-        </button>
         <div className="flex flex-col items-center gap-3 px-4">
           <div className="flex items-center justify-between w-full">
             <img src={LOGO_URL} alt="Logo GestaUp" className="w-16 h-auto object-contain rounded-[22px] ml-7" />
@@ -35,7 +29,15 @@ export default function ModulosMenuPage() {
           {fazenda && (
             <h1 className="text-2xl font-bold text-white">{fazenda.toUpperCase()}</h1>
           )}
-          <p className="text-white text-base font-semibold">CADERNETAS</p>
+          <div className="flex items-center gap-3 w-full relative">
+            <button
+              onClick={() => navigate('/')}
+              className="text-yellow-400 font-bold text-sm min-h-[40px] px-3 absolute left-0"
+            >
+              VOLTAR
+            </button>
+            <p className="text-white text-base font-semibold flex-1 text-center">CADERNETAS DIGITAIS</p>
+          </div>
         </div>
       </header>
 

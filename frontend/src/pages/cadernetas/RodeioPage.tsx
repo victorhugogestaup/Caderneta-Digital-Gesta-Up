@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { Button, Input, DatePicker, Checkbox, Radio, ValidationMessage } from '../../components/ui'
+import { Button, Input, DatePicker, Checkbox, Radio, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { LOGO_URL, getFarmLogo } from '../../utils/constants'
+import { LOGO_URL, getFarmLogo, BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 
 const AVALIACOES_SN = [
@@ -121,6 +121,9 @@ export default function RodeioPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
+  const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
 
   // Gerar cards de animais tratados quando número muda
   useEffect(() => {
@@ -145,6 +148,35 @@ export default function RodeioPage() {
       }))
     }
   }, [form.animaisTratados])
+
+  // Carregar pastos e lotes quando fazenda mudar
+  useEffect(() => {
+    async function carregarPastosELotes() {
+      if (!fazenda) return
+
+      setCarregandoPastosLotes(true)
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
+        const data = await response.json()
+
+        if (data.success) {
+          setPastosDisponiveis(data.pastos || [])
+          setLotesDisponiveis(data.lotes || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pastos e lotes:', error)
+      } finally {
+        setCarregandoPastosLotes(false)
+      }
+    }
+
+    carregarPastosELotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
+  }, [fazenda])
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -328,21 +360,46 @@ export default function RodeioPage() {
           )}
           <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={set('data')} error={getError('data')} />
-          <Input
-            label="PASTO"
-            placeholder="Ex: Pasto 12"
-            value={form.pasto}
-            onChange={setInput('pasto')}
-            error={getError('pasto')}
-          />
-          <Input
-            label="NÚMERO DO LOTE"
-            placeholder="Ex: 02"
-            value={form.numeroLote}
-            onChange={setInput('numeroLote')}
-            error={getError('numeroLote')}
-            inputMode="numeric"
-          />
+          <div className="grid grid-cols-2 gap-3">
+            {pastosDisponiveis.length > 0 ? (
+              <Select
+                label="PASTO"
+                value={form.pasto}
+                onChange={(e) => set('pasto')(e.target.value)}
+                error={getError('pasto')}
+                options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+              />
+            ) : (
+              <Input
+                label="PASTO"
+                placeholder="Carregando..."
+                value={form.pasto}
+                onChange={setInput('pasto')}
+                error={getError('pasto')}
+              />
+            )}
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="NÚMERO LOTE"
+                value={form.numeroLote}
+                onChange={(e) => set('numeroLote')(e.target.value)}
+                error={getError('numeroLote')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="NÚMERO LOTE"
+                placeholder="Carregando..."
+                value={form.numeroLote}
+                onChange={setInput('numeroLote')}
+                error={getError('numeroLote')}
+                inputMode="numeric"
+              />
+            )}
+          </div>
+          {carregandoPastosLotes && (
+            <div className="text-sm text-gray-500">Carregando pastos e lotes...</div>
+          )}
         </div>
 
         {/* Seção 2: Quantidade por Categoria */}

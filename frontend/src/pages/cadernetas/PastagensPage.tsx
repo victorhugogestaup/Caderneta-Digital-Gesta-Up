@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { Button, Input, DatePicker, Radio, ValidationMessage } from '../../components/ui'
+import { Button, Input, DatePicker, Radio, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { LOGO_URL, getFarmLogo } from '../../utils/constants'
+import { LOGO_URL, getFarmLogo, BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 
 const AVALIACOES = [
@@ -51,7 +51,7 @@ const makeInitial = (usuario?: string): FormState => ({
 const CATEGORIAS: { campo: keyof FormState; label: string }[] = [
   { campo: 'vaca', label: 'VACAS' },
   { campo: 'touro', label: 'TOUROS' },
-  { campo: 'bezerro', label: 'BEZERROS (AS)' },
+  { campo: 'bezerro', label: 'BEZERROS(AS)' },
   { campo: 'boiMagro', label: 'BOIS MAGROS' },
   { campo: 'garrote', label: 'GARROTES' },
   { campo: 'novilha', label: 'NOVILHAS' },
@@ -66,6 +66,9 @@ export default function PastagensPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [editandoManejador, setEditandoManejador] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
+  const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -74,6 +77,35 @@ export default function PastagensPage() {
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
+
+  // Carregar pastos e lotes quando fazenda mudar
+  useEffect(() => {
+    async function carregarPastosELotes() {
+      if (!fazenda) return
+
+      setCarregandoPastosLotes(true)
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
+        const data = await response.json()
+
+        if (data.success) {
+          setPastosDisponiveis(data.pastos || [])
+          setLotesDisponiveis(data.lotes || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pastos e lotes:', error)
+      } finally {
+        setCarregandoPastosLotes(false)
+      }
+    }
+
+    carregarPastosELotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
+  }, [fazenda])
 
   const total = ['vaca', 'touro', 'bezerro', 'boiMagro', 'garrote', 'novilha'].reduce(
     (acc, c) => acc + (Number(form[c as keyof FormState]) || 0), 0
@@ -178,26 +210,49 @@ export default function PastagensPage() {
               readOnly={!editandoManejador}
             />
           </div>
-          <Input
-            label="NÚMERO DO LOTE"
-            placeholder="Ex: 03"
-            value={form.numeroLote}
-            onChange={setInput('numeroLote')}
-            error={getError('numeroLote')}
-            inputMode="numeric"
-          />
+          {lotesDisponiveis.length > 0 ? (
+            <Select
+              label="NÚMERO DO LOTE"
+              value={form.numeroLote}
+              onChange={(e) => set('numeroLote')(e.target.value)}
+              error={getError('numeroLote')}
+              options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+            />
+          ) : (
+            <Input
+              label="NÚMERO DO LOTE"
+              placeholder="Carregando..."
+              value={form.numeroLote}
+              onChange={setInput('numeroLote')}
+              error={getError('numeroLote')}
+              inputMode="numeric"
+            />
+          )}
+          {carregandoPastosLotes && (
+            <div className="text-sm text-gray-500">Carregando pastos e lotes...</div>
+          )}
         </div>
 
         {/* Seção 2: Pasto de Saída */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">2. PASTO DE SAÍDA</h2>
-          <Input
-            label="PASTO DE SAÍDA"
-            placeholder="Ex: Pasto 12"
-            value={form.pastoSaida}
-            onChange={setInput('pastoSaida')}
-            error={getError('pastoSaida')}
-          />
+          {pastosDisponiveis.length > 0 ? (
+            <Select
+              label="PASTO DE SAÍDA"
+              value={form.pastoSaida}
+              onChange={(e) => set('pastoSaida')(e.target.value)}
+              error={getError('pastoSaida')}
+              options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+            />
+          ) : (
+            <Input
+              label="PASTO DE SAÍDA"
+              placeholder="Carregando..."
+              value={form.pastoSaida}
+              onChange={setInput('pastoSaida')}
+              error={getError('pastoSaida')}
+            />
+          )}
           <Radio
             name="avaliacaoSaida"
             label="AVALIAÇÃO DO PASTO DE SAÍDA"
@@ -212,13 +267,23 @@ export default function PastagensPage() {
         {/* Seção 3: Pasto de Entrada */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">3. PASTO DE ENTRADA</h2>
-          <Input
-            label="PASTO DE ENTRADA"
-            placeholder="Ex: Pasto 07"
-            value={form.pastoEntrada}
-            onChange={setInput('pastoEntrada')}
-            error={getError('pastoEntrada')}
-          />
+          {pastosDisponiveis.length > 0 ? (
+            <Select
+              label="PASTO DE ENTRADA"
+              value={form.pastoEntrada}
+              onChange={(e) => set('pastoEntrada')(e.target.value)}
+              error={getError('pastoEntrada')}
+              options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+            />
+          ) : (
+            <Input
+              label="PASTO DE ENTRADA"
+              placeholder="Carregando..."
+              value={form.pastoEntrada}
+              onChange={setInput('pastoEntrada')}
+              error={getError('pastoEntrada')}
+            />
+          )}
           <Radio
             name="avaliacaoEntrada"
             label="AVALIAÇÃO DO PASTO DE ENTRADA"

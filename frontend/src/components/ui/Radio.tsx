@@ -51,7 +51,7 @@ export default function Radio({
                 cursor-pointer rounded-xl border-2 
                 transition-all active:scale-95
                 flex flex-col items-center justify-center gap-1
-                ${isCompact ? 'p-2 min-h-[50px]' : 'p-3 sm:p-4 min-h-[70px] sm:min-h-[80px]'}
+                ${isCompact ? 'p-2 min-h-[70px]' : 'p-3 sm:p-4 min-h-[70px] sm:min-h-[80px]'}
                 ${isSelected 
                   ? 'bg-black text-white border-black' 
                   : 'bg-white text-gray-900 border-gray-300 hover:border-gray-400'

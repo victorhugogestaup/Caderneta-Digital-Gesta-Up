@@ -10,7 +10,7 @@ export default function InsumosMenuPage() {
   const menuItems = [
     {
       id: 'cadastro',
-      label: 'CADASTRO',
+      label: 'VISUALIZAR CADASTROS',
       emoji: '📋',
       description: 'Visualizar insumos, dietas, fornecedores e funcionários',
       path: '/estoque-insumos/cadastro',
@@ -32,6 +32,15 @@ export default function InsumosMenuPage() {
       path: '/estoque-insumos/producao',
       color: '#f59e0b',
     },
+    {
+      id: 'estoque',
+      label: 'ESTOQUE',
+      emoji: '📦',
+      description: 'Visualizar estoque atual',
+      path: '/estoque-insumos/estoque',
+      color: '#8b5cf6',
+      disponivel: false,
+    },
   ]
 
   const hexToRgba = (hex: string, alpha: number = 0.25): string => {
@@ -45,12 +54,6 @@ export default function InsumosMenuPage() {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
       <header className="bg-[#1a3a2a] text-white py-6 border-b-4 border-yellow-400 relative">
-        <button
-          onClick={() => navigate('/')}
-          className="absolute top-0 left-4 flex items-center justify-center text-white hover:text-yellow-400 transition-colors z-10"
-        >
-          <span className="text-2xl">←</span>
-        </button>
         <div className="flex flex-col items-center gap-3 px-4">
           <div className="flex items-center justify-between w-full">
             <img src={LOGO_URL} alt="Logo GestaUp" className="w-16 h-auto object-contain rounded-[22px] ml-7" />
@@ -61,30 +64,42 @@ export default function InsumosMenuPage() {
           {fazenda && (
             <h1 className="text-2xl font-bold text-white">{fazenda.toUpperCase()}</h1>
           )}
-          <p className="text-white text-base font-semibold">ESTOQUE DE INSUMOS</p>
+          <div className="flex items-center gap-3 w-full relative">
+            <button
+              onClick={() => navigate('/')}
+              className="text-yellow-400 font-bold text-sm min-h-[40px] px-3 absolute left-0"
+            >
+              VOLTAR
+            </button>
+            <p className="text-white text-base font-semibold flex-1 text-center">CHECKLISTS DIGITAIS</p>
+          </div>
         </div>
       </header>
 
       {/* Menu de Insumos - 3 botões grandes */}
       <main className="flex-1 p-4">
-        <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-2 gap-6">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => navigate(item.path)}
+              onClick={() => item.disponivel !== false && navigate(item.path)}
+              disabled={item.disponivel === false}
               style={{ backgroundColor: hexToRgba(item.color) }}
-              className="relative flex items-center gap-4 p-6 transition-all rounded-2xl hover:scale-105"
+              className={`relative flex flex-col items-center justify-center gap-2 p-4 transition-all rounded-2xl
+                ${item.disponivel === false
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:scale-105'
+                }`}
             >
-              <span className="text-6xl">{item.emoji}</span>
-              <div className="flex-1 text-left">
-                <span className="text-xl font-bold text-gray-900 block">
-                  {item.label}
+              {item.disponivel === false && (
+                <span className="absolute top-2 right-2 bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                  EM BREVE
                 </span>
-                <span className="text-sm text-gray-700 block">
-                  {item.description}
-                </span>
-              </div>
-              <span className="text-3xl text-gray-400">→</span>
+              )}
+              <span className="text-5xl">{item.emoji}</span>
+              <span className="text-base font-bold text-center leading-tight text-gray-900">
+                {item.label}
+              </span>
             </button>
           ))}
         </div>

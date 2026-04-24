@@ -73,7 +73,7 @@ export default function CheckboxGroup({
                   ? 'flex flex-col items-center justify-center gap-1'
                   : 'relative flex items-center gap-3 p-4'
                 }
-                ${isCompact ? 'p-2 min-h-[50px]' : hideCheckbox ? 'p-3 sm:p-4 min-h-[70px] sm:min-h-[80px]' : 'min-h-[60px]'}
+                ${isCompact ? 'p-2 min-h-[70px]' : hideCheckbox ? 'p-3 sm:p-4 min-h-[70px] sm:min-h-[80px]' : 'min-h-[60px]'}
                 ${isSelected
                   ? 'bg-black text-white border-black'
                   : 'bg-white text-gray-900 border-gray-300 hover:border-gray-400'

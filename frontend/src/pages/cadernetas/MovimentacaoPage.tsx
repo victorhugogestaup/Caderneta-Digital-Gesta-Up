@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage } from '../../components/ui'
+import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { LOGO_URL, getFarmLogo } from '../../utils/constants'
+import { LOGO_URL, getFarmLogo, BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 
 const MOTIVOS = [
@@ -79,6 +79,8 @@ export default function MovimentacaoPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [carregandoLotes, setCarregandoLotes] = useState(false)
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -86,6 +88,34 @@ export default function MovimentacaoPage() {
   }
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
+
+  // Carregar lotes quando fazenda mudar
+  useEffect(() => {
+    async function carregarLotes() {
+      if (!fazenda) return
+
+      setCarregandoLotes(true)
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
+        const data = await response.json()
+
+        if (data.success) {
+          setLotesDisponiveis(data.lotes || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar lotes:', error)
+      } finally {
+        setCarregandoLotes(false)
+      }
+    }
+
+    carregarLotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarLotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
+  }, [fazenda])
 
   const handleSalvar = async () => {
     setSalvando(true)
@@ -204,47 +234,72 @@ export default function MovimentacaoPage() {
           <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={(val) => setForm((p) => ({ ...p, data: val }))} error={getError('data')} />
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="LOTE ORIGEM"
-              placeholder="Ex: 03"
-              value={form.loteOrigem}
-              onChange={setInput('loteOrigem')}
-              error={getError('loteOrigem')}
-              inputMode="numeric"
-            />
-            <Input
-              label="LOTE DESTINO"
-              placeholder="Ex: 07"
-              value={form.loteDestino}
-              onChange={setInput('loteDestino')}
-              error={getError('loteDestino')}
-              inputMode="numeric"
-            />
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="LOTE ORIGEM"
+                value={form.loteOrigem}
+                onChange={(e) => setForm((p) => ({ ...p, loteOrigem: e.target.value }))}
+                error={getError('loteOrigem')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="LOTE ORIGEM"
+                placeholder="Carregando..."
+                value={form.loteOrigem}
+                onChange={setInput('loteOrigem')}
+                error={getError('loteOrigem')}
+                inputMode="numeric"
+              />
+            )}
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="LOTE DESTINO"
+                value={form.loteDestino}
+                onChange={(e) => setForm((p) => ({ ...p, loteDestino: e.target.value }))}
+                error={getError('loteDestino')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="LOTE DESTINO"
+                placeholder="Carregando..."
+                value={form.loteDestino}
+                onChange={setInput('loteDestino')}
+                error={getError('loteDestino')}
+                inputMode="numeric"
+              />
+            )}
           </div>
+          {carregandoLotes && (
+            <div className="text-sm text-gray-500">Carregando lotes...</div>
+          )}
         </div>
 
         {/* Seção 2: Quantificação */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">2. QUANTIFICAÇÃO</h2>
-          <Input
-            label="NÚMERO DE CABEÇAS"
-            placeholder="Ex: 25"
-            value={form.numeroCabecas}
-            onChange={setInput('numeroCabecas')}
-            error={getError('numeroCabecas')}
-            inputMode="numeric"
-            type="number"
-            min="0"
-          />
-          <Input
-            label="PESO MÉDIO (kg)"
-            placeholder="Ex: 450"
-            value={form.pesoMedio}
-            onChange={setInput('pesoMedio')}
-            inputMode="decimal"
-            type="number"
-            min="0"
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="NÚMERO DE CABEÇAS"
+              placeholder="Ex: 25"
+              value={form.numeroCabecas}
+              onChange={setInput('numeroCabecas')}
+              error={getError('numeroCabecas')}
+              inputMode="numeric"
+              type="number"
+              min="0"
+            />
+            <Input
+              label="PESO MÉDIO (kg)"
+              placeholder="Ex: 450"
+              value={form.pesoMedio}
+              onChange={setInput('pesoMedio')}
+              inputMode="decimal"
+              type="number"
+              min="0"
+            />
+          </div>
         </div>
 
         {/* Seção 3: Categorias */}

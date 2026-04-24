@@ -269,43 +269,45 @@ export default function SuplementacaoPage() {
             error={getError('tratador')}
             readOnly
           />
-          {pastosDisponiveis.length > 0 ? (
-            <Select
-              label="PASTO"
-              value={form.pasto}
-              onChange={(e) => set('pasto')(e.target.value)}
-              error={getError('pasto')}
-              options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
-            />
-          ) : (
-            <Input
-              label="PASTO"
-              placeholder="Carregando..."
-              value={form.pasto}
-              onChange={setInput('pasto')}
-              error={getError('pasto')}
-            />
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            {pastosDisponiveis.length > 0 ? (
+              <Select
+                label="PASTO"
+                value={form.pasto}
+                onChange={(e) => set('pasto')(e.target.value)}
+                error={getError('pasto')}
+                options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+              />
+            ) : (
+              <Input
+                label="PASTO"
+                placeholder="Carregando..."
+                value={form.pasto}
+                onChange={setInput('pasto')}
+                error={getError('pasto')}
+              />
+            )}
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="NÚMERO LOTE"
+                value={form.numeroLote}
+                onChange={(e) => set('numeroLote')(e.target.value)}
+                error={getError('numeroLote')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="NÚMERO LOTE"
+                placeholder="Carregando..."
+                value={form.numeroLote}
+                onChange={setInput('numeroLote')}
+                error={getError('numeroLote')}
+                inputMode="numeric"
+              />
+            )}
+          </div>
           {carregandoPastosLotes && (
             <div className="text-sm text-gray-500">Carregando pastos e lotes...</div>
-          )}
-          {lotesDisponiveis.length > 0 ? (
-            <Select
-              label="NÚMERO DO LOTE"
-              value={form.numeroLote}
-              onChange={(e) => set('numeroLote')(e.target.value)}
-              error={getError('numeroLote')}
-              options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
-            />
-          ) : (
-            <Input
-              label="NÚMERO DO LOTE"
-              placeholder="Carregando..."
-              value={form.numeroLote}
-              onChange={setInput('numeroLote')}
-              error={getError('numeroLote')}
-              inputMode="numeric"
-            />
           )}
         </div>
 

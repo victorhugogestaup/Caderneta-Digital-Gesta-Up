@@ -51,7 +51,6 @@ export default function Home() {
           {configurado && fazenda && (
             <h1 className="text-2xl font-bold text-white">{fazenda.toUpperCase()}</h1>
           )}
-          <p className="text-white text-base font-semibold">CADERNETAS DIGITAIS</p>
         </div>
       </header>
 
@@ -82,9 +81,6 @@ export default function Home() {
                 <span className="text-2xl font-bold text-gray-900 block">
                   CADERNETAS
                 </span>
-                <span className="text-sm text-gray-700 block">
-                  Maternidade, Troca de Pastos, Rodeio, Suplementação, Bebedouros, Movimentação
-                </span>
               </div>
               <span className="text-3xl text-gray-400">→</span>
             </button>
@@ -99,10 +95,7 @@ export default function Home() {
                 <span className="text-6xl">📦</span>
                 <div className="flex-1 text-left">
                   <span className="text-2xl font-bold text-gray-900 block">
-                    ESTOQUE DE INSUMOS
-                  </span>
-                  <span className="text-sm text-gray-700 block">
-                    Cadastro, Entrada de Insumos, Produção Fábrica
+                    CHECKLISTS
                   </span>
                 </div>
                 <span className="text-3xl text-gray-400">→</span>

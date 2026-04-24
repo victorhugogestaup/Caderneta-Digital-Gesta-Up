@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { Button, Input, DatePicker, Radio, ValidationMessage } from '../../components/ui'
+import { Button, Input, DatePicker, Radio, ValidationMessage, Select, Checkbox } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
-import { LOGO_URL, getFarmLogo } from '../../utils/constants'
+import { LOGO_URL, getFarmLogo, BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 
 const TIPOS_GADO = [
@@ -35,7 +35,7 @@ interface FormState {
   pasto: string
   numeroLote: string
   gado: string
-  categoria: string
+  categorias: string[]
   leituraBebedouro: string
   numeroBebedouro: string
   observacao: string
@@ -47,7 +47,7 @@ const makeInitial = (usuario?: string): FormState => ({
   pasto: '',
   numeroLote: '',
   gado: '',
-  categoria: '',
+  categorias: [],
   leituraBebedouro: '',
   numeroBebedouro: '',
   observacao: '',
@@ -60,8 +60,10 @@ export default function BebedourosPage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const [editandoResponsavel, setEditandoResponsavel] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
+  const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -69,7 +71,45 @@ export default function BebedourosPage() {
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
 
+  const toggleCategoria = (cat: string) => {
+    setForm((prev) => ({
+      ...prev,
+      categorias: prev.categorias.includes(cat)
+        ? prev.categorias.filter((c) => c !== cat)
+        : [...prev.categorias, cat],
+    }))
+  }
+
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
+
+  // Carregar pastos e lotes quando fazenda mudar
+  useEffect(() => {
+    async function carregarPastosELotes() {
+      if (!fazenda) return
+
+      setCarregandoPastosLotes(true)
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
+        const data = await response.json()
+
+        if (data.success) {
+          setPastosDisponiveis(data.pastos || [])
+          setLotesDisponiveis(data.lotes || [])
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pastos e lotes:', error)
+      } finally {
+        setCarregandoPastosLotes(false)
+      }
+    }
+
+    carregarPastosELotes()
+
+    // Polling a cada 3 minutos
+    const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
+
+    return () => clearInterval(interval)
+  }, [fazenda])
 
   const handleSalvar = async () => {
     setSalvando(true)
@@ -81,7 +121,7 @@ export default function BebedourosPage() {
       pasto: form.pasto,
       numeroLote: form.numeroLote,
       gado: form.gado,
-      categoria: form.categoria,
+      categoria: form.categorias.join(', '),
       leituraBebedouro: form.leituraBebedouro ? Number(form.leituraBebedouro) : null,
       numeroBebedouro: form.numeroBebedouro,
       observacao: form.observacao,
@@ -98,7 +138,7 @@ export default function BebedourosPage() {
         pasto: form.pasto,
         numeroLote: form.numeroLote,
         gado: form.gado,
-        categoria: form.categoria,
+        categoria: form.categorias.join(', '),
         leituraBebedouro: form.leituraBebedouro ? Number(form.leituraBebedouro) : null,
         numeroBebedouro: form.numeroBebedouro,
         observacao: form.observacao,
@@ -106,7 +146,6 @@ export default function BebedourosPage() {
       setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
       setForm(makeInitial(usuario))
-      setEditandoResponsavel(false)
     }
   }
 
@@ -164,57 +203,54 @@ export default function BebedourosPage() {
           )}
           <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={set('data')} error={getError('data')} />
-          <div>
-            <label className="block text-base font-bold text-gray-700 mb-2">RESPONSÁVEL</label>
-            {editandoResponsavel ? (
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Nome do responsável"
-                  value={form.responsavel}
-                  onChange={setInput('responsavel')}
-                  error={getError('responsavel')}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => setEditandoResponsavel(false)}
-                  variant="success"
-                  icon="✓"
-                  fullWidth={false}
-                  className="min-h-[32px] w-10 px-2"
-                />
-              </div>
+          <Input
+            label="RESPONSÁVEL"
+            placeholder="Nome do responsável"
+            value={form.responsavel}
+            onChange={setInput('responsavel')}
+            error={getError('responsavel')}
+            readOnly
+          />
+          <div className="grid grid-cols-2 gap-3">
+            {pastosDisponiveis.length > 0 ? (
+              <Select
+                label="PASTO"
+                value={form.pasto}
+                onChange={(e) => set('pasto')(e.target.value)}
+                error={getError('pasto')}
+                options={pastosDisponiveis.map(p => ({ value: p, label: p }))}
+              />
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-gray-50 border-2 border-gray-300 rounded-lg px-3 sm:px-4 py-3 min-h-[60px] flex items-center">
-                  <span className="text-base font-semibold text-black">
-                    {form.responsavel || 'Não definido'}
-                  </span>
-                </div>
-                <Button
-                  onClick={() => setEditandoResponsavel(true)}
-                  variant="secondary"
-                  icon="✏️"
-                  fullWidth={false}
-                  className="min-h-[32px] w-10 px-2"
-                />
-              </div>
+              <Input
+                label="PASTO"
+                placeholder="Carregando..."
+                value={form.pasto}
+                onChange={setInput('pasto')}
+                error={getError('pasto')}
+              />
+            )}
+            {lotesDisponiveis.length > 0 ? (
+              <Select
+                label="NÚMERO LOTE"
+                value={form.numeroLote}
+                onChange={(e) => set('numeroLote')(e.target.value)}
+                error={getError('numeroLote')}
+                options={lotesDisponiveis.map(l => ({ value: l, label: l }))}
+              />
+            ) : (
+              <Input
+                label="NÚMERO LOTE"
+                placeholder="Carregando..."
+                value={form.numeroLote}
+                onChange={setInput('numeroLote')}
+                error={getError('numeroLote')}
+                inputMode="numeric"
+              />
             )}
           </div>
-          <Input
-            label="PASTO"
-            placeholder="Ex: Pasto 12"
-            value={form.pasto}
-            onChange={setInput('pasto')}
-            error={getError('pasto')}
-          />
-          <Input
-            label="NÚMERO DO LOTE"
-            placeholder="Ex: 03"
-            value={form.numeroLote}
-            onChange={setInput('numeroLote')}
-            error={getError('numeroLote')}
-            inputMode="numeric"
-          />
+          {carregandoPastosLotes && (
+            <div className="text-sm text-gray-500">Carregando pastos e lotes...</div>
+          )}
         </div>
 
         {/* Seção 2: Classificação */}
@@ -229,15 +265,20 @@ export default function BebedourosPage() {
             error={getError('gado')}
             gridCols={3}
           />
-          <Radio
-            name="categoria"
-            label="CATEGORIA"
-            options={CATEGORIAS}
-            value={form.categoria}
-            onChange={set('categoria')}
-            error={getError('categoria')}
-            gridCols={2}
-          />
+          {getError('categorias') && (
+            <p className="text-base font-semibold text-red-700">⚠️ {getError('categorias')}</p>
+          )}
+          <p className="text-lg font-bold text-gray-800">CATEGORIAS:</p>
+          <div className="grid grid-cols-2 gap-3">
+            {CATEGORIAS.map((cat) => (
+              <Checkbox
+                key={cat.value}
+                label={cat.label}
+                checked={form.categorias.includes(cat.value)}
+                onChange={() => toggleCategoria(cat.value)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Seção 3: Bebedouro */}
