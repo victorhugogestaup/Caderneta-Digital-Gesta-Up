@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LOGO_URL, DATABASE_URL, getFarmLogo } from '../utils/constants'
+import { LOGO_URL, getFarmLogo } from '../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
-import { BACKEND_URL } from '../utils/constants'
 
 const BASE = import.meta.env.BASE_URL
 
