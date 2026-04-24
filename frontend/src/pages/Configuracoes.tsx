@@ -31,12 +31,12 @@ export default function Configuracoes() {
     return newErrors.length === 0
   }
 
-  const validarFazendaNaBase = async (id: string): Promise<{ sucesso: boolean; nome?: string; link?: string }> => {
+  const validarFazendaNaBase = async (id: string, prefix: string = 'Caderneta'): Promise<{ sucesso: boolean; nome?: string; link?: string }> => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: id }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: id, prefix }),
       })
       if (res.ok) {
         const json = await res.json() as { success: boolean; farmName?: string; farmSheetUrl?: string }
@@ -53,25 +53,43 @@ export default function Configuracoes() {
     if (!validate()) return
 
     setValidandoFazenda(true)
-    const validacao = await validarFazendaNaBase(fazenda.trim())
+
+    // Validar com prefixo 'Caderneta' para obter URL da planilha da caderneta
+    const validacaoCaderneta = await validarFazendaNaBase(fazenda.trim(), 'Caderneta')
+
+    // Validar com prefixo 'Cadastro' para obter URL da planilha de cadastro
+    const validacaoCadastro = await validarFazendaNaBase(fazenda.trim(), 'Cadastro')
+
     setValidandoFazenda(false)
 
-    if (!validacao.sucesso) {
+    if (!validacaoCaderneta.sucesso) {
       setErrors([{ field: 'fazenda', message: 'Verifique o ID digitado ou contate o administrador' }])
       return
     }
 
     // Se validou com sucesso, usa o nome e link retornados da base de dados
-    const nomeFazenda = validacao.nome || fazenda.trim()
-    const linkPlanilha = validacao.link
+    const nomeFazenda = validacaoCaderneta.nome || fazenda.trim()
+    const linkPlanilha = validacaoCaderneta.link
+    const linkCadastro = validacaoCadastro.link
 
     if (!linkPlanilha) {
       setErrors([{ field: 'fazenda', message: 'Link da planilha não encontrado na base de dados. Contate o administrador.' }])
       return
     }
 
+    // Aviso se link de cadastro não for encontrado (não é obrigatório)
+    if (!linkCadastro) {
+      console.warn('Link de cadastro não encontrado na base de dados. Funcionalidades de cadastro podem não funcionar corretamente.')
+    }
+
     setFazendaNome(nomeFazenda)
-    const configData = { fazenda: nomeFazenda, fazendaId: fazenda.trim(), usuario: usuario.trim(), planilhaUrl: linkPlanilha }
+    const configData = {
+      fazenda: nomeFazenda,
+      fazendaId: fazenda.trim(),
+      usuario: usuario.trim(),
+      planilhaUrl: linkPlanilha,
+      cadastroSheetUrl: linkCadastro || ''
+    }
     console.log('Configuracoes: Salvando configurações', configData)
 
     dispatch(setConfig(configData))

@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DATABASE_URL } from '../../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
-import { BACKEND_URL } from '../../utils/constants'
 import FarmLogo from '../../components/FarmLogo'
 import { Input, Select, DatePicker, Button } from '../../components/ui'
-
-interface CadastroData {
-  insumos: string[]
-  fornecedores: string[]
-  funcionarios: string[]
-}
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 interface FormData {
   dataEntrada: string
@@ -29,7 +22,7 @@ interface FormData {
 
 export default function EntradaPage() {
   const navigate = useNavigate()
-  const { fazenda, fazendaId, planilhaUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, fazendaId, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [cadastroData, setCadastroData] = useState<CadastroData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -52,53 +45,15 @@ export default function EntradaPage() {
   })
 
   useEffect(() => {
-    const loadCadastroData = async () => {
-      if (!planilhaUrl) {
-        setError('URL da planilha não configurada')
+    const loadData = async () => {
+      if (!cadastroSheetUrl) {
+        setError('URL da planilha de cadastro não configurada')
         setLoading(false)
         return
       }
 
       try {
-        const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Insumo' }),
-        })
-
-        const validateData = await validateRes.json()
-        if (!validateData.success || !validateData.farmSheetUrl) {
-          setError('Não foi possível obter a URL da planilha de insumos')
-          setLoading(false)
-          return
-        }
-
-        const readRes = await fetch(`${BACKEND_URL}/api/insumos/cadastro`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ insumosSheetUrl: validateData.farmSheetUrl }),
-        })
-
-        const readData = await readRes.json()
-        if (!readData.success || !readData.rows) {
-          setError('Não foi possível ler os dados de cadastro')
-          setLoading(false)
-          return
-        }
-
-        const rows = readData.rows as (string | number | null)[][]
-        const data: CadastroData = {
-          insumos: [],
-          fornecedores: [],
-          funcionarios: [],
-        }
-
-        for (const row of rows) {
-          if (row[0]) data.insumos.push(String(row[0]))
-          if (row[2]) data.fornecedores.push(String(row[2]))
-          if (row[3]) data.funcionarios.push(String(row[3]))
-        }
-
+        const data = await loadCadastroData(cadastroSheetUrl)
         setCadastroData(data)
         setLoading(false)
       } catch (err) {
@@ -107,8 +62,8 @@ export default function EntradaPage() {
       }
     }
 
-    loadCadastroData()
-  }, [planilhaUrl, fazenda])
+    loadData()
+  }, [cadastroSheetUrl])
 
   useEffect(() => {
     const quantidade = parseFloat(form.quantidade) || 0
@@ -151,7 +106,7 @@ export default function EntradaPage() {
       const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Insumo' }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Checklist' }),
       })
 
       const validateData = await validateRes.json()

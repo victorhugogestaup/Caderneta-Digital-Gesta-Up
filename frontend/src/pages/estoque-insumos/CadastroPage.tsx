@@ -1,79 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DATABASE_URL } from '../../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
-import { BACKEND_URL } from '../../utils/constants'
 import FarmLogo from '../../components/FarmLogo'
-
-interface CadastroData {
-  insumos: string[]
-  dietas: string[]
-  fornecedores: string[]
-  funcionarios: string[]
-}
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 export default function CadastroPage() {
   const navigate = useNavigate()
-  const { fazenda, fazendaId, planilhaUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, fazendaId, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [data, setData] = useState<CadastroData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadCadastroData = async () => {
-      if (!planilhaUrl) {
-        setError('URL da planilha não configurada')
+    const loadData = async () => {
+      if (!cadastroSheetUrl) {
+        setError('URL da planilha de cadastro não configurada')
         setLoading(false)
         return
       }
 
       try {
-        // Validar fazenda na planilha base para obter URL da planilha de insumos com prefixo 'Insumo'
-        const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Insumo' }),
-        })
-
-        const validateData = await validateRes.json()
-        if (!validateData.success || !validateData.farmSheetUrl) {
-          setError('Não foi possível obter a URL da planilha de insumos')
-          setLoading(false)
-          return
-        }
-
-        // Ler dados da página "Cadastro"
-        const readRes = await fetch(`${BACKEND_URL}/api/insumos/cadastro`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ insumosSheetUrl: validateData.farmSheetUrl }),
-        })
-
-        const readData = await readRes.json()
-        if (!readData.success || !readData.rows) {
-          setError('Não foi possível ler os dados de cadastro')
-          setLoading(false)
-          return
-        }
-
-        // Processar dados (assumindo que cada linha representa uma categoria)
-        const rows = readData.rows as (string | number | null)[][]
-        const cadastroData: CadastroData = {
-          insumos: [],
-          dietas: [],
-          fornecedores: [],
-          funcionarios: [],
-        }
-
-        // Assumindo estrutura: coluna 0 = Insumos, coluna 1 = Dietas, coluna 2 = Fornecedores, coluna 3 = Funcionários
-        for (const row of rows) {
-          if (row[0]) cadastroData.insumos.push(String(row[0]))
-          if (row[1]) cadastroData.dietas.push(String(row[1]))
-          if (row[2]) cadastroData.fornecedores.push(String(row[2]))
-          if (row[3]) cadastroData.funcionarios.push(String(row[3]))
-        }
-
+        const cadastroData = await loadCadastroData(cadastroSheetUrl)
         setData(cadastroData)
         setLoading(false)
       } catch (err) {
@@ -82,8 +30,8 @@ export default function CadastroPage() {
       }
     }
 
-    loadCadastroData()
-  }, [planilhaUrl, fazenda])
+    loadData()
+  }, [cadastroSheetUrl])
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -117,7 +65,7 @@ export default function CadastroPage() {
       <main className="flex-1 p-4">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-4xl animate-spin">⏳</div>
+            <div className="text-4xl animate-spin">Carregando...</div>
           </div>
         ) : error ? (
           <div className="bg-red-50 border-2 border-red-400 rounded-2xl p-6 text-center">
@@ -128,10 +76,99 @@ export default function CadastroPage() {
           </div>
         ) : data ? (
           <div className="space-y-6">
+            {/* Pastos */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                PASTOS
+              </h2>
+              {data.pastos.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {data.pastos.map((pasto, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 text-gray-900">
+                      {pasto}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Nenhum pasto cadastrado</p>
+              )}
+            </div>
+
+            {/* Lotes */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                LOTES
+              </h2>
+              {data.lotes.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {data.lotes.map((lote, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 text-gray-900">
+                      {lote}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Nenhum lote cadastrado</p>
+              )}
+            </div>
+
+            {/* Minerais */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                MINERAIS
+              </h2>
+              {data.minerais.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {data.minerais.map((mineral, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 text-gray-900">
+                      {mineral}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Nenhum mineral cadastrado</p>
+              )}
+            </div>
+
+            {/* Proteinados */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                PROTEINADOS
+              </h2>
+              {data.proteinados.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {data.proteinados.map((proteinado, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 text-gray-900">
+                      {proteinado}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Nenhum proteinado cadastrado</p>
+              )}
+            </div>
+
+            {/* Rações */}
+            <div className="bg-white rounded-2xl p-6 shadow-md">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                RAÇÕES
+              </h2>
+              {data.racoes.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {data.racoes.map((racao, index) => (
+                    <div key={index} className="bg-gray-50 rounded-lg p-3 text-gray-900">
+                      {racao}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">Nenhuma ração cadastrada</p>
+              )}
+            </div>
+
             {/* Insumos */}
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-3xl">📦</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 INSUMOS
               </h2>
               {data.insumos.length > 0 ? (
@@ -149,8 +186,7 @@ export default function CadastroPage() {
 
             {/* Dietas */}
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-3xl">🥗</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 DIETAS
               </h2>
               {data.dietas.length > 0 ? (
@@ -168,8 +204,7 @@ export default function CadastroPage() {
 
             {/* Fornecedores */}
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-3xl">🏢</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 FORNECEDORES
               </h2>
               {data.fornecedores.length > 0 ? (
@@ -187,8 +222,7 @@ export default function CadastroPage() {
 
             {/* Funcionários */}
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-3xl">👷</span>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 FUNCIONÁRIOS
               </h2>
               {data.funcionarios.length > 0 ? (

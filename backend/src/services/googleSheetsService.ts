@@ -43,9 +43,9 @@ export function extractSpreadsheetId(url: string): string {
 
 /**
  * Extrai link por prefixo de uma célula que pode conter múltiplos links
- * Exemplo: "Caderneta: https://... Insumo: https://..."
+ * Exemplo: "Caderneta: https://... Insumo: https://... checklist: https://..."
  * @param cellValue Valor da célula
- * @param prefix Prefixo a buscar (ex: "Caderneta", "Insumo")
+ * @param prefix Prefixo a buscar (ex: "Caderneta", "Insumo", "Cadastro", "checklist")
  * @returns Link extraído ou null se não encontrado
  */
 export function extractLinkByPrefix(cellValue: string, prefix: string): string | null {
@@ -57,7 +57,7 @@ export function extractLinkByPrefix(cellValue: string, prefix: string): string |
   }
 
   // Buscar por prefixo específico
-  const regex = new RegExp(`${prefix}:\\s*([^\\s]+)`, 'i')
+  const regex = new RegExp(`${prefix}:\\s*(https?://[^\\s]+)`, 'i')
   const match = cellValue.match(regex)
 
   if (match) {
@@ -207,7 +207,7 @@ export async function validateFarm(spreadsheetUrl: string, farmId: string, prefi
           let extractedUrl = extractLinkByPrefix(sheetUrlInCell, prefix)
 
           // Se não encontrou o prefixo na célula atual, procurar nas linhas abaixo na coluna C
-          if (!extractedUrl && prefix === 'Insumo') {
+          if (!extractedUrl && (prefix === 'Checklist' || prefix === 'Cadastro')) {
             logger.info(`Prefixo '${prefix}' não encontrado na linha 2, procurando nas linhas abaixo...`)
             const columnCResponse = await sheets.spreadsheets.values.get({
               spreadsheetId,
@@ -309,60 +309,4 @@ export async function getSubtiposDaFazenda(
 
   logger.warn(`Nenhum subtipo encontrado para tipo ${tipo}`)
   return []
-}
-
-export async function getPastosELotesDaFazenda(
-  spreadsheetUrl: string,
-  farmId: string
-): Promise<{ pastos: string[], lotes: string[] }> {
-  const auth = getAuth()
-  const sheets = google.sheets({ version: 'v4', auth })
-  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
-
-  const response = await sheets.spreadsheets.get({ spreadsheetId })
-  const sheetNames = response.data.sheets?.map((sheet) => sheet.properties?.title).filter((title): title is string => title !== undefined) || []
-
-  for (const sheetName of sheetNames) {
-    try {
-      // Buscar colunas G (PASTO) e H (LOTE) a partir da linha 2
-      const range = `${sheetName}!G2:H1000`
-      const cellResponse = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range,
-      })
-
-      const values = cellResponse.data.values
-      if (!values || values.length === 0) {
-        continue
-      }
-
-      const pastos: string[] = []
-      const lotes: string[] = []
-
-      for (const row of values) {
-        const pasto = row.length > 0 ? String(row[0]).trim() : ''
-        const lote = row.length > 1 ? String(row[1]).trim() : ''
-
-        if (pasto && pasto !== '') {
-          pastos.push(pasto)
-        }
-        if (lote && lote !== '') {
-          lotes.push(lote)
-        }
-      }
-
-      if (pastos.length > 0 || lotes.length > 0) {
-        logger.info(`Pastos e lotes encontrados na aba ${sheetName}`)
-        return {
-          pastos: [...new Set(pastos)].sort(),
-          lotes: [...new Set(lotes)].sort()
-        }
-      }
-    } catch (error) {
-      logger.error(`Erro ao buscar pastos e lotes na aba ${sheetName}: ${error}`)
-    }
-  }
-
-  logger.warn(`Nenhum pasto ou lote encontrado para fazenda ${farmId}`)
-  return { pastos: [], lotes: [] }
 }

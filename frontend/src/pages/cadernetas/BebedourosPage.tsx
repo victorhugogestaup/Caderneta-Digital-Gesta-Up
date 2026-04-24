@@ -8,6 +8,7 @@ import { todayBR } from '../../utils/formatDate'
 import { BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 const TIPOS_GADO = [
   { value: 'Cria', label: 'CRIA', icon: '🍼' },
@@ -56,7 +57,7 @@ const makeInitial = (usuario?: string): FormState => ({
 
 export default function BebedourosPage() {
   const navigate = useNavigate()
-  const { usuario, fazenda } = useSelector((state: RootState) => state.config)
+  const { usuario, fazenda, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(() => makeInitial(usuario))
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -86,17 +87,16 @@ export default function BebedourosPage() {
   // Carregar pastos e lotes quando fazenda mudar
   useEffect(() => {
     async function carregarPastosELotes() {
-      if (!fazenda) return
+      if (!cadastroSheetUrl) {
+        setCarregandoPastosLotes(false)
+        return
+      }
 
       setCarregandoPastosLotes(true)
       try {
-        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
-        const data = await response.json()
-
-        if (data.success) {
-          setPastosDisponiveis(data.pastos || [])
-          setLotesDisponiveis(data.lotes || [])
-        }
+        const data = await loadCadastroData(cadastroSheetUrl)
+        setPastosDisponiveis(data.pastos || [])
+        setLotesDisponiveis(data.lotes || [])
       } catch (error) {
         console.error('Erro ao carregar pastos e lotes:', error)
       } finally {
@@ -110,7 +110,7 @@ export default function BebedourosPage() {
     const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
 
     return () => clearInterval(interval)
-  }, [fazenda])
+  }, [cadastroSheetUrl])
 
   const handleSalvar = async () => {
     setSalvando(true)

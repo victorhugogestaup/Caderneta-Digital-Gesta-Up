@@ -1,16 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DATABASE_URL } from '../../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
-import { BACKEND_URL } from '../../utils/constants'
 import FarmLogo from '../../components/FarmLogo'
 import { Input, Select, DatePicker, Button } from '../../components/ui'
-
-interface CadastroData {
-  insumos: string[]
-  dietas: string[]
-}
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 // Mapeamento dieta → insumos (será definido na planilha base)
 // Por enquanto, usando um mapeamento estático como exemplo
@@ -29,7 +23,7 @@ interface FormData {
 
 export default function ProducaoPage() {
   const navigate = useNavigate()
-  const { fazenda, fazendaId, planilhaUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, fazendaId, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [cadastroData, setCadastroData] = useState<CadastroData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -47,51 +41,16 @@ export default function ProducaoPage() {
   const DESTINOS = ['Cria', 'Recria', 'Engorda', 'Tropa', 'Outros Animais']
 
   useEffect(() => {
-    const loadCadastroData = async () => {
-      if (!planilhaUrl) {
-        setError('URL da planilha não configurada')
+    const loadData = async () => {
+      if (!cadastroSheetUrl) {
+        setError('URL da planilha de cadastro não configurada')
         setLoading(false)
         return
       }
 
       try {
-        const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Insumo' }),
-        })
-
-        const validateData = await validateRes.json()
-        if (!validateData.success || !validateData.farmSheetUrl) {
-          setError('Não foi possível obter a URL da planilha de insumos')
-          setLoading(false)
-          return
-        }
-
-        const readRes = await fetch(`${BACKEND_URL}/api/insumos/cadastro`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ insumosSheetUrl: validateData.farmSheetUrl }),
-        })
-
-        const readData = await readRes.json()
-        if (!readData.success || !readData.rows) {
-          setError('Não foi possível ler os dados de cadastro')
-          setLoading(false)
-          return
-        }
-
-        const rows = readData.rows as (string | number | null)[][]
-        const data: CadastroData = {
-          insumos: [],
-          dietas: [],
-        }
-
-        for (const row of rows) {
-          if (row[0]) data.insumos.push(String(row[0]))
-          if (row[1]) data.dietas.push(String(row[1]))
-        }
-
+        const data = await loadCadastroData(cadastroSheetUrl)
+        
         // Inicializar quantidades de insumos como vazio
         const insumosQuantidades: Record<string, string> = {}
         data.insumos.forEach(insumo => {
@@ -107,8 +66,8 @@ export default function ProducaoPage() {
       }
     }
 
-    loadCadastroData()
-  }, [planilhaUrl, fazenda])
+    loadData()
+  }, [cadastroSheetUrl])
 
   useEffect(() => {
     // Calcular total produzido (soma das quantidades de insumos)
@@ -144,7 +103,7 @@ export default function ProducaoPage() {
       const validateRes = await fetch(`${BACKEND_URL}/api/sheets/validate-farm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Insumo' }),
+        body: JSON.stringify({ planilhaUrl: DATABASE_URL, farmId: fazendaId || fazenda, prefix: 'Checklist' }),
       })
 
       const validateData = await validateRes.json()

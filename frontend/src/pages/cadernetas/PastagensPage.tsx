@@ -8,6 +8,7 @@ import { todayBR } from '../../utils/formatDate'
 import { BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 const AVALIACOES = [
   { value: '1', label: '1', icon: '🔴' },
@@ -60,7 +61,7 @@ const CATEGORIAS: { campo: keyof FormState; label: string }[] = [
 
 export default function PastagensPage() {
   const navigate = useNavigate()
-  const { usuario, fazenda } = useSelector((state: RootState) => state.config)
+  const { usuario, fazenda, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(() => makeInitial(usuario))
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -82,17 +83,16 @@ export default function PastagensPage() {
   // Carregar pastos e lotes quando fazenda mudar
   useEffect(() => {
     async function carregarPastosELotes() {
-      if (!fazenda) return
+      if (!cadastroSheetUrl) {
+        setCarregandoPastosLotes(false)
+        return
+      }
 
       setCarregandoPastosLotes(true)
       try {
-        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
-        const data = await response.json()
-
-        if (data.success) {
-          setPastosDisponiveis(data.pastos || [])
-          setLotesDisponiveis(data.lotes || [])
-        }
+        const data = await loadCadastroData(cadastroSheetUrl)
+        setPastosDisponiveis(data.pastos || [])
+        setLotesDisponiveis(data.lotes || [])
       } catch (error) {
         console.error('Erro ao carregar pastos e lotes:', error)
       } finally {
@@ -106,7 +106,7 @@ export default function PastagensPage() {
     const interval = setInterval(carregarPastosELotes, 180000) // 3 minutos
 
     return () => clearInterval(interval)
-  }, [fazenda])
+  }, [cadastroSheetUrl])
 
   const total = ['vaca', 'touro', 'bezerro', 'boiMagro', 'garrote', 'novilha'].reduce(
     (acc, c) => acc + (Number(form[c as keyof FormState]) || 0), 0

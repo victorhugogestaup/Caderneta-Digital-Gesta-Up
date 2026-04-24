@@ -8,6 +8,7 @@ import { todayBR } from '../../utils/formatDate'
 import { BACKEND_URL } from '../../utils/constants'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
+import { loadCadastroData, CadastroData } from '../../services/cadastroData'
 
 const MOTIVOS = [
   { value: 'Morte', label: 'MORTE', icon: '⚰️' },
@@ -74,7 +75,7 @@ const makeInitial = (): FormState => ({
 
 export default function MovimentacaoPage() {
   const navigate = useNavigate()
-  const { usuario, fazenda } = useSelector((state: RootState) => state.config)
+  const { usuario, fazenda, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(makeInitial)
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -93,16 +94,15 @@ export default function MovimentacaoPage() {
   // Carregar lotes quando fazenda mudar
   useEffect(() => {
     async function carregarLotes() {
-      if (!fazenda) return
+      if (!cadastroSheetUrl) {
+        setCarregandoLotes(false)
+        return
+      }
 
       setCarregandoLotes(true)
       try {
-        const response = await fetch(`${BACKEND_URL}/api/suplementacao/pastos-lotes?fazenda=${encodeURIComponent(fazenda)}`)
-        const data = await response.json()
-
-        if (data.success) {
-          setLotesDisponiveis(data.lotes || [])
-        }
+        const data = await loadCadastroData(cadastroSheetUrl)
+        setLotesDisponiveis(data.lotes || [])
       } catch (error) {
         console.error('Erro ao carregar lotes:', error)
       } finally {
@@ -116,7 +116,7 @@ export default function MovimentacaoPage() {
     const interval = setInterval(carregarLotes, 180000) // 3 minutos
 
     return () => clearInterval(interval)
-  }, [fazenda])
+  }, [cadastroSheetUrl])
 
   const handleSalvar = async () => {
     setSalvando(true)
