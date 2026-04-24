@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { CADERNETAS, LOGO_URL } from '../utils/constants'
+import { CADERNETAS, LOGO_URL, getFarmLogo } from '../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
 
@@ -23,7 +23,7 @@ export default function ModulosMenuPage() {
           <div className="flex items-center justify-between w-full">
             <img src={LOGO_URL} alt="Logo GestaUp" className="w-16 h-auto object-contain rounded-[22px] ml-7" />
             {fazenda && (
-              <img src={LOGO_URL} alt="Logo Fazenda" className="h-[58px] w-auto object-contain rounded-[22px] mr-7" />
+              <img src={getFarmLogo(fazenda)} alt="Logo Fazenda" className="h-[58px] w-auto object-contain rounded-[22px] mr-7" />
             )}
           </div>
           {fazenda && (

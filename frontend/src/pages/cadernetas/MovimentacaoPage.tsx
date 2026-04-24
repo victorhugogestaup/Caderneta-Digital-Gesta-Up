@@ -281,7 +281,7 @@ export default function MovimentacaoPage() {
           <h2 className="section-title">2. QUANTIFICAÇÃO</h2>
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="NÚMERO DE CABEÇAS"
+              label="N° CABEÇAS"
               placeholder="Ex: 25"
               value={form.numeroCabecas}
               onChange={setInput('numeroCabecas')}
@@ -291,7 +291,7 @@ export default function MovimentacaoPage() {
               min="0"
             />
             <Input
-              label="PESO MÉDIO (kg)"
+              label="PESO MÉDIO"
               placeholder="Ex: 450"
               value={form.pesoMedio}
               onChange={setInput('pesoMedio')}

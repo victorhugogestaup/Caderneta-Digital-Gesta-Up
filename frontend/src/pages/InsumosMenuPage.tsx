@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LOGO_URL } from '../utils/constants'
+import { LOGO_URL, DATABASE_URL, getFarmLogo } from '../utils/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
+import { BACKEND_URL } from '../utils/constants'
+
+const BASE = import.meta.env.BASE_URL
 
 export default function InsumosMenuPage() {
   const navigate = useNavigate()
@@ -12,6 +16,7 @@ export default function InsumosMenuPage() {
       id: 'cadastro',
       label: 'VISUALIZAR CADASTROS',
       emoji: '📋',
+      icon: `${BASE}checklists/cadastro.png`,
       description: 'Visualizar insumos, dietas, fornecedores e funcionários',
       path: '/estoque-insumos/cadastro',
       color: '#3b82f6',
@@ -20,6 +25,7 @@ export default function InsumosMenuPage() {
       id: 'entrada',
       label: 'ENTRADA DE INSUMOS',
       emoji: '📥',
+      icon: `${BASE}checklists/entrada.png`,
       description: 'Registrar entrada de insumos no estoque',
       path: '/estoque-insumos/entrada',
       color: '#10b981',
@@ -28,6 +34,7 @@ export default function InsumosMenuPage() {
       id: 'producao',
       label: 'PRODUÇÃO FÁBRICA',
       emoji: '🏭',
+      icon: `${BASE}checklists/producao.png`,
       description: 'Registrar saída de insumos para produção',
       path: '/estoque-insumos/producao',
       color: '#f59e0b',
@@ -36,6 +43,7 @@ export default function InsumosMenuPage() {
       id: 'estoque',
       label: 'ESTOQUE',
       emoji: '📦',
+      icon: `${BASE}checklists/estoque.png`,
       description: 'Visualizar estoque atual',
       path: '/estoque-insumos/estoque',
       color: '#8b5cf6',
@@ -58,7 +66,7 @@ export default function InsumosMenuPage() {
           <div className="flex items-center justify-between w-full">
             <img src={LOGO_URL} alt="Logo GestaUp" className="w-16 h-auto object-contain rounded-[22px] ml-7" />
             {fazenda && (
-              <img src={LOGO_URL} alt="Logo Fazenda" className="h-[58px] w-auto object-contain rounded-[22px] mr-7" />
+              <img src={getFarmLogo(fazenda)} alt="Logo Fazenda" className="h-[58px] w-auto object-contain rounded-[22px] mr-7" />
             )}
           </div>
           {fazenda && (
@@ -96,7 +104,24 @@ export default function InsumosMenuPage() {
                   EM BREVE
                 </span>
               )}
-              <span className="text-5xl">{item.emoji}</span>
+              {item.icon ? (
+                <>
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    className="w-40 h-auto object-contain rounded-[32px]"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const emoji = target.parentElement?.querySelector('.fallback-emoji') as HTMLElement
+                      if (emoji) emoji.style.display = 'block'
+                    }}
+                  />
+                  <span className="text-5xl fallback-emoji hidden">{item.emoji}</span>
+                </>
+              ) : (
+                <span className="text-5xl">{item.emoji}</span>
+              )}
               <span className="text-base font-bold text-center leading-tight text-gray-900">
                 {item.label}
               </span>
