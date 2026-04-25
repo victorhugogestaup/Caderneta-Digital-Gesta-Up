@@ -87,9 +87,9 @@ insumosRouter.post('/estoque/inicializar', async (req: Request, res: Response) =
     return res.status(400).json({ error: 'insumosSheetUrl é obrigatório' })
   }
   try {
-    // Ler insumos cadastrados
+    // Ler insumos cadastrados (coluna 5 = INSUMOS)
     const cadastroRows = await getRows(insumosSheetUrl, 'Cadastro')
-    const insumosCadastrados = cadastroRows.map((row) => row[0]).filter((val) => val) as string[]
+    const insumosCadastrados = cadastroRows.map((row) => row[5]).filter((val) => val) as string[]
 
     // Ler linhas existentes na aba Estoque
     const estoqueRows = await getRows(insumosSheetUrl, 'Estoque')
