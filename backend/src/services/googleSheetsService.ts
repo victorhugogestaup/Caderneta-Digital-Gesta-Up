@@ -341,3 +341,194 @@ export async function getSubtiposDaFazenda(
     return []
   }
 }
+
+/**
+ * Busca o número da linha onde o insumo está localizado na coluna "Insumo" (coluna C)
+ * @param spreadsheetUrl URL da planilha
+ * @param sheetName Nome da aba
+ * @param insumoName Nome do insumo a buscar
+ * @returns Número da linha (1-indexed) ou null se não encontrado
+ */
+export async function findRowByInsumo(
+  spreadsheetUrl: string,
+  sheetName: string,
+  insumoName: string
+): Promise<number | null> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: 'v4', auth })
+  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${sheetName}!C2:C1000`, // Coluna C (Insumo) a partir da linha 2
+    })
+
+    const values = response.data.values || []
+    for (let i = 0; i < values.length; i++) {
+      if (values[i].length > 0 && String(values[i][0]).trim() === insumoName.trim()) {
+        // Retorna número da linha (linha 2 do array = linha 3 da planilha)
+        return i + 2
+      }
+    }
+
+    logger.warn(`Insumo "${insumoName}" não encontrado na aba ${sheetName}`)
+    return null
+  } catch (error) {
+    logger.error(`Erro ao buscar insumo "${insumoName}" na aba ${sheetName}: ${error}`)
+    return null
+  }
+}
+
+/**
+ * Calcula a previsão de estoque para 30 dias
+ * @param qtdSaida Quantidade total de saída
+ * @param dataInicial Data inicial do período (formato dd/mm/aaaa)
+ * @param dataFinal Data final do período (formato dd/mm/aaaa)
+ * @param estoqueAtual Estoque atual
+ * @returns Previsão de estoque para daqui 30 dias
+ */
+export function calcularPrevisaoEstoque(
+  qtdSaida: number,
+  dataInicial: string,
+  dataFinal: string,
+  estoqueAtual: number
+): number {
+  if (qtdSaida === 0 || estoqueAtual <= 0) {
+    return estoqueAtual
+  }
+
+  // Converter datas brasileiras para objetos Date
+  const [diaIni, mesIni, anoIni] = dataInicial.split('/').map(Number)
+  const [diaFim, mesFim, anoFim] = dataFinal.split('/').map(Number)
+
+  const dataIni = new Date(anoIni, mesIni - 1, diaIni)
+  const dataFim = new Date(anoFim, mesFim - 1, diaFim)
+
+  // Calcular diferença em dias
+  const diferencaTempo = dataFim.getTime() - dataIni.getTime()
+  const dias = Math.max(1, Math.floor(diferencaTempo / (1000 * 60 * 60 * 24)))
+
+  // Calcular saída média diária
+  const saidaMediaDiaria = qtdSaida / dias
+
+  // Previsão para 30 dias
+  const previsao = estoqueAtual - (saidaMediaDiaria * 30)
+
+  return Math.max(0, previsao) // Não retorna negativo
+}
+
+/**
+ * Calcula o estoque atual de um insumo
+ * @param spreadsheetUrl URL da planilha
+ * @param insumoName Nome do insumo
+ * @returns Objeto com qtdEntrada, qtdSaida, estoque, dataInicial, dataFinal, previsao
+ */
+export async function calcularEstoque(
+  spreadsheetUrl: string,
+  insumoName: string
+): Promise<{
+  qtdEntrada: number
+  qtdSaida: number
+  estoque: number
+  dataInicial: string
+  dataFinal: string
+  previsao: number
+}> {
+  const auth = getAuth()
+  const sheets = google.sheets({ version: 'v4', auth })
+  const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
+
+  let qtdEntrada = 0
+  let qtdSaida = 0
+  let primeiraEntrada: string | null = null
+
+  try {
+    // Ler todas as entradas da aba "Entrada" para o insumo
+    const entradaResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: 'Entrada!A2:Z1000',
+    })
+
+    const entradaValues = entradaResponse.data.values || []
+    for (const row of entradaValues) {
+      if (row.length > 3) { // Coluna D é o produto (índice 3)
+        const produto = String(row[3]).trim()
+        if (produto === insumoName) {
+          const quantidade = row.length > 4 ? parseFloat(String(row[4])) : 0
+          if (!isNaN(quantidade)) {
+            qtdEntrada += quantidade
+            if (!primeiraEntrada && row.length > 1) {
+              primeiraEntrada = String(row[1]) // Coluna B é a data
+            }
+          }
+        }
+      }
+    }
+
+    // Ler todas as saídas da aba "Saída" para o insumo
+    // Primeiro, precisamos buscar na aba "Dieta Insumos" para relacionar produção com insumos
+    const dietaInsumosResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: 'Dieta Insumos!A2:Z1000',
+    })
+
+    const dietaInsumosValues = dietaInsumosResponse.data.values || []
+    const saidaIds = new Set<number>()
+
+    for (const row of dietaInsumosValues) {
+      if (row.length > 3) { // Coluna D é o insumo (índice 3)
+        const insumo = String(row[3]).trim()
+        if (insumo === insumoName) {
+          const saidaId = row.length > 0 ? parseInt(String(row[0])) : 0
+          if (!isNaN(saidaId)) {
+            saidaIds.add(saidaId)
+          }
+        }
+      }
+    }
+
+    // Agora buscar as saídas correspondentes na aba "Saída"
+    const saidaResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: 'Saída!A2:Z1000',
+    })
+
+    const saidaValues = saidaResponse.data.values || []
+    for (const row of saidaValues) {
+      if (row.length > 0) {
+        const saidaId = parseInt(String(row[0]))
+        if (!isNaN(saidaId) && saidaIds.has(saidaId)) {
+          const totalProduzido = row.length > 4 ? parseFloat(String(row[4])) : 0
+          if (!isNaN(totalProduzido)) {
+            qtdSaida += totalProduzido
+          }
+        }
+      }
+    }
+
+    const estoque = qtdEntrada - qtdSaida
+    const dataFinal = new Date().toLocaleDateString('pt-BR')
+    const dataInicial = primeiraEntrada || dataFinal
+    const previsao = calcularPrevisaoEstoque(qtdSaida, dataInicial, dataFinal, estoque)
+
+    return {
+      qtdEntrada,
+      qtdSaida,
+      estoque,
+      dataInicial,
+      dataFinal,
+      previsao,
+    }
+  } catch (error) {
+    logger.error(`Erro ao calcular estoque para insumo "${insumoName}": ${error}`)
+    return {
+      qtdEntrada: 0,
+      qtdSaida: 0,
+      estoque: 0,
+      dataInicial: new Date().toLocaleDateString('pt-BR'),
+      dataFinal: new Date().toLocaleDateString('pt-BR'),
+      previsao: 0,
+    }
+  }
+}
