@@ -99,11 +99,19 @@ export async function appendRow(
   const sheets = google.sheets({ version: 'v4', auth })
   const spreadsheetId = extractSpreadsheetId(spreadsheetUrl)
 
+  // Forçar datas como texto para evitar conversão automática do Google Sheets
+  const processedValues = values.map(v => {
+    if (typeof v === 'string' && v.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      return `'${v}` // Adicionar apóstrofo para forçar como texto
+    }
+    return v
+  })
+
   const response = await sheets.spreadsheets.values.append({
     spreadsheetId,
     range: `${sheetName}!A1`,
     valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [values] },
+    requestBody: { values: [processedValues] },
   })
 
   const updatedRange = response.data.updates?.updatedRange || ''
