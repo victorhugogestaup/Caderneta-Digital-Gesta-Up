@@ -34,6 +34,7 @@ interface FormState {
   data: string
   loteOrigem: string
   loteDestino: string
+  destinoCustomizado: string
   numeroCabecas: string
   pesoMedio: string
   motivoMovimentacao: string
@@ -55,6 +56,7 @@ const makeInitial = (): FormState => ({
   data: todayBR(),
   loteOrigem: '',
   loteDestino: '',
+  destinoCustomizado: '',
   numeroCabecas: '',
   pesoMedio: '',
   motivoMovimentacao: '',
@@ -81,6 +83,7 @@ export default function MovimentacaoPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [destinosDisponiveis, setDestinosDisponiveis] = useState<string[]>([])
   const [carregandoLotes, setCarregandoLotes] = useState(false)
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +105,7 @@ export default function MovimentacaoPage() {
       try {
         const data = await loadCadastroData(cadastroSheetUrl)
         setLotesDisponiveis(data.lotes || [])
+        setDestinosDisponiveis(data.destinos || [])
       } catch (error) {
         console.error('Erro ao carregar lotes:', error)
       } finally {
@@ -125,10 +129,13 @@ export default function MovimentacaoPage() {
     const tropaValor = form.tropa ? 'S' : 'N'
     const outraCategoria = form.outros && form.outrosTexto.trim() ? form.outrosTexto.trim() : ''
 
+    // Se destino customizado for preenchido, usar em vez de loteDestino
+    const destinoFinal = form.destinoCustomizado.trim() ? form.destinoCustomizado.trim() : form.loteDestino
+
     const result = await salvarRegistro('movimentacao', {
       data: form.data,
       loteOrigem: form.loteOrigem,
-      loteDestino: form.loteDestino,
+      loteDestino: destinoFinal,
       numeroCabecas: form.numeroCabecas ? Number(form.numeroCabecas) : 0,
       pesoMedio: form.pesoMedio ? Number(form.pesoMedio) : null,
       motivoMovimentacao: form.motivoMovimentacao,
@@ -154,7 +161,7 @@ export default function MovimentacaoPage() {
       const dadosRegistro = {
         data: form.data,
         loteOrigem: form.loteOrigem,
-        loteDestino: form.loteDestino,
+        loteDestino: destinoFinal,
         numeroCabecas: form.numeroCabecas ? Number(form.numeroCabecas) : 0,
         pesoMedio: form.pesoMedio ? Number(form.pesoMedio) : null,
         motivoMovimentacao: form.motivoMovimentacao,
@@ -186,8 +193,6 @@ export default function MovimentacaoPage() {
     setShowSuccessModal(false)
     navigate('/')
   }
-
-  const algumaCategoria = CATEGORIAS.some(({ campo }) => form[campo as keyof FormState])
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -234,46 +239,24 @@ export default function MovimentacaoPage() {
           )}
           <h2 className="section-title">1. DADOS PRINCIPAIS</h2>
           <DatePicker label="DATA" value={form.data} onChange={(val) => setForm((p) => ({ ...p, data: val }))} error={getError('data')} />
-          <div className="grid grid-cols-2 gap-3">
-            {lotesDisponiveis.length > 0 ? (
-              <Select
-                label="LOTE ORIGEM"
-                value={form.loteOrigem}
-                onChange={(e) => setForm((p) => ({ ...p, loteOrigem: e.target.value }))}
-                error={getError('loteOrigem')}
-                options={[{ value: '', label: 'Selecione...' }, ...lotesDisponiveis.map(l => ({ value: l, label: l }))]}
-
-              />
-            ) : (
-              <Input
-                label="LOTE ORIGEM"
-                placeholder="Carregando..."
-                value={form.loteOrigem}
-                onChange={setInput('loteOrigem')}
-                error={getError('loteOrigem')}
-                inputMode="numeric"
-              />
-            )}
-            {lotesDisponiveis.length > 0 ? (
-              <Select
-                label="LOTE DESTINO"
-                value={form.loteDestino}
-                onChange={(e) => setForm((p) => ({ ...p, loteDestino: e.target.value }))}
-                error={getError('loteDestino')}
-                options={[{ value: '', label: 'Selecione...' }, ...lotesDisponiveis.map(l => ({ value: l, label: l }))]}
-
-              />
-            ) : (
-              <Input
-                label="LOTE DESTINO"
-                placeholder="Carregando..."
-                value={form.loteDestino}
-                onChange={setInput('loteDestino')}
-                error={getError('loteDestino')}
-                inputMode="numeric"
-              />
-            )}
-          </div>
+          {lotesDisponiveis.length > 0 ? (
+            <Select
+              label="LOTE ORIGEM"
+              value={form.loteOrigem}
+              onChange={(e) => setForm((p) => ({ ...p, loteOrigem: e.target.value }))}
+              error={getError('loteOrigem')}
+              options={[{ value: '', label: 'Selecione...' }, ...lotesDisponiveis.map(l => ({ value: l, label: l }))]}
+            />
+          ) : (
+            <Input
+              label="LOTE ORIGEM"
+              placeholder="Carregando..."
+              value={form.loteOrigem}
+              onChange={setInput('loteOrigem')}
+              error={getError('loteOrigem')}
+              inputMode="numeric"
+            />
+          )}
           {carregandoLotes && (
             <div className="text-sm text-gray-500">Carregando lotes...</div>
           )}
@@ -311,9 +294,6 @@ export default function MovimentacaoPage() {
           {getError('categorias') && (
             <p className="text-base font-semibold text-red-700">⚠️ {getError('categorias')}</p>
           )}
-          {algumaCategoria && (
-            <p className="text-lg font-bold text-green-700">✅ {CATEGORIAS.filter(c => form[c.campo as keyof FormState]).length} categoria(s) selecionada(s)</p>
-          )}
           <div className="grid grid-cols-2 gap-3">
             {CATEGORIAS.map(({ campo, label }) => (
               <Checkbox
@@ -346,6 +326,65 @@ export default function MovimentacaoPage() {
             error={getError('motivoMovimentacao')}
             gridCols={2}
           />
+          {form.motivoMovimentacao ? (
+            <>
+              {form.motivoMovimentacao === 'Entreverado' ? (
+                <>
+                  {lotesDisponiveis.length > 0 ? (
+                    <Select
+                      label="SELECIONE UM DESTINO:"
+                      value={form.loteDestino}
+                      onChange={(e) => setForm((p) => ({ ...p, loteDestino: e.target.value }))}
+                      error={getError('loteDestino')}
+                      options={[{ value: '', label: 'Selecione...' }, ...lotesDisponiveis.map(l => ({ value: l, label: l }))]}
+                    />
+                  ) : (
+                    <Input
+                      label="SELECIONE UM DESTINO:"
+                      placeholder="Carregando..."
+                      value={form.loteDestino}
+                      onChange={setInput('loteDestino')}
+                      error={getError('loteDestino')}
+                      inputMode="numeric"
+                    />
+                  )}
+                  <p className="text-lg font-bold text-gray-900">NÃO É UM LOTE?</p>
+                  <Input
+                    label=""
+                    placeholder="Descreva o destino"
+                    value={form.destinoCustomizado}
+                    onChange={(e) => setForm((p) => ({ ...p, destinoCustomizado: e.target.value }))}
+                  />
+                </>
+              ) : (
+                <>
+                  {destinosDisponiveis.length > 0 ? (
+                    <Select
+                      label="SELECIONE UM DESTINO:"
+                      value={form.loteDestino}
+                      onChange={(e) => setForm((p) => ({ ...p, loteDestino: e.target.value }))}
+                      error={getError('loteDestino')}
+                      options={[{ value: '', label: 'Selecione...' }, ...destinosDisponiveis.map(l => ({ value: l, label: l }))]}
+                    />
+                  ) : (
+                    <Input
+                      label="SELECIONE UM DESTINO:"
+                      placeholder="Carregando..."
+                      value={form.loteDestino}
+                      onChange={setInput('loteDestino')}
+                      error={getError('loteDestino')}
+                      inputMode="numeric"
+                    />
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <div>
+              <p className="text-lg font-bold text-gray-900 mb-2">SELECIONE UM DESTINO:</p>
+              <p className="text-sm text-gray-500 italic">Escolha uma das opções acima primeiro...</p>
+            </div>
+          )}
         </div>
 
         {/* Seção 5: Identificação e Observação */}

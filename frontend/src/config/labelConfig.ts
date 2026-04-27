@@ -87,7 +87,7 @@ const BEBEDOUROS_LABELS = {
 const MOVIMENTACAO_LABELS = {
   ...COMMON_LABELS,
   loteOrigem: 'LOTE ORIGEM',
-  loteDestino: 'LOTE DESTINO',
+  loteDestino: 'DESTINO',
   numeroCabecas: 'NÚMERO CABEÇAS',
   pesoMedio: 'PESO MÉDIO',
   motivoMovimentacao: 'MOTIVO',

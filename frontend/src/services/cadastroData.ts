@@ -10,6 +10,7 @@ export interface CadastroData {
   dietas: string[]
   fornecedores: string[]
   funcionarios: string[]
+  destinos: string[]
 }
 
 // Cache simples em memória
@@ -62,10 +63,11 @@ export async function loadCadastroData(
       dietas: [],
       fornecedores: [],
       funcionarios: [],
+      destinos: [],
     }
 
     // Estrutura esperada: coluna 0 = PASTO, coluna 1 = LOTE, coluna 2 = MINERAL, coluna 3 = PROTEINADO,
-    // coluna 4 = RACAO, coluna 5 = INSUMOS, coluna 6 = DIETAS, coluna 7 = FORNECEDORES, coluna 8 = FUNCIONÁRIOS
+    // coluna 4 = RACAO, coluna 5 = INSUMOS, coluna 6 = DIETAS, coluna 7 = FORNECEDORES, coluna 8 = FUNCIONÁRIOS, coluna 9 = DESTINOS
     for (const row of rows) {
       if (row[0]) cadastroData.pastos.push(String(row[0]))
       if (row[1]) cadastroData.lotes.push(String(row[1]))
@@ -76,6 +78,7 @@ export async function loadCadastroData(
       if (row[6]) cadastroData.dietas.push(String(row[6]))
       if (row[7]) cadastroData.fornecedores.push(String(row[7]))
       if (row[8]) cadastroData.funcionarios.push(String(row[8]))
+      if (row[9]) cadastroData.destinos.push(String(row[9]))
     }
 
     // Atualizar cache
