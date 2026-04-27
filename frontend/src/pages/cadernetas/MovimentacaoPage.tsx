@@ -68,7 +68,6 @@ export default function MovimentacaoPage() {
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [frigorificosDisponiveis, setFrigorificosDisponiveis] = useState<string[]>([])
-  const [destinosDisponiveis, setDestinosDisponiveis] = useState<string[]>([])
   const [carregandoLotes, setCarregandoLotes] = useState(false)
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,7 +120,6 @@ export default function MovimentacaoPage() {
         const data = await loadCadastroData(cadastroSheetUrl)
         setLotesDisponiveis(data.lotes || [])
         setFrigorificosDisponiveis(data.frigorificos || [])
-        setDestinosDisponiveis(data.destinos || [])
       } catch (error) {
         console.error('Erro ao carregar lotes:', error)
       } finally {
