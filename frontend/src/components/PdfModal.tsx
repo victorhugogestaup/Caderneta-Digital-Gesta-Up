@@ -8,7 +8,7 @@ interface PdfModalProps {
 }
 
 export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
-  const [zoom, setZoom] = useState(1)
+  const [zoom, setZoom] = useState(1.1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
@@ -42,7 +42,7 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
   // Reset zoom e posição quando modal fecha
   useEffect(() => {
     if (!isOpen) {
-      setZoom(1)
+      setZoom(1.1)
       setPosition({ x: 0, y: 0 })
     }
   }, [isOpen])
@@ -132,7 +132,7 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
   }
 
   const handleDoubleClick = () => {
-    setZoom(prev => prev === 1 ? 2 : 1)
+    setZoom(prev => prev === 1.1 ? 2 : 1.1)
     setPosition({ x: 0, y: 0 })
   }
 
@@ -191,11 +191,11 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
         <div
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-            transformOrigin: 'top center',
+            transformOrigin: 'center center',
             transition: isDragging ? 'none' : 'transform 0.1s ease',
           }}
         >
-          <div className="flex flex-col gap-4 items-center p-4 pb-32">
+          <div className="flex flex-col gap-4 items-center justify-center p-4 pb-32 min-h-screen">
             {images.map((image, index) => (
               <div
                 key={index}

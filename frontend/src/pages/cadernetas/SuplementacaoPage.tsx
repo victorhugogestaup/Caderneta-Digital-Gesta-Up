@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
+import PdfModal from '../../components/PdfModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { BACKEND_URL } from '../../utils/constants'
@@ -69,6 +70,7 @@ export default function SuplementacaoPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [showPdfModal, setShowPdfModal] = useState(false)
   const [suplementos, setSuplementos] = useState<string[]>([])
   const [suplemento, setSuplemento] = useState('')
   const [quantidadeCreep, setQuantidadeCreep] = useState('')
@@ -376,6 +378,13 @@ export default function SuplementacaoPage() {
         {/* Seção 3: Leitura e Quantidade */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">3. LEITURA E QUANTIDADE</h2>
+          <button
+            onClick={() => setShowPdfModal(true)}
+            className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors"
+          >
+            <span className="text-xl">📄</span>
+            <span>VER POP LEITURA DE COCHO</span>
+          </button>
           <Radio
             name="leitura"
             label="LEITURA DO COCHO (-1 a 3)"
@@ -453,6 +462,14 @@ export default function SuplementacaoPage() {
         cadernetaName="Suplementação"
         registro={registroSalvo}
         caderneta="suplementacao"
+      />
+
+      <PdfModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        images={[
+          '/Caderneta-Digital-Gesta-Up/docs/POP_Cocho.jpg'
+        ]}
       />
     </div>
   )

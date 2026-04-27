@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button, Input, DatePicker, Radio, Checkbox, ValidationMessage, Select } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
+import PdfModal from '../../components/PdfModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { RootState } from '../../store/store'
@@ -122,6 +123,7 @@ export default function RodeioPage() {
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
+  const [showPdfModal, setShowPdfModal] = useState(false)
   const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
@@ -458,6 +460,13 @@ export default function RodeioPage() {
         {/* Seção 4: Tratamento e Avaliação */}
         <div className="bg-white rounded-2xl p-5 shadow border-2 border-gray-200 flex flex-col gap-4">
           <h2 className="section-title">4. TRATAMENTO E AVALIAÇÃO</h2>
+          <button
+            onClick={() => setShowPdfModal(true)}
+            className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors"
+          >
+            <span className="text-xl">📄</span>
+            <span>VER POP ESCORE DE FEZES</span>
+          </button>
           <Radio
             name="escoreFezes"
             label="ESCORE DE FEZES (1 a 5)"
@@ -574,6 +583,14 @@ export default function RodeioPage() {
         cadernetaName="Rodeio Gado"
         registro={registroSalvo}
         caderneta="rodeio"
+      />
+
+      <PdfModal
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+        images={[
+          '/Caderneta-Digital-Gesta-Up/docs/POP_Fezes.jpg'
+        ]}
       />
     </div>
   )
