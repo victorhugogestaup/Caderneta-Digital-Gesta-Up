@@ -4,7 +4,7 @@ export default function BebedourosListaPage() {
   return (
     <ListaRegistros
       caderneta="bebedouros"
-      titulo="BEBEDOUROS — LISTA"
+      titulo="BEBEDOUROS"
       rotaForm="/caderneta/bebedouros"
     />
   )

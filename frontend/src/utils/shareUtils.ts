@@ -158,35 +158,20 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'brincoChip',
       'numeroCabecas',
       'pesoMedio',
+      'categoria',
       'motivoMovimentacao',
-      'loteDestino',
-      'causaObservacao'
+      'causaObservacao',
+      'loteDestino'
     ]
     
     ordemMovimentacao.forEach(key => {
       const value = registro[key]
       if (value !== null && value !== undefined && value !== '') {
-        // Pular categoria e causaObservacao pois serão tratados separadamente
-        if (key === 'categoria' || key === 'causaObservacao') return
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
         const valorFormatado = formatFieldValue(key, value)
         texto += `*${label}:* ${valorFormatado}\n`
       }
     })
-    
-    // Adicionar categorias dos animais após pesoMedio e antes de motivoMovimentacao
-    if (registro.categoria && typeof registro.categoria === 'string') {
-      texto += `*CATEGORIA:* ${registro.categoria}\n`
-    } else if (categoriasAnimais.length > 0) {
-      texto += `*CATEGORIA:* ${categoriasAnimais.join(', ')}\n`
-    }
-    
-    // Adicionar causaObservacao por último
-    if (registro.causaObservacao && registro.causaObservacao !== '') {
-      let label = LABELS_BY_CADERNETA[caderneta]?.['causaObservacao'] || 'CAUSA/OBSERVAÇÃO'
-      const valorFormatado = formatFieldValue('causaObservacao', registro.causaObservacao)
-      texto += `*${label}:* ${valorFormatado}\n`
-    }
   } else if (caderneta === 'bebedouros') {
     // Para bebedouros, usar ordem específica dos formulários
     const ordemBebedouros = [
@@ -209,7 +194,7 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       }
     })
   } else if (caderneta === 'suplementacao') {
-    // Para suplementação, usar ordem específica dos formulários
+    // Para suplementacao, usar ordem específica dos formulários
     const ordemSuplementacao = [
       'data',
       'tratador',
@@ -229,6 +214,90 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
         const valorFormatado = formatFieldValue(key, value)
         texto += `*${label}:* ${valorFormatado}\n`
+      }
+    })
+  } else if (caderneta === 'rodeio') {
+    // Para rodeio, usar ordem específica dos formulários
+    const ordemRodeio = [
+      'data',
+      'pasto',
+      'numeroLote',
+      'vaca',
+      'touro',
+      'boiGordo',
+      'boiMagro',
+      'garrote',
+      'bezerro',
+      'novilha',
+      'tropa',
+      'outros',
+      'totalCabecas',
+      'escoreGadoIdeal',
+      'aguaBoaBebedouro',
+      'pastagemAdequada',
+      'animaisDoentes',
+      'cercasCochos',
+      'carrapatosMoscas',
+      'animaisEntreverados',
+      'animalMorto',
+      'escoreFezes',
+      'equipe'
+    ]
+    
+    ordemRodeio.forEach(key => {
+      const value = registro[key]
+      // Para campos numéricos (categorias), não incluir se for 0
+      if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros'].includes(key)) {
+        if (value !== null && value !== undefined && value !== '' && Number(value) > 0) {
+          let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+          const valorFormatado = formatFieldValue(key, value)
+          texto += `*${label}:* ${valorFormatado}\n`
+        }
+      } else if (value !== null && value !== undefined && value !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = formatFieldValue(key, value)
+        texto += `*${label}:* ${valorFormatado}\n`
+      }
+      
+      // Adicionar observação imediatamente após o campo principal
+      const obsField = `${key}Obs`
+      if (registro[obsField] && registro[obsField] !== '') {
+        const label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        texto += `*${label} - OBSERVAÇÃO:* ${registro[obsField]}\n`
+      }
+    })
+  } else if (caderneta === 'enfermaria') {
+    // Para enfermaria, usar ordem específica dos formulários
+    const ordemEnfermaria = [
+      'data',
+      'pasto',
+      'lote',
+      'brincoChip',
+      'categoria',
+      'tratamento',
+      'problemaCasco',
+      'sintomasPneumonia',
+      'picadoCobra',
+      'incoordenacaoTremores',
+      'febreAlta',
+      'presencaSangue',
+      'fraturas',
+      'desordensDigestivas'
+    ]
+    
+    ordemEnfermaria.forEach(key => {
+      const value = registro[key]
+      if (value !== null && value !== undefined && value !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = formatFieldValue(key, value)
+        texto += `*${label}:* ${valorFormatado}\n`
+      }
+      
+      // Adicionar observação imediatamente após o campo principal
+      const obsField = `${key}Obs`
+      if (registro[obsField] && registro[obsField] !== '') {
+        const label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        texto += `*${label} - OBSERVAÇÃO:* ${registro[obsField]}\n`
       }
     })
   } else {

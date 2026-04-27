@@ -40,10 +40,13 @@ const ESCALA_EQUIPE = [
 const CATEGORIAS_ANIMAIS: { campo: string; label: string }[] = [
   { campo: 'vaca', label: 'VACAS' },
   { campo: 'touro', label: 'TOUROS' },
-  { campo: 'bezerro', label: 'BEZERROS(AS)' },
-  { campo: 'boi', label: 'BOIS' },
+  { campo: 'boiGordo', label: 'BOIS GORDOS' },
+  { campo: 'boiMagro', label: 'BOIS MAGROS' },
   { campo: 'garrote', label: 'GARROTES' },
+  { campo: 'bezerro', label: 'BEZERROS(AS)' },
   { campo: 'novilha', label: 'NOVILHAS' },
+  { campo: 'tropa', label: 'TROPAS' },
+  { campo: 'outros', label: 'OUTROS' },
 ]
 
 type SnFields = {
@@ -76,12 +79,13 @@ interface FormState extends SnFields {
   numeroLote: string
   vaca: string
   touro: string
-  bezerro: string
-  boi: string
+  boiGordo: string
+  boiMagro: string
   garrote: string
+  bezerro: string
   novilha: string
-  animaisTratados: string
-  animaisTratadosDetalhes: AnimalTratado[]
+  tropa: string
+  outros: string
   escoreFezes: string
   equipe: string
 }
@@ -90,7 +94,7 @@ const makeInitial = (): FormState => ({
   data: todayBR(),
   pasto: '',
   numeroLote: '',
-  vaca: '', touro: '', bezerro: '', boi: '', garrote: '', novilha: '',
+  vaca: '', touro: '', boiGordo: '', boiMagro: '', garrote: '', bezerro: '', novilha: '', tropa: '', outros: '',
   escoreGadoIdeal: '', escoreGadoIdealObs: '',
   aguaBoaBebedouro: '', aguaBoaBebedouroObs: '',
   pastagemAdequada: '', pastagemAdequadaObs: '',
@@ -99,8 +103,6 @@ const makeInitial = (): FormState => ({
   carrapatosMoscas: '', carrapatosMoscasObs: '',
   animaisEntreverados: '', animaisEntreveradosObs: '',
   animalMorto: '', animalMortoObs: '',
-  animaisTratados: '',
-  animaisTratadosDetalhes: [],
   escoreFezes: '',
   equipe: '',
 })
@@ -122,30 +124,6 @@ export default function RodeioPage() {
   const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [carregandoPastosLotes, setCarregandoPastosLotes] = useState(false)
-
-  // Gerar cards de animais tratados quando número muda
-  useEffect(() => {
-    const numAnimais = Number(form.animaisTratados) || 0
-    const detalhesAtuais = form.animaisTratadosDetalhes
-    
-    if (numAnimais > detalhesAtuais.length) {
-      // Adicionar novos cards
-      const novosAnimais = Array.from({ length: numAnimais - detalhesAtuais.length }, () => ({
-        id: '',
-        tratamentos: [],
-      }))
-      setForm((prev) => ({
-        ...prev,
-        animaisTratadosDetalhes: [...detalhesAtuais, ...novosAnimais],
-      }))
-    } else if (numAnimais < detalhesAtuais.length) {
-      // Remover cards excedentes
-      setForm((prev) => ({
-        ...prev,
-        animaisTratadosDetalhes: detalhesAtuais.slice(0, numAnimais),
-      }))
-    }
-  }, [form.animaisTratados])
 
   // Carregar pastos e lotes quando fazenda mudar
   useEffect(() => {
@@ -183,7 +161,7 @@ export default function RodeioPage() {
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
 
-  const total = ['vaca', 'touro', 'bezerro', 'boi', 'garrote', 'novilha'].reduce(
+  const total = ['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros'].reduce(
     (acc, c) => acc + (Number(form[c as keyof FormState]) || 0), 0
   )
 
@@ -191,28 +169,19 @@ export default function RodeioPage() {
     setSalvando(true)
     setErrors([])
 
-    // Gerar 20 pares de colunas para animais tratados
-    const animaisTratadosData: Record<string, string> = {}
-    for (let i = 0; i < 20; i++) {
-      const animal = form.animaisTratadosDetalhes[i]
-      animaisTratadosData[`animal${i + 1}Id`] = animal?.id || ''
-      // Concatenar tratamentos, removendo "Outros: " prefixo se existir
-      const tratamentosLimpos = animal?.tratamentos
-        .map(t => t.replace('Outros: ', ''))
-        .filter(Boolean) || []
-      animaisTratadosData[`animal${i + 1}Tratamentos`] = tratamentosLimpos.join(', ')
-    }
-    
     const result = await salvarRegistro('rodeio', {
       data: form.data,
       pasto: form.pasto,
       numeroLote: form.numeroLote,
       vaca: form.vaca ? Number(form.vaca) : 0,
       touro: form.touro ? Number(form.touro) : 0,
-      bezerro: form.bezerro ? Number(form.bezerro) : 0,
-      boi: form.boi ? Number(form.boi) : 0,
+      boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
+      boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
       garrote: form.garrote ? Number(form.garrote) : 0,
+      bezerro: form.bezerro ? Number(form.bezerro) : 0,
       novilha: form.novilha ? Number(form.novilha) : 0,
+      tropa: form.tropa ? Number(form.tropa) : 0,
+      outros: form.outros ? Number(form.outros) : 0,
       totalCabecas: total,
       escoreGadoIdeal: form.escoreGadoIdeal,
       escoreGadoIdealObs: form.escoreGadoIdealObs || '',
@@ -230,10 +199,8 @@ export default function RodeioPage() {
       animaisEntreveradosObs: form.animaisEntreveradosObs || '',
       animalMorto: form.animalMorto,
       animalMortoObs: form.animalMortoObs || '',
-      animaisTratados: form.animaisTratados ? Number(form.animaisTratados) : 0,
       escoreFezes: form.escoreFezes ? Number(form.escoreFezes) : null,
       equipe: form.equipe ? Number(form.equipe) : null,
-      ...animaisTratadosData,
     })
 
     setSalvando(false)
@@ -247,10 +214,13 @@ export default function RodeioPage() {
         numeroLote: form.numeroLote,
         vaca: form.vaca ? Number(form.vaca) : 0,
         touro: form.touro ? Number(form.touro) : 0,
-        bezerro: form.bezerro ? Number(form.bezerro) : 0,
-        boi: form.boi ? Number(form.boi) : 0,
+        boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
+        boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
         garrote: form.garrote ? Number(form.garrote) : 0,
+        bezerro: form.bezerro ? Number(form.bezerro) : 0,
         novilha: form.novilha ? Number(form.novilha) : 0,
+        tropa: form.tropa ? Number(form.tropa) : 0,
+        outros: form.outros ? Number(form.outros) : 0,
         totalCabecas: total,
         escoreGadoIdeal: form.escoreGadoIdeal,
         escoreGadoIdealObs: form.escoreGadoIdealObs || '',
@@ -268,10 +238,8 @@ export default function RodeioPage() {
         animaisEntreveradosObs: form.animaisEntreveradosObs || '',
         animalMorto: form.animalMorto,
         animalMortoObs: form.animalMortoObs || '',
-        animaisTratados: form.animaisTratados ? Number(form.animaisTratados) : 0,
         escoreFezes: form.escoreFezes ? Number(form.escoreFezes) : null,
         equipe: form.equipe ? Number(form.equipe) : null,
-        ...animaisTratadosData,
       }
       setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)

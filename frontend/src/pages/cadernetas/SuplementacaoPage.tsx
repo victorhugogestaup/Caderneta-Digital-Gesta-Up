@@ -372,7 +372,7 @@ export default function SuplementacaoPage() {
           {form.produto === 'Creep' && (
             <div className="mt-2">
               <Input
-                label="QUANTIDADE"
+                label="QUANTIDADE (kg)"
                 placeholder="0"
                 value={quantidadeCreep}
                 onChange={(e) => setQuantidadeCreep(e.target.value)}

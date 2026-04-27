@@ -484,9 +484,10 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                         'brincoChip',
                         'numeroCabecas',
                         'pesoMedio',
+                        'categoria',
                         'motivoMovimentacao',
-                        'loteDestino',
-                        'causaObservacao'
+                        'causaObservacao',
+                        'loteDestino'
                       ]
                       
                       ordemMovimentacao.forEach(key => {
@@ -495,11 +496,6 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                           camposNormais.push([key, value])
                         }
                       })
-                      
-                      // Adicionar categoria se existir
-                      if (registro.categoria && typeof registro.categoria === 'string') {
-                        camposNormais.push(['categoria', registro.categoria])
-                      }
                     } else if (caderneta === 'bebedouros') {
                       // Para bebedouros, usar ordem específica dos formulários
                       const ordemBebedouros = [
@@ -536,6 +532,75 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                         const value = registro[key]
                         if (value !== null && value !== undefined && value !== '') {
                           camposNormais.push([key, value])
+                        }
+                      })
+                    } else if (caderneta === 'rodeio') {
+                      // Para rodeio, usar ordem específica dos formulários
+                      const ordemRodeio = [
+                        'pasto',
+                        'numeroLote',
+                        'vaca',
+                        'touro',
+                        'boiGordo',
+                        'boiMagro',
+                        'garrote',
+                        'bezerro',
+                        'novilha',
+                        'tropa',
+                        'outros',
+                        'totalCabecas',
+                        'escoreGadoIdeal',
+                        'aguaBoaBebedouro',
+                        'pastagemAdequada',
+                        'animaisDoentes',
+                        'cercasCochos',
+                        'carrapatosMoscas',
+                        'animaisEntreverados',
+                        'animalMorto',
+                        'escoreFezes',
+                        'equipe'
+                      ]
+                      
+                      ordemRodeio.forEach(key => {
+                        const value = registro[key]
+                        if (value !== null && value !== undefined && value !== '') {
+                          camposNormais.push([key, value])
+                        }
+                        
+                        // Adicionar observação imediatamente após o campo principal
+                        const obsField = `${key}Obs`
+                        if (registro[obsField] && registro[obsField] !== '') {
+                          camposNormais.push([obsField, registro[obsField]])
+                        }
+                      })
+                    } else if (caderneta === 'enfermaria') {
+                      // Para enfermaria, usar ordem específica dos formulários
+                      const ordemEnfermaria = [
+                        'pasto',
+                        'lote',
+                        'brincoChip',
+                        'categoria',
+                        'tratamento',
+                        'problemaCasco',
+                        'sintomasPneumonia',
+                        'picadoCobra',
+                        'incoordenacaoTremores',
+                        'febreAlta',
+                        'presencaSangue',
+                        'fraturas',
+                        'desordensDigestivas'
+                      ]
+                      
+                      ordemEnfermaria.forEach(key => {
+                        const value = registro[key]
+                        if (value !== null && value !== undefined && value !== '') {
+                          camposNormais.push([key, value])
+                        }
+                        
+                        // Adicionar observação imediatamente após o campo principal
+                        const obsField = `${key}Obs`
+                        if (registro[obsField] && registro[obsField] !== '') {
+                          camposNormais.push([obsField, registro[obsField]])
                         }
                       })
                     } else {

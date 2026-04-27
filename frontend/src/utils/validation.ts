@@ -105,7 +105,7 @@ export function validateRodeio(data: Record<string, unknown>): ValidationResult 
   if (!isNonEmptyString(data.numeroLote))
     errors.push({ field: 'numeroLote', message: 'Número do lote é obrigatório' })
 
-  const categorias = ['vaca', 'touro', 'bezerro', 'boi', 'garrote', 'novilha']
+  const categorias = ['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros']
   const algumPreenchido = categorias.some(
     (c) => data[c] !== null && data[c] !== undefined && data[c] !== '' && Number(data[c]) > 0
   )
@@ -148,8 +148,6 @@ export function validateSuplementacao(data: Record<string, unknown>): Validation
     errors.push({ field: 'numeroLote', message: 'Lote é obrigatório' })
   if (!isNonEmptyString(data.produto))
     errors.push({ field: 'produto', message: 'Produto é obrigatório' })
-  if (!isNonEmptyString(data.gado))
-    errors.push({ field: 'gado', message: 'Tipo de gado é obrigatório' })
   if (!isScaleValue(data.leituraCocho, -1, 3))
     errors.push({ field: 'leituraCocho', message: 'Leitura deve ser entre -1 e 3' })
   if (!isPositiveNumber(data.kgCocho))
