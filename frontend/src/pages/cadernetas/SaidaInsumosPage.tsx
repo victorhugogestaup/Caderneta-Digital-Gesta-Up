@@ -8,8 +8,6 @@ import SuccessModal from '../../components/SuccessModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { loadCadastroData, CadastroData } from '../../services/cadastroData'
-import { BACKEND_URL } from '../../utils/constants'
-import { DATABASE_URL } from '../../utils/constants'
 
 interface FormState {
   dataProducao: string
@@ -29,7 +27,7 @@ const makeInitial = (): FormState => ({
 
 export default function SaidaInsumosPage() {
   const navigate = useNavigate()
-  const { usuario, fazenda, fazendaId, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, cadastroSheetUrl } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(makeInitial())
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)

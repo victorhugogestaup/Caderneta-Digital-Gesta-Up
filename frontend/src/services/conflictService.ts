@@ -51,6 +51,9 @@ function buildRegistroFromRow(
     bebedouros: ['data', 'responsavel', 'pasto', 'numeroLote', 'gado', 'categoria', 'leituraBebedouro', 'numeroBebedouro', 'observacao'],
     movimentacao: ['data', 'loteOrigem', 'loteDestino', 'numeroCabecas', 'pesoMedio', 'vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros', 'motivoMovimentacao', 'brincoChip', 'causaObservacao'],
     enfermaria: ['data', 'pasto', 'lote', 'brincoChip', 'categoria', 'problemaCasco', 'problemaCascoObs', 'sintomasPneumonia', 'sintomasPneumoniaObs', 'picadoCobra', 'picadoCobraObs', 'incoordenacaoTremores', 'incoordenacaoTremoresObs', 'febreAlta', 'febreAltaObs', 'presencaSangue', 'presencaSangueObs', 'fraturas', 'fraturasObs', 'desordensDigestivas', 'desordensDigestivasObs'],
+    'entrada-insumos': ['dataEntrada', 'horario', 'produto', 'quantidade', 'valorUnitario', 'valorTotal', 'notaFiscal', 'fornecedor', 'placa', 'motorista', 'responsavelRecebimento'],
+    'saida-insumos': ['dataProducao', 'dietaProduzida', 'destinoProducao', 'totalProduzido', 'insumosQuantidades'],
+    'insumos-por-saida': ['idSaida', 'dataProducao', 'dietaProduzida', 'insumo', 'quantidade'],
   }
 
   const fields = fieldsByCaderneta[caderneta]
