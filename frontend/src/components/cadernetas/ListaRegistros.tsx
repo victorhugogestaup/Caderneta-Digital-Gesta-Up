@@ -518,6 +518,26 @@ export default function ListaRegistros({ caderneta, titulo, rotaForm }: Props) {
                           camposNormais.push([key, value])
                         }
                       })
+                    } else if (caderneta === 'suplementacao') {
+                      // Para suplementação, usar ordem específica dos formulários
+                      const ordemSuplementacao = [
+                        'tratador',
+                        'pasto',
+                        'numeroLote',
+                        'produto',
+                        'creepKg',
+                        'leituraCocho',
+                        'kgCocho',
+                        'kgDeposito',
+                        'categorias'
+                      ]
+                      
+                      ordemSuplementacao.forEach(key => {
+                        const value = registro[key]
+                        if (value !== null && value !== undefined && value !== '') {
+                          camposNormais.push([key, value])
+                        }
+                      })
                     } else {
                       Object.entries(registro).forEach(([key, value]) => {
                         if (

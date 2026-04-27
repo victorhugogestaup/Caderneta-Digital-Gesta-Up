@@ -208,6 +208,29 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         texto += `*${label}:* ${valorFormatado}\n`
       }
     })
+  } else if (caderneta === 'suplementacao') {
+    // Para suplementação, usar ordem específica dos formulários
+    const ordemSuplementacao = [
+      'data',
+      'tratador',
+      'pasto',
+      'numeroLote',
+      'produto',
+      'creepKg',
+      'leituraCocho',
+      'kgCocho',
+      'kgDeposito',
+      'categorias'
+    ]
+    
+    ordemSuplementacao.forEach(key => {
+      const value = registro[key]
+      if (value !== null && value !== undefined && value !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = formatFieldValue(key, value)
+        texto += `*${label}:* ${valorFormatado}\n`
+      }
+    })
   } else {
     camposNormais.forEach(([key, value]) => {
       let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
