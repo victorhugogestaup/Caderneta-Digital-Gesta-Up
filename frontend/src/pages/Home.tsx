@@ -5,6 +5,9 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../store/store'
 import { Settings, ClipboardList, ClipboardCheck, Sun, Moon } from 'lucide-react'
 import FarmLogo from '../components/FarmLogo'
+import { VERSICULOS, Versiculo } from '../config/versiculos'
+
+const BASE = import.meta.env.BASE_URL
 
 export default function Home() {
   const navigate = useNavigate()
@@ -35,6 +38,7 @@ export default function Home() {
   const [greetingIcon, setGreetingIcon] = useState(<Sun />)
   const [currentDate, setCurrentDate] = useState('')
   const [ultimaCaderneta, setUltimaCaderneta] = useState<string | null>(null)
+  const [versiculoDoDia, setVersiculoDoDia] = useState<Versiculo | null>(null)
 
   useEffect(() => {
     const now = new Date()
@@ -64,6 +68,32 @@ export default function Home() {
     // Carregar última caderneta acessada
     const ultima = localStorage.getItem('ultima-caderneta-acessada')
     setUltimaCaderneta(ultima)
+
+    // Lógica de versículos
+    const STORAGE_KEY = 'versiculos-exibidos'
+    const versiculosExibidos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    
+    // Se todos os versículos foram exibidos, reiniciar o ciclo
+    if (versiculosExibidos.length >= VERSICULOS.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]))
+    }
+    
+    // Carregar versículos já exibidos atualizados
+    const versiculosExibidosAtualizados = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    
+    // Encontrar o próximo versículo não exibido
+    const versiculosDisponiveis = VERSICULOS.filter((_, index) => !versiculosExibidosAtualizados.includes(index))
+    
+    if (versiculosDisponiveis.length > 0) {
+      const proximoVersiculo = versiculosDisponiveis[0]
+      const proximoIndex = VERSICULOS.indexOf(proximoVersiculo)
+      
+      setVersiculoDoDia(proximoVersiculo)
+      
+      // Marcar como exibido
+      versiculosExibidosAtualizados.push(proximoIndex)
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(versiculosExibidosAtualizados))
+    }
   }, [])
 
   return (
@@ -137,41 +167,50 @@ export default function Home() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             {/* Botão Cadernetas */}
             <button
               onClick={() => navigate('/modulos/cadernetas')}
-              className="relative flex items-center gap-4 p-6 transition-all duration-300 ease-out rounded-2xl hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-500/20 border border-white/30 backdrop-blur-sm animate-fade-in-delay-0"
+              className="relative flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-out rounded-2xl hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-500/20 border border-white/30 backdrop-blur-sm animate-fade-in-delay-0"
               style={{ backgroundImage: 'linear-gradient(to bottom right, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.1))' }}
             >
-              <ClipboardList size={64} className="text-green-600" />
-              <div className="flex-1 text-left">
-                <span className="text-2xl font-bold text-gray-900 block">
-                  CADERNETAS
-                </span>
-              </div>
-              <span className="text-3xl text-gray-400">→</span>
+              <img src={`${BASE}cadernetas/cadernetas.png`} alt="Cadernetas" className="w-40 h-auto object-contain rounded-[32px]" />
+              <span className="text-base font-bold text-center leading-tight text-gray-900">
+                CADERNETAS
+              </span>
             </button>
 
             {/* Botão Estoque de Insumos (só Marcon e GestaUp) */}
             {showInsumos && (
               <button
                 onClick={() => navigate('/modulos/insumos')}
-                className="relative flex items-center gap-4 p-6 transition-all duration-300 ease-out rounded-2xl hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-blue-500/20 border border-white/30 backdrop-blur-sm animate-fade-in-delay-100"
+                className="relative flex flex-col items-center justify-center gap-2 p-4 transition-all duration-300 ease-out rounded-2xl hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-blue-500/20 border border-white/30 backdrop-blur-sm animate-fade-in-delay-100"
                 style={{ backgroundImage: 'linear-gradient(to bottom right, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1))' }}
               >
-                <ClipboardCheck size={64} className="text-blue-600" />
-                <div className="flex-1 text-left">
-                  <span className="text-2xl font-bold text-gray-900 block">
-                    CHECKLISTS
-                  </span>
-                </div>
-                <span className="text-3xl text-gray-400">→</span>
+                <img src={`${BASE}cadernetas/checklists.png`} alt="Checklists" className="w-40 h-auto object-contain rounded-[32px]" />
+                <span className="text-base font-bold text-center leading-tight text-gray-900">
+                  CHECKLISTS
+                </span>
               </button>
             )}
           </div>
         )}
       </main>
+
+      {/* Versículo do Dia */}
+      {versiculoDoDia && (
+        <div className="px-4 py-6 bg-gradient-to-r from-green-50 to-blue-50 border-t-2 border-green-200">
+          <div className="max-w-md mx-auto text-center">
+            <div className="text-2xl mb-2">📖</div>
+            <p className="text-base font-semibold text-gray-800 leading-relaxed mb-2">
+              {versiculoDoDia.texto}
+            </p>
+            <p className="text-sm text-gray-600 font-medium">
+              {versiculoDoDia.referencia}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

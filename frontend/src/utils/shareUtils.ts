@@ -61,6 +61,13 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
           return // Não incluir campos com valor zero
         }
       }
+      // Filtrar categorias de gado com valor zero nas pastagens
+      if (caderneta === 'pastagens' && ['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros'].includes(key)) {
+        const numValue = Number(value)
+        if (numValue === 0) {
+          return // Não incluir campos com valor zero
+        }
+      }
       // Filtrar kgCocho com valor zero na suplementação
       if (caderneta === 'suplementacao' && key === 'kgCocho') {
         const numValue = Number(value)

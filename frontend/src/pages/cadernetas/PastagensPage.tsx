@@ -28,9 +28,12 @@ interface FormState {
   vaca: string
   touro: string
   bezerro: string
+  boiGordo: string
   boiMagro: string
   garrote: string
   novilha: string
+  tropa: string
+  outros: string
 }
 
 const makeInitial = (usuario?: string): FormState => ({
@@ -44,18 +47,24 @@ const makeInitial = (usuario?: string): FormState => ({
   vaca: '',
   touro: '',
   bezerro: '',
+  boiGordo: '',
   boiMagro: '',
   garrote: '',
   novilha: '',
+  tropa: '',
+  outros: '',
 })
 
 const CATEGORIAS: { campo: keyof FormState; label: string }[] = [
   { campo: 'vaca', label: 'VACAS' },
   { campo: 'touro', label: 'TOUROS' },
-  { campo: 'bezerro', label: 'BEZERROS(AS)' },
+  { campo: 'boiGordo', label: 'BOIS GORDOS' },
   { campo: 'boiMagro', label: 'BOIS MAGROS' },
   { campo: 'garrote', label: 'GARROTES' },
+  { campo: 'bezerro', label: 'BEZERROS(AS)' },
   { campo: 'novilha', label: 'NOVILHAS' },
+  { campo: 'tropa', label: 'TROPAS' },
+  { campo: 'outros', label: 'OUTROS' },
 ]
 
 export default function PastagensPage() {
@@ -107,7 +116,7 @@ export default function PastagensPage() {
     return () => clearInterval(interval)
   }, [cadastroSheetUrl])
 
-  const total = ['vaca', 'touro', 'bezerro', 'boiMagro', 'garrote', 'novilha'].reduce(
+  const total = ['vaca', 'touro', 'bezerro', 'boiGordo', 'boiMagro', 'garrote', 'novilha', 'tropa', 'outros'].reduce(
     (acc, c) => acc + (Number(form[c as keyof FormState]) || 0), 0
   )
 
@@ -116,13 +125,22 @@ export default function PastagensPage() {
     setErrors([])
 
     const result = await salvarRegistro('pastagens', {
-      ...form,
+      data: form.data,
+      manejador: form.manejador,
+      numeroLote: form.numeroLote,
+      pastoSaida: form.pastoSaida,
+      avaliacaoSaida: form.avaliacaoSaida ? Number(form.avaliacaoSaida) : 0,
+      pastoEntrada: form.pastoEntrada,
+      avaliacaoEntrada: form.avaliacaoEntrada ? Number(form.avaliacaoEntrada) : 0,
       vaca: form.vaca ? Number(form.vaca) : 0,
       touro: form.touro ? Number(form.touro) : 0,
-      bezerro: form.bezerro ? Number(form.bezerro) : 0,
+      boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
       boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
       garrote: form.garrote ? Number(form.garrote) : 0,
+      bezerro: form.bezerro ? Number(form.bezerro) : 0,
       novilha: form.novilha ? Number(form.novilha) : 0,
+      tropa: form.tropa ? Number(form.tropa) : 0,
+      outros: form.outros ? Number(form.outros) : 0,
     })
 
     setSalvando(false)
@@ -131,13 +149,22 @@ export default function PastagensPage() {
     } else {
       // Armazenar o registro salvo para compartilhamento
       const dadosRegistro = {
-        ...form,
+        data: form.data,
+        manejador: form.manejador,
+        numeroLote: form.numeroLote,
+        pastoSaida: form.pastoSaida,
+        avaliacaoSaida: form.avaliacaoSaida ? Number(form.avaliacaoSaida) : 0,
+        pastoEntrada: form.pastoEntrada,
+        avaliacaoEntrada: form.avaliacaoEntrada ? Number(form.avaliacaoEntrada) : 0,
         vaca: form.vaca ? Number(form.vaca) : 0,
         touro: form.touro ? Number(form.touro) : 0,
-        bezerro: form.bezerro ? Number(form.bezerro) : 0,
+        boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
         boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
         garrote: form.garrote ? Number(form.garrote) : 0,
+        bezerro: form.bezerro ? Number(form.bezerro) : 0,
         novilha: form.novilha ? Number(form.novilha) : 0,
+        tropa: form.tropa ? Number(form.tropa) : 0,
+        outros: form.outros ? Number(form.outros) : 0,
       }
       setRegistroSalvo(dadosRegistro)
       setShowSuccessModal(true)
