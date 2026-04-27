@@ -99,9 +99,7 @@ export default defineConfig({
             }
           }
         ],
-        cleanupOutdatedCaches: true,
-        // Limpar caches antigos imediatamente ao atualizar
-        deleteStrategy: 'immediate'
+        cleanupOutdatedCaches: true
       },
       devOptions: {
         enabled: false
