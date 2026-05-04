@@ -389,6 +389,7 @@ function registroToSupabase(store: CadernetaStore, registro: Registro, fazendaId
         motivo_movimentacao: registro.motivoMovimentacao || null,
         brinco_chip: registro.brincoChip || null,
         causa_observacao: registro.causaObservacao || null,
+        causa_morte: registro.causaMorte || null,
       }
     }
     case 'enfermaria':
