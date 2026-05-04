@@ -70,9 +70,9 @@ export function getSupabaseClient() {
       const payload = JSON.parse(atob(token.split('.')[1]))
       const now = Math.floor(Date.now() / 1000)
       
-      // Se o token expirou, limpar e usar cliente anon
-      if (payload.exp && payload.exp < now) {
-        console.log('[SupabaseClient] Token expirado, limpando localStorage')
+      // Se o token expirou ou vai expirar em menos de 1 minuto, limpar
+      if (payload.exp && payload.exp - now < 60) {
+        console.log('[SupabaseClient] Token expirado ou expirando em breve, limpando localStorage')
         localStorage.removeItem('supabase_token')
         localStorage.removeItem('supabase_refresh_token')
         return supabase
