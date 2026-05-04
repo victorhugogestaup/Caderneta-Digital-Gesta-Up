@@ -131,7 +131,8 @@ export async function updateFazenda(id: string, fazenda: TablesUpdate['fazendas'
 // ==================== PASTOS ====================
 
 export async function getPastos(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('pastos')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -177,7 +178,8 @@ export async function deletePasto(id: string) {
 // ==================== LOTES ====================
 
 export async function getLotes(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('lotes')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -189,7 +191,8 @@ export async function getLotes(fazendaId: string) {
 }
 
 export async function getLoteByNome(fazendaId: string, nome: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('lotes')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -236,7 +239,8 @@ export async function deleteLote(id: string) {
 // ==================== CATEGORIAS ====================
 
 export async function getCategorias(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('categorias')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -261,7 +265,8 @@ export async function createCategoria(categoria: TablesInsert['categorias']['Ins
 // ==================== INSUMOS ====================
 
 export async function getInsumos(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('insumos')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -311,7 +316,8 @@ export async function updateInsumo(id: string, insumo: TablesUpdate['insumos']['
 // ==================== MINERAL ====================
 
 export async function getMineral(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('mineral')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -349,7 +355,8 @@ export async function createMineral(mineral: any) {
 // ==================== PROTEINADO ====================
 
 export async function getProteinado(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('proteinado')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -387,7 +394,8 @@ export async function createProteinado(proteinado: any) {
 // ==================== RACAO ====================
 
 export async function getRacao(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('racao')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -425,7 +433,8 @@ export async function createRacao(racao: any) {
 // ==================== DIETAS ====================
 
 export async function getDietas(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('dietas')
     .select('*')
     .eq('fazenda_id', fazendaId)
@@ -463,7 +472,8 @@ export async function createDieta(dieta: any) {
 // ==================== FUNCIONARIOS ====================
 
 export async function getFuncionarios(fazendaId: string) {
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('funcionarios')
     .select('*')
     .eq('fazenda_id', fazendaId)

@@ -107,8 +107,9 @@ export default function Configuracoes() {
       console.log('Fazenda encontrada:', fazenda)
       
       if (fazenda) {
-        // Salvar token JWT no localStorage
+        // Salvar token JWT e refresh token no localStorage
         localStorage.setItem('supabase_token', loginData.access_token)
+        localStorage.setItem('supabase_refresh_token', loginData.refresh_token || '')
         return { sucesso: true, fazendaId: fazenda.id, nome: fazenda.nome, token: loginData.access_token, acessoId: fazenda.acesso_id, logoUrl: fazenda.logo_url || undefined }
       }
     } catch (error) {

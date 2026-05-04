@@ -1,6 +1,7 @@
 import { BACKEND_URL } from '../utils/constants'
 import { saveCadastroData, getAllCadastroData } from './indexedDB'
 import * as supabaseService from './supabaseService'
+import { eventBus, CADASTRO_CACHE_UPDATED } from '../utils/eventBus'
 
 const CACHE_KEYS = {
   PASTOS_LOTES: 'pastos_lotes',
@@ -102,6 +103,9 @@ export async function saveToCache(data: CadastroCacheData): Promise<void> {
       insumos: data.insumos,
       dietas: data.dietas,
     })
+    
+    // Emitir evento para notificar que o cache foi atualizado
+    eventBus.emit(CADASTRO_CACHE_UPDATED, data)
   } catch (error) {
     console.error('Erro ao salvar no cache:', error)
   }
@@ -119,13 +123,23 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
       // Buscar do Supabase
       console.log('[CadastroCache] Buscando dados do Supabase para fazenda:', fazendaId)
       
-      const [pastosData, lotesData] = await Promise.all([
+      const [pastosData, lotesData, mineralData, proteinadoData, racaoData, insumosData, dietasData] = await Promise.all([
         supabaseService.getPastos(fazendaId),
-        supabaseService.getLotes(fazendaId)
+        supabaseService.getLotes(fazendaId),
+        supabaseService.getMineral(fazendaId),
+        supabaseService.getProteinado(fazendaId),
+        supabaseService.getRacao(fazendaId),
+        supabaseService.getInsumos(fazendaId),
+        supabaseService.getDietas(fazendaId)
       ])
       
       const pastos = pastosData?.map((p: any) => p.nome) || []
       const lotes = lotesData?.map((l: any) => l.nome) || []
+      const mineral = mineralData?.map((m: any) => m.nome) || []
+      const proteinado = proteinadoData?.map((p: any) => p.nome) || []
+      const racao = racaoData?.map((r: any) => r.nome) || []
+      const insumos = insumosData?.map((i: any) => i.nome) || []
+      const dietas = dietasData?.map((d: any) => d.nome) || []
       
       return {
         pastos,
@@ -133,11 +147,11 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
         frigorificos: [],
         pastosDetalhes: {},
         lotesDetalhes: {},
-        mineral: [],
-        proteinado: [],
-        racao: [],
-        insumos: [],
-        dietas: [],
+        mineral,
+        proteinado,
+        racao,
+        insumos,
+        dietas,
       }
     }
     
