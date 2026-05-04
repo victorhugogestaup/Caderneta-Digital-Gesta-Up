@@ -9,7 +9,9 @@ import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { RootState } from '../../store/store'
 import { getCachedCadastroData } from '../../services/cadastroCache'
+import { getLoteByNome } from '../../services/supabaseService'
 import { scrollToFirstError } from '../../utils/scrollToError'
+import LoteDetalhesCard from '../../components/LoteDetalhesCard'
 import { eventBus, CADASTRO_CACHE_UPDATED } from '../../utils/eventBus'
 
 const BASE = import.meta.env.BASE_URL
@@ -25,6 +27,16 @@ const CATEGORIAS = [
   { value: 'Tropa', label: 'TROPA' },
   { value: 'Outros', label: 'OUTROS' },
 ]
+
+// Função para processar categorias com diferentes delimitadores
+function processarCategorias(categorias: string): string[] {
+  if (!categorias) return []
+  const regex = /[,.;]+\s*/
+  return categorias
+    .split(regex)
+    .map(c => c.trim())
+    .filter(c => c.length > 0)
+}
 
 const LEITURAS_BEBEDOURO = [
   { value: '1', label: '1', icon: '🟢' },
@@ -58,7 +70,7 @@ const makeInitial = (usuario?: string): FormState => ({
 
 export default function BebedourosPage() {
   const navigate = useNavigate()
-  const { usuario } = useSelector((state: RootState) => state.config)
+  const { usuario, fazendaId } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(() => makeInitial(usuario))
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -67,6 +79,8 @@ export default function BebedourosPage() {
   const [showPdfModal, setShowPdfModal] = useState(false)
   const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
+  const [bebedourosDisponiveis, setBebedourosDisponiveis] = useState<string[]>([])
+  const [detalhesLote, setDetalhesLote] = useState<any>(null)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -86,6 +100,7 @@ export default function BebedourosPage() {
     if (cache) {
       setPastosDisponiveis(cache.pastos || [])
       setLotesDisponiveis(cache.lotes || [])
+      setBebedourosDisponiveis(cache.bebedouros || [])
     }
   }, [])
 
@@ -96,11 +111,34 @@ export default function BebedourosPage() {
       if (data) {
         setPastosDisponiveis(data.pastos || [])
         setLotesDisponiveis(data.lotes || [])
+        setBebedourosDisponiveis(data.bebedouros || [])
       }
     })
 
     return unsubscribe
   }, [])
+
+  // Buscar detalhes do lote quando selecionado
+  useEffect(() => {
+    async function carregarDetalhesLote() {
+      if (!form.numeroLote || !fazendaId) {
+        setDetalhesLote(null)
+        return
+      }
+
+      try {
+        const lote = await getLoteByNome(fazendaId, form.numeroLote)
+        if (lote) {
+          setDetalhesLote(lote)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar detalhes do lote:', error)
+        setDetalhesLote(null)
+      }
+    }
+
+    carregarDetalhesLote()
+  }, [form.numeroLote, fazendaId])
 
   const handleSalvar = async () => {
     setSalvando(true)
@@ -230,6 +268,9 @@ export default function BebedourosPage() {
               />
             )}
           </div>
+          {detalhesLote && (
+            <LoteDetalhesCard detalhes={detalhesLote} processarCategorias={processarCategorias} />
+          )}
         </div>
 
         {/* Seção 2: Classificação */}
@@ -260,16 +301,26 @@ export default function BebedourosPage() {
         {/* Seção 3: Bebedouro */}
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
           <h2 className="text-lg font-black text-gray-900 tracking-tight">3. BEBEDOURO</h2>
-          <Input
-            label="NÚMERO DO BEBEDOURO"
-            placeholder="Ex: 5"
-            value={form.numeroBebedouro}
-            onChange={setInput('numeroBebedouro')}
-            error={getError('numeroBebedouro')}
-            inputMode="numeric"
-            type="number"
-            min="0"
-          />
+          {bebedourosDisponiveis.length > 0 ? (
+            <SearchableModal
+              label=""
+              value={form.numeroBebedouro}
+              onChange={set('numeroBebedouro')}
+              error={getError('numeroBebedouro')}
+              options={bebedourosDisponiveis}
+              placeholder="Selecione o bebedouro..."
+              id="numeroBebedouro"
+              name="numeroBebedouro"
+            />
+          ) : (
+            <Input
+              label="BEBEDOURO"
+              value={form.numeroBebedouro}
+              onChange={setInput('numeroBebedouro')}
+              error={getError('numeroBebedouro')}
+              id="numeroBebedouro"
+            />
+          )}
           <Radio
             name="leituraBebedouro"
             label={"LEITURA DE BEBEDOURO" + "\n" + "(1 a 3)"}

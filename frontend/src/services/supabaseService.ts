@@ -525,6 +525,21 @@ export async function getFrigorificos(fazendaId: string) {
   return data
 }
 
+// ==================== BEBEDOUROS ====================
+
+export async function getBebedouros(fazendaId: string) {
+  const client = getSupabaseClient()
+  const { data, error } = await client
+    .from('bebedouros')
+    .select('*')
+    .eq('fazenda_id', fazendaId)
+    .eq('ativo', true)
+    .order('nome')
+
+  if (error) throw error
+  return data
+}
+
 // ==================== REGISTROS MATERNIDADE ====================
 
 export async function getRegistrosMaternidade(fazendaId: string, dataInicio?: string, dataFim?: string) {

@@ -32,6 +32,7 @@ export interface CadastroCacheData {
   lotes: string[]
   frigorificos?: string[]
   causasMorte?: string[]
+  bebedouros?: string[]
   mineral?: string[]
   proteinado?: string[]
   racao?: string[]
@@ -57,6 +58,7 @@ export async function loadFromCache(): Promise<CadastroCacheData | null> {
         lotes: cached[CACHE_KEYS.PASTOS_LOTES]?.lotes?.length || 0,
         frigorificos: cached[CACHE_KEYS.PASTOS_LOTES]?.frigorificos?.length || 0,
         causasMorte: cached[CACHE_KEYS.PASTOS_LOTES]?.causasMorte?.length || 0,
+        bebedouros: cached[CACHE_KEYS.PASTOS_LOTES]?.bebedouros?.length || 0,
         pastosDetalhes: Object.keys(cached[CACHE_KEYS.PASTOS_LOTES]?.pastosDetalhes || {}).length,
         lotesDetalhes: Object.keys(cached[CACHE_KEYS.PASTOS_LOTES]?.lotesDetalhes || {}).length,
         mineral: cached[CACHE_KEYS.SUPLEMENTACAO]?.mineral?.length || 0,
@@ -70,6 +72,7 @@ export async function loadFromCache(): Promise<CadastroCacheData | null> {
         lotes: cached[CACHE_KEYS.PASTOS_LOTES]?.lotes || [],
         frigorificos: cached[CACHE_KEYS.PASTOS_LOTES]?.frigorificos || [],
         causasMorte: cached[CACHE_KEYS.PASTOS_LOTES]?.causasMorte || [],
+        bebedouros: cached[CACHE_KEYS.PASTOS_LOTES]?.bebedouros || [],
         pastosDetalhes: cached[CACHE_KEYS.PASTOS_LOTES]?.pastosDetalhes || {},
         lotesDetalhes: cached[CACHE_KEYS.PASTOS_LOTES]?.lotesDetalhes || {},
         mineral: cached[CACHE_KEYS.SUPLEMENTACAO]?.mineral || [],
@@ -97,6 +100,7 @@ export async function saveToCache(data: CadastroCacheData): Promise<void> {
       lotes: data.lotes,
       frigorificos: data.frigorificos || [],
       causasMorte: data.causasMorte || [],
+      bebedouros: data.bebedouros || [],
       pastosDetalhes: data.pastosDetalhes || {},
       lotesDetalhes: data.lotesDetalhes || {},
     })
@@ -127,11 +131,12 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
       // Buscar do Supabase
       console.log('[CadastroCache] Buscando dados do Supabase para fazenda:', fazendaId)
       
-      const [pastosData, lotesData, frigorificosData, causasMorteData, mineralData, proteinadoData, racaoData, insumosData, dietasData] = await Promise.all([
+      const [pastosData, lotesData, frigorificosData, causasMorteData, bebedourosData, mineralData, proteinadoData, racaoData, insumosData, dietasData] = await Promise.all([
         supabaseService.getPastos(fazendaId),
         supabaseService.getLotes(fazendaId),
         supabaseService.getFrigorificos(fazendaId),
         supabaseService.getCausasMorte(fazendaId),
+        supabaseService.getBebedouros(fazendaId),
         supabaseService.getMineral(fazendaId),
         supabaseService.getProteinado(fazendaId),
         supabaseService.getRacao(fazendaId),
@@ -143,6 +148,7 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
       const lotes = lotesData?.map((l: any) => l.nome) || []
       const frigorificos = frigorificosData?.map((f: any) => f.nome) || []
       const causasMorte = causasMorteData?.map((c: any) => c.nome) || []
+      const bebedouros = bebedourosData?.map((b: any) => b.nome) || []
       const mineral = mineralData?.map((m: any) => m.nome) || []
       const proteinado = proteinadoData?.map((p: any) => p.nome) || []
       const racao = racaoData?.map((r: any) => r.nome) || []
@@ -154,6 +160,7 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
         lotes,
         frigorificos,
         causasMorte,
+        bebedouros,
         pastosDetalhes: {},
         lotesDetalhes: {},
         mineral,
