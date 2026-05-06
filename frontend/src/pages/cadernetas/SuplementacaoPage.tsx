@@ -10,7 +10,7 @@ import { todayBR } from '../../utils/formatDate'
 import { RootState } from '../../store/store'
 import FarmLogo from '../../components/FarmLogo'
 import { getCachedCadastroData } from '../../services/cadastroCache'
-import { getMineralNomes, getProteinadoNomes, getRacaoNomes, getInsumosNomes, getDietasNomes, getLoteByNome } from '../../services/supabaseService'
+import { getLoteByNome } from '../../services/supabaseService'
 import LoteDetalhesCard from '../../components/LoteDetalhesCard'
 import EspacamentoCochoCard from '../../components/EspacamentoCochoCard'
 import { scrollToFirstError } from '../../utils/scrollToError'
@@ -144,7 +144,11 @@ export default function SuplementacaoPage() {
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
   const [showPdfModal, setShowPdfModal] = useState(false)
   const [showFezesModal, setShowFezesModal] = useState(false)
-  const [suplementos, setSuplementos] = useState<string[]>([])
+  const [mineralDisponiveis, setMineralDisponiveis] = useState<string[]>([])
+  const [proteinadoDisponiveis, setProteinadoDisponiveis] = useState<string[]>([])
+  const [racaoDisponiveis, setRacaoDisponiveis] = useState<string[]>([])
+  const [insumosDisponiveis, setInsumosDisponiveis] = useState<string[]>([])
+  const [dietasDisponiveis, setDietasDisponiveis] = useState<string[]>([])
   const [suplemento, setSuplemento] = useState('')
   const [quantidadeCreep, setQuantidadeCreep] = useState('')
   const [kgDeposito, setKgDeposito] = useState('')
@@ -152,97 +156,42 @@ export default function SuplementacaoPage() {
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [detalhesLote, setDetalhesLote] = useState<any>(null)
 
-  // Carregar suplementos quando tipo principal muda (exceto Creep)
+  // Carregar todos os suplementos ao abrir a página
   useEffect(() => {
-    const carregarSuplementos = async () => {
-      if (!form.produto || form.produto === 'Creep') {
-        setSuplementos([])
-        setSuplemento('')
-        return
-      }
-
-      // Buscar do Supabase usando o fazendaId
-      if (!fazendaId) {
-        setSuplementos([])
-        return
-      }
-
-      try {
-        let suplementosArray: string[] = []
-        switch (form.produto) {
-          case 'Mineral':
-            suplementosArray = await getMineralNomes(fazendaId)
-            break
-          case 'Proteinado':
-            suplementosArray = await getProteinadoNomes(fazendaId)
-            break
-          case 'Ração':
-            suplementosArray = await getRacaoNomes(fazendaId)
-            break
-          case 'Insumos':
-            suplementosArray = await getInsumosNomes(fazendaId)
-            break
-          case 'Dietas':
-            suplementosArray = await getDietasNomes(fazendaId)
-            break
-          default:
-            suplementosArray = []
-        }
-
-        // Fallback para cache se Supabase retornar vazio
-        if (suplementosArray.length === 0) {
-          console.log('[SuplementacaoPage] Supabase retornou vazio, usando cache como fallback')
-          const cached = getCachedCadastroData()
-          switch (form.produto) {
-            case 'Mineral':
-              suplementosArray = cached?.mineral || []
-              break
-            case 'Proteinado':
-              suplementosArray = cached?.proteinado || []
-              break
-            case 'Ração':
-              suplementosArray = cached?.racao || []
-              break
-            case 'Insumos':
-              suplementosArray = cached?.insumos || []
-              break
-            case 'Dietas':
-              suplementosArray = cached?.dietas || []
-              break
-          }
-        }
-
-        setSuplementos(suplementosArray)
-        setSuplemento('')
-      } catch (error) {
-        console.error('Erro ao carregar suplementos do Supabase, usando cache como fallback:', error)
-        // Fallback para cache em caso de erro
-        const cached = getCachedCadastroData()
-        let suplementosArray: string[] = []
-        switch (form.produto) {
-          case 'Mineral':
-            suplementosArray = cached?.mineral || []
-            break
-          case 'Proteinado':
-            suplementosArray = cached?.proteinado || []
-            break
-          case 'Ração':
-            suplementosArray = cached?.racao || []
-            break
-          case 'Insumos':
-            suplementosArray = cached?.insumos || []
-            break
-          case 'Dietas':
-            suplementosArray = cached?.dietas || []
-            break
-        }
-        setSuplementos(suplementosArray)
-        setSuplemento('')
-      }
+    const cache = getCachedCadastroData()
+    if (cache) {
+      setMineralDisponiveis(cache.mineral || [])
+      setProteinadoDisponiveis(cache.proteinado || [])
+      setRacaoDisponiveis(cache.racao || [])
+      setInsumosDisponiveis(cache.insumos || [])
+      setDietasDisponiveis(cache.dietas || [])
+      setPastosDisponiveis(cache.pastos || [])
+      setLotesDisponiveis(cache.lotes || [])
     }
+  }, [])
 
-    carregarSuplementos()
-  }, [form.produto, fazendaId])
+  // Limpar suplemento selecionado quando o produto muda
+  useEffect(() => {
+    setSuplemento('')
+  }, [form.produto])
+
+  // Obter opções de suplemento baseado no produto selecionado
+  const getSuplementoOptions = (): string[] => {
+    switch (form.produto) {
+      case 'Mineral':
+        return mineralDisponiveis
+      case 'Proteinado':
+        return proteinadoDisponiveis
+      case 'Ração':
+        return racaoDisponiveis
+      case 'Insumos':
+        return insumosDisponiveis
+      case 'Dietas':
+        return dietasDisponiveis
+      default:
+        return []
+    }
+  }
 
   // Carregar pastos e lotes do cache global
   useEffect(() => {
@@ -258,28 +207,13 @@ export default function SuplementacaoPage() {
     const unsubscribe = eventBus.on(CADASTRO_CACHE_UPDATED, (data: any) => {
       console.log('[SuplementacaoPage] Cache atualizado, recarregando dados')
       if (data) {
+        setMineralDisponiveis(data.mineral || [])
+        setProteinadoDisponiveis(data.proteinado || [])
+        setRacaoDisponiveis(data.racao || [])
+        setInsumosDisponiveis(data.insumos || [])
+        setDietasDisponiveis(data.dietas || [])
         setPastosDisponiveis(data.pastos || [])
         setLotesDisponiveis(data.lotes || [])
-        // Se houver um produto selecionado, recarregar suplementos
-        if (form.produto && form.produto !== 'Creep') {
-          switch (form.produto) {
-            case 'Mineral':
-              setSuplementos(data.mineral || [])
-              break
-            case 'Proteinado':
-              setSuplementos(data.proteinado || [])
-              break
-            case 'Ração':
-              setSuplementos(data.racao || [])
-              break
-            case 'Insumos':
-              setSuplementos(data.insumos || [])
-              break
-            case 'Dietas':
-              setSuplementos(data.dietas || [])
-              break
-          }
-        }
       }
     })
 
@@ -508,29 +442,17 @@ export default function SuplementacaoPage() {
             gridCols={2}
           />
 
-          {/* Lista suspensa para suplemento (Mineral/Proteinado/Ração) */}
+          {/* SearchableModal para suplemento (Mineral/Proteinado/Ração) */}
           {form.produto && form.produto !== 'Creep' && (
-            <div className="mt-2">
-              {suplementos.length > 0 ? (
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-bold text-gray-700">Suplemento:</label>
-                  <select
-                    value={suplemento}
-                    onChange={(e) => setSuplemento(e.target.value)}
-                    className="w-full p-3 border-2 border-gray-300 rounded-xl text-lg focus:border-[#3b82f6] focus:outline-none"
-                  >
-                    <option value="">Selecione o suplemento...</option>
-                    {suplementos.map((sup) => (
-                      <option key={sup} value={sup}>
-                        {sup}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              ) : (
-                <p className="text-gray-500">Nenhum suplemento disponível</p>
-              )}
-            </div>
+            <SearchableModal
+              label="SUPLEMENTO"
+              value={suplemento}
+              onChange={setSuplemento}
+              options={getSuplementoOptions()}
+              placeholder="Buscar suplemento..."
+              id="suplemento"
+              name="suplemento"
+            />
           )}
 
           {/* Campo numérico para Creep */}

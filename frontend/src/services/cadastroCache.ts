@@ -331,10 +331,25 @@ export function stopCadastroCachePolling(): void {
 }
 
 /**
- * Retorna os dados em cache
+ * Retorna os dados em cache (ordenados alfabeticamente)
  */
 export function getCachedCadastroData(): CadastroCacheData | null {
-  return cacheData
+  if (!cacheData) return null
+
+  return {
+    pastos: [...(cacheData.pastos || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    lotes: [...(cacheData.lotes || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    frigorificos: [...(cacheData.frigorificos || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    causasMorte: [...(cacheData.causasMorte || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    bebedouros: [...(cacheData.bebedouros || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    mineral: [...(cacheData.mineral || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    proteinado: [...(cacheData.proteinado || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    racao: [...(cacheData.racao || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    insumos: [...(cacheData.insumos || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    dietas: [...(cacheData.dietas || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    pastosDetalhes: cacheData.pastosDetalhes || {},
+    lotesDetalhes: cacheData.lotesDetalhes || {},
+  }
 }
 
 /**
