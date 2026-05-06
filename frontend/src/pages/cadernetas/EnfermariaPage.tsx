@@ -73,7 +73,8 @@ interface FormState {
   data: string
   pasto: string
   lote: string
-  brincoChip: string
+  brinco: string
+  chip: string
   categorias: string[]
   outrosTexto: string
   tratamentos: string[]
@@ -105,7 +106,8 @@ const makeInitial = (): FormState => ({
   data: todayBR(),
   pasto: '',
   lote: '',
-  brincoChip: '',
+  brinco: '',
+  chip: '',
   categorias: [],
   outrosTexto: '',
   tratamentos: [],
@@ -240,7 +242,8 @@ export default function EnfermariaPage() {
       data: form.data,
       pasto: form.pasto,
       lote: form.lote,
-      brincoChip: form.brincoChip,
+      brinco: form.brinco,
+      chip: form.chip,
       categoria: categoriasString,
       problemaCasco: form.problemaCasco,
       problemaCascoObs: form.problemaCascoObs,
@@ -387,11 +390,18 @@ export default function EnfermariaPage() {
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
           <h2 className="text-lg font-black text-gray-900 tracking-tight">2. IDENTIFICAÇÃO</h2>
           <Input
-            label="BRINCO / CHIP"
-            placeholder="Número do brinco ou chip"
-            value={form.brincoChip}
-            onChange={setInput('brincoChip')}
-            error={getError('brincoChip')}
+            label="BRINCO"
+            placeholder="Número do brinco"
+            value={form.brinco}
+            onChange={setInput('brinco')}
+            error={getError('brinco')}
+          />
+          <Input
+            label="CHIP"
+            placeholder="Número do chip"
+            value={form.chip}
+            onChange={setInput('chip')}
+            error={getError('chip')}
           />
           <CheckboxGroup
             label="CATEGORIAS:"

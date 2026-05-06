@@ -245,6 +245,12 @@ export function validateMovimentacao(data: Record<string, unknown>): ValidationR
   if (!isNonEmptyString(data.motivoMovimentacao))
     errors.push({ field: 'motivoMovimentacao', message: 'Motivo da movimentação é obrigatório' })
 
+  // Validação de brinco/chip apenas se for 1 cabeça
+  if (Number(data.numeroCabecas) === 1) {
+    if (!isNonEmptyString(data.brinco) && !isNonEmptyString(data.chip))
+      errors.push({ field: 'brinco', message: 'Brinco ou Chip é obrigatório quando for 1 cabeça' })
+  }
+
   const categoriasError = validateCategoriasArray(
     data.categorias,
     'categorias',
@@ -264,8 +270,9 @@ export function validateEnfermaria(data: Record<string, unknown>): ValidationRes
     errors.push({ field: 'pasto', message: 'Pasto é obrigatório' })
   if (!isNonEmptyString(data.lote))
     errors.push({ field: 'lote', message: 'Lote é obrigatório' })
-  if (!isNonEmptyString(data.brincoChip))
-    errors.push({ field: 'brincoChip', message: 'Brinco/Chip é obrigatório' })
+  // Pelo menos um dos dois é obrigatório
+  if (!isNonEmptyString(data.brinco) && !isNonEmptyString(data.chip))
+    errors.push({ field: 'brinco', message: 'Brinco ou Chip é obrigatório' })
 
   return { isValid: errors.length === 0, errors }
 }
@@ -279,6 +286,9 @@ export function validateMorte(data: Record<string, unknown>): ValidationResult {
     errors.push({ field: 'pasto', message: 'Pasto é obrigatório' })
   if (!isNonEmptyString(data.lote))
     errors.push({ field: 'lote', message: 'Lote é obrigatório' })
+  // Pelo menos um dos dois é obrigatório
+  if (!isNonEmptyString(data.brinco) && !isNonEmptyString(data.chip))
+    errors.push({ field: 'brinco', message: 'Brinco ou Chip é obrigatório' })
   if (!isNonEmptyString(data.sexo))
     errors.push({ field: 'sexo', message: 'Sexo é obrigatório' })
   if (!isNonEmptyString(data.raca))

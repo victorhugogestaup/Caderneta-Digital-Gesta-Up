@@ -164,8 +164,11 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
     if (registro.loteOrigem) {
       texto += `LOTE ORIGEM: ${registro.loteOrigem}\n`
     }
-    if (registro.brincoChip) {
-      texto += `BRINCO/CHIP: ${registro.brincoChip}\n`
+    if (registro.brinco) {
+      texto += `BRINCO: ${registro.brinco}\n`
+    }
+    if (registro.chip) {
+      texto += `CHIP: ${registro.chip}\n`
     }
     texto += `\n`
 
@@ -386,10 +389,10 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
   } else if (caderneta === 'enfermaria') {
     // Para enfermaria, usar ordem específica dos formulários
     const ordemEnfermaria = [
-      'data',
       'pasto',
       'lote',
-      'brincoChip',
+      'brinco',
+      'chip',
       'categoria',
       'tratamento',
       'problemaCasco',
@@ -420,10 +423,10 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
   } else if (caderneta === 'morte') {
     // Para morte, usar ordem específica dos formulários
     const ordemMorte = [
-      'data',
       'pasto',
       'lote',
-      'brincoChip',
+      'brinco',
+      'chip',
       'vaca',
       'touro',
       'boiGordo',

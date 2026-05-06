@@ -1175,10 +1175,11 @@ export type Database = {
         Row: {
           andar_cambaleante: boolean | null
           andar_cambaleante_obs: string | null
-          brinco_chip: string | null
+          brinco: string | null
           categoria: string | null
           cegueira: boolean | null
           cegueira_obs: string | null
+          chip: string | null
           created_at: string | null
           data: string
           deleted_at: string | null
@@ -1215,10 +1216,11 @@ export type Database = {
         Insert: {
           andar_cambaleante?: boolean | null
           andar_cambaleante_obs?: string | null
-          brinco_chip?: string | null
+          brinco?: string | null
           categoria?: string | null
           cegueira?: boolean | null
           cegueira_obs?: string | null
+          chip?: string | null
           created_at?: string | null
           data: string
           deleted_at?: string | null
@@ -1255,10 +1257,11 @@ export type Database = {
         Update: {
           andar_cambaleante?: boolean | null
           andar_cambaleante_obs?: string | null
-          brinco_chip?: string | null
+          brinco?: string | null
           categoria?: string | null
           cegueira?: boolean | null
           cegueira_obs?: string | null
+          chip?: string | null
           created_at?: string | null
           data?: string
           deleted_at?: string | null
@@ -1318,7 +1321,8 @@ export type Database = {
           data: string
           pasto: string | null
           lote: string | null
-          brinco_chip: string | null
+          brinco: string | null
+          chip: string | null
           vaca: number
           touro: number
           boi_gordo: number
@@ -1361,7 +1365,8 @@ export type Database = {
           data: string
           pasto?: string | null
           lote?: string | null
-          brinco_chip?: string | null
+          brinco?: string | null
+          chip?: string | null
           vaca?: number
           touro?: number
           boi_gordo?: number
@@ -1404,7 +1409,8 @@ export type Database = {
           data?: string
           pasto?: string | null
           lote?: string | null
-          brinco_chip?: string | null
+          brinco?: string | null
+          chip?: string | null
           vaca?: number
           touro?: number
           boi_gordo?: number
@@ -1638,8 +1644,9 @@ export type Database = {
           bezerro: boolean | null
           boi_gordo: boolean | null
           boi_magro: boolean | null
-          brinco_chip: string | null
+          brinco: string | null
           causa_observacao: string | null
+          chip: string | null
           created_at: string | null
           data: string
           deleted_at: string | null
@@ -1669,8 +1676,9 @@ export type Database = {
           bezerro?: boolean | null
           boi_gordo?: boolean | null
           boi_magro?: boolean | null
-          brinco_chip?: string | null
+          brinco?: string | null
           causa_observacao?: string | null
+          chip?: string | null
           created_at?: string | null
           data: string
           deleted_at?: string | null
@@ -1700,8 +1708,9 @@ export type Database = {
           bezerro?: boolean | null
           boi_gordo?: boolean | null
           boi_magro?: boolean | null
-          brinco_chip?: string | null
+          brinco?: string | null
           causa_observacao?: string | null
+          chip?: string | null
           created_at?: string | null
           data?: string
           deleted_at?: string | null

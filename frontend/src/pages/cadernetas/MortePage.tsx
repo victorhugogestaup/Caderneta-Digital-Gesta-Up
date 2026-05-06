@@ -55,7 +55,8 @@ interface FormState {
   data: string
   pasto: string
   lote: string
-  brincoChip: string
+  brinco: string
+  chip: string
   vaca: string
   touro: string
   boiGordo: string
@@ -92,7 +93,8 @@ const makeInitial = (): FormState => ({
   data: todayBR(),
   pasto: '',
   lote: '',
-  brincoChip: '',
+  brinco: '',
+  chip: '',
   vaca: '',
   touro: '',
   boiGordo: '',
@@ -231,7 +233,8 @@ export default function MortePage() {
       data: form.data,
       pasto: form.pasto,
       lote: form.lote,
-      brincoChip: form.brincoChip,
+      brinco: form.brinco,
+      chip: form.chip,
       vaca: form.vaca ? Number(form.vaca) : 0,
       touro: form.touro ? Number(form.touro) : 0,
       boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
@@ -383,11 +386,18 @@ export default function MortePage() {
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
           <h2 className="text-lg font-black text-gray-900 tracking-tight">2. IDENTIFICAÇÃO</h2>
           <Input
-            label="BRINCO / CHIP"
-            placeholder="Número do brinco ou chip"
-            value={form.brincoChip}
-            onChange={setInput('brincoChip')}
-            error={getError('brincoChip')}
+            label="BRINCO"
+            placeholder="Número do brinco"
+            value={form.brinco}
+            onChange={setInput('brinco')}
+            error={getError('brinco')}
+          />
+          <Input
+            label="CHIP"
+            placeholder="Número do chip"
+            value={form.chip}
+            onChange={setInput('chip')}
+            error={getError('chip')}
           />
         </div>
 

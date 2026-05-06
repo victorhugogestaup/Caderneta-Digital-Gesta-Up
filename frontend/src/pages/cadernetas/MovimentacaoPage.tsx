@@ -66,7 +66,8 @@ interface FormState {
   motivoMovimentacao: string
   tipoSaida: string // Venda, Apartação, Transferência
   tipoEntrada: string // Compras, Apartação, Transferência
-  brincoChip: string
+  brinco: string
+  chip: string
   causaObservacao: string
   categorias: string[]
   outrosTexto: string
@@ -82,7 +83,8 @@ const makeInitial = (): FormState => ({
   motivoMovimentacao: '',
   tipoSaida: '',
   tipoEntrada: '',
-  brincoChip: '',
+  brinco: '',
+  chip: '',
   causaObservacao: '',
   categorias: [],
   outrosTexto: '',
@@ -218,7 +220,8 @@ export default function MovimentacaoPage() {
       motivoMovimentacao: form.motivoMovimentacao,
       tipoSaida: form.tipoSaida || null,
       tipoEntrada: form.tipoEntrada || null,
-      brincoChip: form.brincoChip,
+      brinco: form.brinco,
+      chip: form.chip,
       causaObservacao: form.causaObservacao,
     })
 
@@ -342,12 +345,20 @@ export default function MovimentacaoPage() {
           </div>
           {/* Identificação - apenas se for 1 cabeça */}
           {form.numeroCabecas === '1' && (
-            <Input
-              label="BRINCO / CHIP"
-              placeholder="Ex: 2023-145"
-              value={form.brincoChip}
-              onChange={setInput('brincoChip')}
-            />
+            <>
+              <Input
+                label="BRINCO"
+                placeholder="Ex: 2023-145"
+                value={form.brinco}
+                onChange={setInput('brinco')}
+              />
+              <Input
+                label="CHIP"
+                placeholder="Ex: 123456789"
+                value={form.chip}
+                onChange={setInput('chip')}
+              />
+            </>
           )}
         </div>
 
