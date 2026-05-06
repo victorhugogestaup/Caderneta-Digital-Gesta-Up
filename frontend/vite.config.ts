@@ -90,14 +90,18 @@ export default defineConfig({
             }
           },
           {
-            // Estratégia mais agressiva para arquivos JS/CSS para garantir atualizações
+            // Estratégia NetworkFirst para JS/CSS para garantir atualizações imediatas
             urlPattern: /\.(?:js|css)$/i,
-            handler: 'StaleWhileRevalidate',
+            handler: 'NetworkFirst',
             options: {
               cacheName: 'static-resources-cache',
+              networkTimeoutSeconds: 3,
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 dias
+                maxAgeSeconds: 60 * 60 * 24 // 1 dia
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
