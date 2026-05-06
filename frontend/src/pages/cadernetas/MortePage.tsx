@@ -41,6 +41,18 @@ const SN_OPTIONS = [
   { value: 'N', label: 'NÃO', icon: '❌' },
 ]
 
+const CATEGORIAS = [
+  { value: 'Vaca', label: 'VACA' },
+  { value: 'Touro', label: 'TOURO' },
+  { value: 'Boi Gordo', label: 'BOI GORDO' },
+  { value: 'Boi Magro', label: 'BOI MAGRO' },
+  { value: 'Garrote', label: 'GARROTE' },
+  { value: 'Bezerro', label: 'BEZERRO' },
+  { value: 'Novilha', label: 'NOVILHA' },
+  { value: 'Tropa', label: 'TROPA' },
+  { value: 'Outros', label: 'OUTROS' },
+]
+
 const DIAGNOSTICOS = [
   { campo: 'secrecaoOrificios', label: 'SECREÇÃO NOS ORIFÍCIOS?' },
   { campo: 'sintomasPneumonia', label: 'SINTOMAS PNEUMONIA?' },
@@ -57,15 +69,8 @@ interface FormState {
   lote: string
   brinco: string
   chip: string
-  vaca: string
-  touro: string
-  boiGordo: string
-  boiMagro: string
-  garrote: string
-  bezerro: string
-  novilha: string
-  tropa: string
-  outros: string
+  categoria: string
+  categoriaOutros: string
   sexo: string
   raca: string
   racaOutros: string
@@ -95,15 +100,8 @@ const makeInitial = (): FormState => ({
   lote: '',
   brinco: '',
   chip: '',
-  vaca: '',
-  touro: '',
-  boiGordo: '',
-  boiMagro: '',
-  garrote: '',
-  bezerro: '',
-  novilha: '',
-  tropa: '',
-  outros: '',
+  categoria: '',
+  categoriaOutros: '',
   sexo: '',
   raca: '',
   racaOutros: '',
@@ -235,15 +233,8 @@ export default function MortePage() {
       lote: form.lote,
       brinco: form.brinco,
       chip: form.chip,
-      vaca: form.vaca ? Number(form.vaca) : 0,
-      touro: form.touro ? Number(form.touro) : 0,
-      boiGordo: form.boiGordo ? Number(form.boiGordo) : 0,
-      boiMagro: form.boiMagro ? Number(form.boiMagro) : 0,
-      garrote: form.garrote ? Number(form.garrote) : 0,
-      bezerro: form.bezerro ? Number(form.bezerro) : 0,
-      novilha: form.novilha ? Number(form.novilha) : 0,
-      tropa: form.tropa ? Number(form.tropa) : 0,
-      outros: form.outros ? Number(form.outros) : 0,
+      categoria: form.categoria,
+      categoriaOutros: form.categoriaOutros,
       sexo: form.sexo,
       raca: racaFinal,
       idade: form.idade,
@@ -403,18 +394,25 @@ export default function MortePage() {
 
         {/* Seção 3: Quantificação de Animais */}
         <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
-          <h2 className="text-lg font-black text-gray-900 tracking-tight">3. QUANTIFICAÇÃO DE ANIMAIS</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="VACA" placeholder="0" value={form.vaca} onChange={setInput('vaca')} inputMode="numeric" type="number" />
-            <Input label="TOURO" placeholder="0" value={form.touro} onChange={setInput('touro')} inputMode="numeric" type="number" />
-            <Input label="BOI GORDO" placeholder="0" value={form.boiGordo} onChange={setInput('boiGordo')} inputMode="numeric" type="number" />
-            <Input label="BOI MAGRO" placeholder="0" value={form.boiMagro} onChange={setInput('boiMagro')} inputMode="numeric" type="number" />
-            <Input label="GARROTE" placeholder="0" value={form.garrote} onChange={setInput('garrote')} inputMode="numeric" type="number" />
-            <Input label="BEZERRO" placeholder="0" value={form.bezerro} onChange={setInput('bezerro')} inputMode="numeric" type="number" />
-            <Input label="NOVILHA" placeholder="0" value={form.novilha} onChange={setInput('novilha')} inputMode="numeric" type="number" />
-            <Input label="TROPA" placeholder="0" value={form.tropa} onChange={setInput('tropa')} inputMode="numeric" type="number" />
-            <Input label="OUTROS" placeholder="0" value={form.outros} onChange={setInput('outros')} inputMode="numeric" type="number" />
-          </div>
+          <h2 className="text-lg font-black text-gray-900 tracking-tight">3. CLASSIFICAÇÃO DO GADO</h2>
+          <Radio
+            name="categoria"
+            label="CATEGORIA:"
+            options={CATEGORIAS}
+            value={form.categoria}
+            onChange={(val) => setForm((p) => ({ ...p, categoria: val }))}
+            error={getError('categoria')}
+            gridCols={2}
+          />
+          {form.categoria === 'Outros' && (
+            <Input
+              label="ESPECIFICAR OUTROS:"
+              placeholder="Descreva a categoria"
+              value={form.categoriaOutros}
+              onChange={setInput('categoriaOutros')}
+              error={getError('categoriaOutros')}
+            />
+          )}
         </div>
 
         {/* Seção 4: Sexo e Raça */}

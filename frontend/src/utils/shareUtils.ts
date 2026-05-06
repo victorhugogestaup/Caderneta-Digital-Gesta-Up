@@ -12,6 +12,9 @@ const formatFieldValue = (key: string, value: unknown): string => {
   if (key === 'pesoCria' && value !== null && value !== undefined && value !== '') {
     return `${String(value)} kg`
   }
+  if (key === 'pesoVivo' && value !== null && value !== undefined && value !== '') {
+    return `${String(value)} kg`
+  }
   const valueStr = String(value)
   if (valueStr === 'S') return 'Sim'
   if (valueStr === 'N') return 'Não'
@@ -26,14 +29,12 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
   const cadernetaInfo = CADERNETAS.find(c => c.id === caderneta)
   const cadernetaNome = cadernetaInfo?.label || caderneta.toUpperCase()
 
-  // Obter horário atual
-  const agora = new Date()
-  const horas = String(agora.getHours()).padStart(2, '0')
-  const minutos = String(agora.getMinutes()).padStart(2, '0')
-  const horario = `${horas}:${minutos}`
-
   let texto = `📋 ${cadernetaNome}\n`
-  texto += `📅 Data: ${String(registro.data)} às ${horario}\n\n`
+  // registro.data já contém data e hora, formatar com "às" antes do horário
+  const dataStr = String(registro.data)
+  // Se já contém horário, inserir "às" antes dele
+  const dataFormatada = dataStr.replace(/(\d{2}:\d{2})$/, 'às $1')
+  texto += `📅 Data: ${dataFormatada}\n\n`
 
   // Separar campos normais, animais tratados e categorias
   const camposNormais: [string, unknown][] = []
@@ -431,15 +432,8 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'lote',
       'brinco',
       'chip',
-      'vaca',
-      'touro',
-      'boiGordo',
-      'boiMagro',
-      'garrote',
-      'bezerro',
-      'novilha',
-      'tropa',
-      'outros',
+      'categoria',
+      'categoriaOutros',
       'sexo',
       'raca',
       'idade',
@@ -456,17 +450,20 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
     
     ordemMorte.forEach(key => {
       const value = registro[key]
-      // Para campos numéricos (categorias), não incluir se for 0
-      if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros'].includes(key)) {
-        if (value !== null && value !== undefined && value !== '' && Number(value) > 0) {
+      
+      // Tratar categoriaOutros apenas se categoria for Outros
+      if (key === 'categoriaOutros') {
+        if (registro.categoria === 'Outros' && value !== null && value !== undefined && value !== '') {
           let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-          const valorFormatado = formatFieldValue(key, value)
-          texto += `*${label}:* ${valorFormatado}\n`
+          texto += `*${label}:* ${value}\n`
         }
-      } else if (['secrecaoOrificios', 'sintomasPneumonia', 'inchaco', 'incoordenacaoTremores', 'apatiaFraqueza', 'presencaSangue', 'desordensDigestivas'].includes(key)) {
+        return
+      }
+      
+      if (['secrecaoOrificios', 'sintomasPneumonia', 'inchaco', 'incoordenacaoTremores', 'apatiaFraqueza', 'presencaSangue', 'desordensDigestivas'].includes(key)) {
         // Para campos booleanos de diagnóstico, sempre incluir mostrando Sim/Não
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-        const valorFormatado = value === true ? 'Sim' : 'Não'
+        const valorFormatado = value === true || value === 'S' ? 'Sim' : 'Não'
         texto += `*${label}:* ${valorFormatado}\n`
         
         // Adicionar observação imediatamente após o campo principal (apenas texto OBSERVAÇÃO)
@@ -478,6 +475,11 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
         const valorFormatado = formatFieldValue(key, value)
         texto += `*${label}:* ${valorFormatado}\n`
+        
+        // Adicionar quebra de linha após chip e categoria
+        if (key === 'chip' || key === 'categoria') {
+          texto += `\n`
+        }
         
         // Adicionar quebra de linha após causa da morte
         if (key === 'causaMorte') {

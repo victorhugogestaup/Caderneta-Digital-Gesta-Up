@@ -289,6 +289,10 @@ export function validateMorte(data: Record<string, unknown>): ValidationResult {
   // Pelo menos um dos dois é obrigatório
   if (!isNonEmptyString(data.brinco) && !isNonEmptyString(data.chip))
     errors.push({ field: 'brinco', message: 'Brinco ou Chip é obrigatório' })
+  if (!isNonEmptyString(data.categoria))
+    errors.push({ field: 'categoria', message: 'Categoria do animal é obrigatória' })
+  if (data.categoria === 'Outros' && !isNonEmptyString(data.categoriaOutros))
+    errors.push({ field: 'categoriaOutros', message: 'Especifique a categoria quando selecionar OUTROS' })
   if (!isNonEmptyString(data.sexo))
     errors.push({ field: 'sexo', message: 'Sexo é obrigatório' })
   if (!isNonEmptyString(data.raca))
@@ -297,14 +301,6 @@ export function validateMorte(data: Record<string, unknown>): ValidationResult {
     errors.push({ field: 'idade', message: 'Idade é obrigatória' })
   if (!isNonEmptyString(data.causaMorte))
     errors.push({ field: 'causaMorte', message: 'Causa da morte é obrigatória' })
-
-  const categoriasError = validateCategoriasNumericas(
-    data,
-    ['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa', 'outros'],
-    'categorias',
-    'Preencha ao menos uma categoria de animal'
-  )
-  if (categoriasError) errors.push(categoriasError)
 
   return { isValid: errors.length === 0, errors }
 }

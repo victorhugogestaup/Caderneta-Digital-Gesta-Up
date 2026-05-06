@@ -1323,15 +1323,8 @@ export type Database = {
           lote: string | null
           brinco: string | null
           chip: string | null
-          vaca: number
-          touro: number
-          boi_gordo: number
-          boi_magro: number
-          garrote: number
-          bezerro: number
-          novilha: number
-          tropa: number
-          outros: number
+          categoria: string | null
+          categoria_outros: string | null
           sexo: string | null
           raca: string | null
           idade: string | null
@@ -1367,15 +1360,8 @@ export type Database = {
           lote?: string | null
           brinco?: string | null
           chip?: string | null
-          vaca?: number
-          touro?: number
-          boi_gordo?: number
-          boi_magro?: number
-          garrote?: number
-          bezerro?: number
-          novilha?: number
-          tropa?: number
-          outros?: number
+          categoria?: string | null
+          categoria_outros?: string | null
           sexo?: string | null
           raca?: string | null
           idade?: string | null
@@ -1411,15 +1397,8 @@ export type Database = {
           lote?: string | null
           brinco?: string | null
           chip?: string | null
-          vaca?: number
-          touro?: number
-          boi_gordo?: number
-          boi_magro?: number
-          garrote?: number
-          bezerro?: number
-          novilha?: number
-          tropa?: number
-          outros?: number
+          categoria?: string | null
+          categoria_outros?: string | null
           sexo?: string | null
           raca?: string | null
           idade?: string | null
