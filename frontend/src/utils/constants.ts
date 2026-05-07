@@ -75,9 +75,9 @@ export const CADERNETAS = [
   { id: 'enfermaria', label: 'ENFERMARIA', emoji: '🏥', icon: `${BASE}cadernetas/enfermaria.png`, color: '#78AB46', sheetName: 'Enfermaria', disponivel: true },
   { id: 'morte', label: 'MORTE', emoji: '💀', icon: `${BASE}cadernetas/morte.png`, color: '#A0522D', sheetName: 'Morte', disponivel: true },
   { id: 'clima', label: 'CLIMA', emoji: '🌤️', icon: `${BASE}cadernetas/clima.png`, color: '#4A90D9', sheetName: 'Clima', disponivel: true },
-  { id: 'abastecimento', label: 'ABASTECIMENTO', emoji: '⛽', icon: `${BASE}cadernetas/abastecimento.png`, color: '#10b981', sheetName: 'Abastecimento', disponivel: true },
-  { id: 'cantina', label: 'CANTINA', emoji: '🍽️', icon: `${BASE}cadernetas/cantina.png`, color: '#f59e0b', sheetName: 'Cantina', disponivel: true },
-  { id: 'limpeza', label: 'LIMPEZA', emoji: '🧹', icon: `${BASE}cadernetas/limpeza.png`, color: '#8B5CF6', sheetName: 'Limpeza', disponivel: true },
+  { id: 'abastecimento', label: 'ABASTECIMENTO', emoji: '⛽', icon: `${BASE}cadernetas/abastecimento.png`, color: '#F59E0B', sheetName: 'Abastecimento', disponivel: true },
+  { id: 'cantina', label: 'CANTINA', emoji: '🍽️', icon: `${BASE}cadernetas/cantina.png`, color: '#3B82F6', sheetName: 'Cantina', disponivel: true },
+  { id: 'limpeza', label: 'LIMPEZA', emoji: '🧹', icon: `${BASE}cadernetas/limpeza.png`, color: '#10B981', sheetName: 'Limpeza', disponivel: true },
   { id: 'entrada-insumos', label: 'ENTRADA DE INSUMOS', emoji: '�', icon: `${BASE}cadernetas/entrada.png`, color: '#B08D5E', sheetName: 'Entrada Insumos', disponivel: true },
   { id: 'saida-insumos', label: 'PRODUÇÃO FÁBRICA', emoji: '📤', icon: `${BASE}cadernetas/producao.png`, color: '#78AB46', sheetName: 'Saída Insumos', disponivel: true },
 ]
