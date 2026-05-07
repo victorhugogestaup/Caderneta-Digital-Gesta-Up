@@ -1,5 +1,5 @@
 import { supabase, getSupabaseClient } from './supabaseClient'
-import type { Database } from '../types/supabase'
+import type { Database, TablesInsert, TablesUpdate } from '../types/supabase'
 
 // Função para fazer upload de logo de fazenda
 export async function uploadFazendaLogo(file: File, fazendaId: string): Promise<string | null> {
@@ -85,9 +85,6 @@ export async function deleteFazendaLogo(fazendaId: string): Promise<boolean> {
   }
 }
 
-type TablesInsert = Database['public']['Tables']
-type TablesUpdate = Database['public']['Tables']
-
 // ==================== FAZENDAS ====================
 
 export async function getFazendaByAcessoId(acessoId: string) {
@@ -105,7 +102,7 @@ export async function getFazendaByAcessoId(acessoId: string) {
   return data
 }
 
-export async function createFazenda(fazenda: TablesInsert['fazendas']['Insert']) {
+export async function createFazenda(fazenda: TablesInsert<'fazendas'>) {
   const { data, error } = await supabase
     .from('fazendas')
     .insert(fazenda)
@@ -116,7 +113,7 @@ export async function createFazenda(fazenda: TablesInsert['fazendas']['Insert'])
   return data
 }
 
-export async function updateFazenda(id: string, fazenda: TablesUpdate['fazendas']['Update']) {
+export async function updateFazenda(id: string, fazenda: TablesUpdate<'fazendas'>) {
   const { data, error } = await supabase
     .from('fazendas')
     .update(fazenda)
@@ -143,7 +140,7 @@ export async function getPastos(fazendaId: string) {
   return data
 }
 
-export async function createPasto(pasto: TablesInsert['pastos']['Insert']) {
+export async function createPasto(pasto: TablesInsert<'pastos'>) {
   const { data, error } = await supabase
     .from('pastos')
     .insert(pasto)
@@ -154,7 +151,7 @@ export async function createPasto(pasto: TablesInsert['pastos']['Insert']) {
   return data
 }
 
-export async function updatePasto(id: string, pasto: TablesUpdate['pastos']['Update']) {
+export async function updatePasto(id: string, pasto: TablesUpdate<'pastos'>) {
   const { data, error } = await supabase
     .from('pastos')
     .update(pasto)
@@ -204,7 +201,7 @@ export async function getLoteByNome(fazendaId: string, nome: string) {
   return data
 }
 
-export async function createLote(lote: TablesInsert['lotes']['Insert']) {
+export async function createLote(lote: TablesInsert<'lotes'>) {
   const { data, error } = await supabase
     .from('lotes')
     .insert(lote)
@@ -215,7 +212,7 @@ export async function createLote(lote: TablesInsert['lotes']['Insert']) {
   return data
 }
 
-export async function updateLote(id: string, lote: TablesUpdate['lotes']['Update']) {
+export async function updateLote(id: string, lote: TablesUpdate<'lotes'>) {
   const { data, error } = await supabase
     .from('lotes')
     .update(lote)
@@ -251,7 +248,7 @@ export async function getCategorias(fazendaId: string) {
   return data
 }
 
-export async function createCategoria(categoria: TablesInsert['categorias']['Insert']) {
+export async function createCategoria(categoria: TablesInsert<'categorias'>) {
   const { data, error } = await supabase
     .from('categorias')
     .insert(categoria)
@@ -305,7 +302,7 @@ export async function getInsumosNomes(fazendaId: string): Promise<string[]> {
   return data?.map(item => item.nome) || []
 }
 
-export async function createInsumo(insumo: TablesInsert['insumos']['Insert']) {
+export async function createInsumo(insumo: TablesInsert<'insumos'>) {
   const { data, error } = await supabase
     .from('insumos')
     .insert(insumo)
@@ -316,7 +313,7 @@ export async function createInsumo(insumo: TablesInsert['insumos']['Insert']) {
   return data
 }
 
-export async function updateInsumo(id: string, insumo: TablesUpdate['insumos']['Update']) {
+export async function updateInsumo(id: string, insumo: TablesUpdate<'insumos'>) {
   const { data, error } = await supabase
     .from('insumos')
     .update(insumo)
@@ -499,7 +496,7 @@ export async function getFuncionarios(fazendaId: string) {
   return data
 }
 
-export async function createFuncionario(funcionario: TablesInsert['funcionarios']['Insert']) {
+export async function createFuncionario(funcionario: TablesInsert<'funcionarios'>) {
   const { data, error } = await supabase
     .from('funcionarios')
     .insert(funcionario)
@@ -711,7 +708,7 @@ export async function getRegistrosMaternidade(fazendaId: string, dataInicio?: st
   return data
 }
 
-export async function createRegistroMaternidade(registro: TablesInsert['registros_maternidade']['Insert']) {
+export async function createRegistroMaternidade(registro: TablesInsert<'registros_maternidade'>) {
   const { data, error } = await supabase
     .from('registros_maternidade')
     .insert(registro)
@@ -722,7 +719,7 @@ export async function createRegistroMaternidade(registro: TablesInsert['registro
   return data
 }
 
-export async function updateRegistroMaternidade(id: string, registro: TablesUpdate['registros_maternidade']['Update']) {
+export async function updateRegistroMaternidade(id: string, registro: TablesUpdate<'registros_maternidade'>) {
   const { data, error } = await supabase
     .from('registros_maternidade')
     .update(registro)
@@ -765,7 +762,7 @@ export async function getRegistrosPastagens(fazendaId: string, dataInicio?: stri
   return data
 }
 
-export async function createRegistroPastagens(registro: TablesInsert['registros_pastagens']['Insert']) {
+export async function createRegistroPastagens(registro: TablesInsert<'registros_pastagens'>) {
   const { data, error } = await supabase
     .from('registros_pastagens')
     .insert(registro)
@@ -776,7 +773,7 @@ export async function createRegistroPastagens(registro: TablesInsert['registros_
   return data
 }
 
-export async function updateRegistroPastagens(id: string, registro: TablesUpdate['registros_pastagens']['Update']) {
+export async function updateRegistroPastagens(id: string, registro: TablesUpdate<'registros_pastagens'>) {
   const { data, error } = await supabase
     .from('registros_pastagens')
     .update(registro)
@@ -819,7 +816,7 @@ export async function getRegistrosRodeio(fazendaId: string, dataInicio?: string,
   return data
 }
 
-export async function createRegistroRodeio(registro: TablesInsert['registros_rodeio']['Insert']) {
+export async function createRegistroRodeio(registro: TablesInsert<'registros_rodeio'>) {
   const { data, error } = await supabase
     .from('registros_rodeio')
     .insert(registro)
@@ -830,7 +827,7 @@ export async function createRegistroRodeio(registro: TablesInsert['registros_rod
   return data
 }
 
-export async function updateRegistroRodeio(id: string, registro: TablesUpdate['registros_rodeio']['Update']) {
+export async function updateRegistroRodeio(id: string, registro: TablesUpdate<'registros_rodeio'>) {
   const { data, error } = await supabase
     .from('registros_rodeio')
     .update(registro)
@@ -873,7 +870,7 @@ export async function getRegistrosSuplementacao(fazendaId: string, dataInicio?: 
   return data
 }
 
-export async function createRegistroSuplementacao(registro: TablesInsert['registros_suplementacao']['Insert']) {
+export async function createRegistroSuplementacao(registro: TablesInsert<'registros_suplementacao'>) {
   const { data, error } = await supabase
     .from('registros_suplementacao')
     .insert(registro)
@@ -884,7 +881,7 @@ export async function createRegistroSuplementacao(registro: TablesInsert['regist
   return data
 }
 
-export async function updateRegistroSuplementacao(id: string, registro: TablesUpdate['registros_suplementacao']['Update']) {
+export async function updateRegistroSuplementacao(id: string, registro: TablesUpdate<'registros_suplementacao'>) {
   const { data, error } = await supabase
     .from('registros_suplementacao')
     .update(registro)
@@ -927,7 +924,7 @@ export async function getRegistrosBebedouros(fazendaId: string, dataInicio?: str
   return data
 }
 
-export async function createRegistroBebedouros(registro: TablesInsert['registros_bebedouros']['Insert']) {
+export async function createRegistroBebedouros(registro: TablesInsert<'registros_bebedouros'>) {
   const { data, error } = await supabase
     .from('registros_bebedouros')
     .insert(registro)
@@ -938,7 +935,7 @@ export async function createRegistroBebedouros(registro: TablesInsert['registros
   return data
 }
 
-export async function updateRegistroBebedouros(id: string, registro: TablesUpdate['registros_bebedouros']['Update']) {
+export async function updateRegistroBebedouros(id: string, registro: TablesUpdate<'registros_bebedouros'>) {
   const { data, error } = await supabase
     .from('registros_bebedouros')
     .update(registro)
@@ -981,7 +978,7 @@ export async function getRegistrosMovimentacao(fazendaId: string, dataInicio?: s
   return data
 }
 
-export async function createRegistroMovimentacao(registro: TablesInsert['registros_movimentacao']['Insert']) {
+export async function createRegistroMovimentacao(registro: TablesInsert<'registros_movimentacao'>) {
   const { data, error } = await supabase
     .from('registros_movimentacao')
     .insert(registro)
@@ -992,7 +989,7 @@ export async function createRegistroMovimentacao(registro: TablesInsert['registr
   return data
 }
 
-export async function updateRegistroMovimentacao(id: string, registro: TablesUpdate['registros_movimentacao']['Update']) {
+export async function updateRegistroMovimentacao(id: string, registro: TablesUpdate<'registros_movimentacao'>) {
   const { data, error } = await supabase
     .from('registros_movimentacao')
     .update(registro)
@@ -1035,7 +1032,7 @@ export async function getRegistrosEnfermaria(fazendaId: string, dataInicio?: str
   return data
 }
 
-export async function createRegistroEnfermaria(registro: TablesInsert['registros_enfermaria']['Insert']) {
+export async function createRegistroEnfermaria(registro: TablesInsert<'registros_enfermaria'>) {
   const { data, error } = await supabase
     .from('registros_enfermaria')
     .insert(registro)
@@ -1046,7 +1043,7 @@ export async function createRegistroEnfermaria(registro: TablesInsert['registros
   return data
 }
 
-export async function updateRegistroEnfermaria(id: string, registro: TablesUpdate['registros_enfermaria']['Update']) {
+export async function updateRegistroEnfermaria(id: string, registro: TablesUpdate<'registros_enfermaria'>) {
   const { data, error } = await supabase
     .from('registros_enfermaria')
     .update(registro)
@@ -1069,7 +1066,7 @@ export async function deleteRegistroEnfermaria(id: string) {
 
 // ==================== REGISTROS CLIMA ====================
 
-export async function createRegistroClima(registro: TablesInsert['registros_clima']['Insert']) {
+export async function createRegistroClima(registro: TablesInsert<'registros_clima'>) {
   const { data, error } = await supabase
     .from('registros_clima')
     .insert(registro)
@@ -1080,7 +1077,7 @@ export async function createRegistroClima(registro: TablesInsert['registros_clim
   return data
 }
 
-export async function updateRegistroClima(id: string, registro: TablesUpdate['registros_clima']['Update']) {
+export async function updateRegistroClima(id: string, registro: TablesUpdate<'registros_clima'>) {
   const { data, error } = await supabase
     .from('registros_clima')
     .update(registro)
@@ -1144,7 +1141,7 @@ export async function updateRegistroCantina(id: string, registro: TablesUpdate<'
 
 // ==================== REGISTROS MORTE ====================
 
-export async function createRegistroMorte(registro: TablesInsert['registros_morte']['Insert']) {
+export async function createRegistroMorte(registro: TablesInsert<'registros_morte'>) {
   const { data, error } = await supabase
     .from('registros_morte')
     .insert(registro)
@@ -1155,7 +1152,7 @@ export async function createRegistroMorte(registro: TablesInsert['registros_mort
   return data
 }
 
-export async function updateRegistroMorte(id: string, registro: TablesUpdate['registros_morte']['Update']) {
+export async function updateRegistroMorte(id: string, registro: TablesUpdate<'registros_morte'>) {
   const { data, error } = await supabase
     .from('registros_morte')
     .update(registro)
@@ -1198,7 +1195,7 @@ export async function getRegistrosEntradaInsumos(fazendaId: string, dataInicio?:
   return data
 }
 
-export async function createRegistroEntradaInsumos(registro: TablesInsert['registros_entrada_insumos']['Insert']) {
+export async function createRegistroEntradaInsumos(registro: TablesInsert<'registros_entrada_insumos'>) {
   const { data, error } = await supabase
     .from('registros_entrada_insumos')
     .insert(registro)
@@ -1209,7 +1206,7 @@ export async function createRegistroEntradaInsumos(registro: TablesInsert['regis
   return data
 }
 
-export async function updateRegistroEntradaInsumos(id: string, registro: TablesUpdate['registros_entrada_insumos']['Update']) {
+export async function updateRegistroEntradaInsumos(id: string, registro: TablesUpdate<'registros_entrada_insumos'>) {
   const { data, error } = await supabase
     .from('registros_entrada_insumos')
     .update(registro)
@@ -1252,7 +1249,7 @@ export async function getRegistrosSaidaInsumos(fazendaId: string, dataInicio?: s
   return data
 }
 
-export async function createRegistroSaidaInsumos(registro: TablesInsert['registros_saida_insumos']['Insert']) {
+export async function createRegistroSaidaInsumos(registro: TablesInsert<'registros_saida_insumos'>) {
   const { data, error } = await supabase
     .from('registros_saida_insumos')
     .insert(registro)
@@ -1263,7 +1260,7 @@ export async function createRegistroSaidaInsumos(registro: TablesInsert['registr
   return data
 }
 
-export async function updateRegistroSaidaInsumos(id: string, registro: TablesUpdate['registros_saida_insumos']['Update']) {
+export async function updateRegistroSaidaInsumos(id: string, registro: TablesUpdate<'registros_saida_insumos'>) {
   const { data, error } = await supabase
     .from('registros_saida_insumos')
     .update(registro)
