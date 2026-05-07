@@ -109,6 +109,16 @@ const BEBEDOUROS_LABELS = {
   numeroBebedouro: 'NÚMERO BEBEDOURO',
   categoria: 'CATEGORIA',
   observacao: 'OBSERVAÇÃO',
+  aguaSuficiente: 'ÁGUA SUFICIENTE',
+  aguaSuficienteObs: 'OBSERVAÇÃO ÁGUA SUFICIENTE',
+  vazaoBebedouroIdeal: 'VAZÃO BEBEDOURO IDEAL',
+  vazaoBebedouroIdealObs: 'OBSERVAÇÃO VAZÃO BEBEDOURO',
+  aterroAcessoBebedouroIdeal: 'ATERRO/ACESSO BEBEDOURO IDEAL',
+  aterroAcessoBebedouroIdealObs: 'OBSERVAÇÃO ATERRO/ACESSO',
+  espacamentoBebedouroIdeal: 'ESPAÇAMENTO BEBEDOURO IDEAL',
+  espacamentoBebedouroIdealObs: 'OBSERVAÇÃO ESPAÇAMENTO',
+  boiaProtecaoBoasCondicoes: 'BÓIA E PROTEÇÃO EM BOAS CONDIÇÕES',
+  boiaProtecaoBoasCondicoesObs: 'OBSERVAÇÃO BÓIA E PROTEÇÃO',
 }
 
 const MOVIMENTACAO_LABELS = {

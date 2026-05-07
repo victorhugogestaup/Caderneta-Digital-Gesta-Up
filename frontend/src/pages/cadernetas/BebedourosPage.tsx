@@ -55,6 +55,7 @@ const CHECKLIST_PERGUNTAS = [
   { campo: 'vazaoBebedouroIdeal', label: 'A VAZÃO DO BEBEDOURO ESTÁ IDEAL?' },
   { campo: 'aterroAcessoBebedouroIdeal', label: 'ATERRO / ACESSO DO BEBEDOURO ESTÁ IDEAL?' },
   { campo: 'espacamentoBebedouroIdeal', label: 'ESPAÇAMENTO DO BEBEDOURO ESTÁ IDEAL?' },
+  { campo: 'boiaProtecaoBoasCondicoes', label: 'A BÓIA E A PROTEÇÃO ESTÃO EM BOAS CONDIÇÕES?' },
 ]
 
 interface FormState {
@@ -76,6 +77,8 @@ interface FormState {
   aterroAcessoBebedouroIdealObs: string
   espacamentoBebedouroIdeal: string
   espacamentoBebedouroIdealObs: string
+  boiaProtecaoBoasCondicoes: string
+  boiaProtecaoBoasCondicoesObs: string
   // Limpeza info fields (read-only)
   tempoDesdeLimpeza: string
   intervaloMedioLimpezas: string
@@ -101,6 +104,8 @@ const makeInitial = (usuario?: string): FormState => ({
   aterroAcessoBebedouroIdealObs: '',
   espacamentoBebedouroIdeal: '',
   espacamentoBebedouroIdealObs: '',
+  boiaProtecaoBoasCondicoes: '',
+  boiaProtecaoBoasCondicoesObs: '',
   // Limpeza info fields (read-only)
   tempoDesdeLimpeza: '',
   intervaloMedioLimpezas: '',
@@ -276,6 +281,8 @@ export default function BebedourosPage() {
       aterroAcessoBebedouroIdealObs: form.aterroAcessoBebedouroIdealObs || '',
       espacamentoBebedouroIdeal: form.espacamentoBebedouroIdeal === 'Sim',
       espacamentoBebedouroIdealObs: form.espacamentoBebedouroIdealObs || '',
+      boiaProtecaoBoasCondicoes: form.boiaProtecaoBoasCondicoes === 'Sim',
+      boiaProtecaoBoasCondicoesObs: form.boiaProtecaoBoasCondicoesObs || '',
       // Limpeza info fields
       tempoDesdeLimpeza: form.tempoDesdeLimpeza,
       intervaloMedioLimpezas: form.intervaloMedioLimpezas,
@@ -490,7 +497,7 @@ export default function BebedourosPage() {
               />
               <Input
                 placeholder="Adicionar observação (opcional)"
-                value={(form as any)[`${campo}Obs`]}
+                value={(form as any)[`${campo}Obs`] || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, [`${campo}Obs`]: e.target.value }))}
                 className="mt-2"
               />

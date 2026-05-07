@@ -235,6 +235,7 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       { campo: 'vazaoBebedouroIdeal', label: 'VAZÃO BEBEDOURO IDEAL' },
       { campo: 'aterroAcessoBebedouroIdeal', label: 'ATERRO / ACESSO BEBEDOURO IDEAL' },
       { campo: 'espacamentoBebedouroIdeal', label: 'ESPAÇAMENTO BEBEDOURO IDEAL' },
+      { campo: 'boiaProtecaoBoasCondicoes', label: 'BÓIA E PROTEÇÃO EM BOAS CONDIÇÕES' },
     ]
     
     // Verificar se há algum campo do checklist preenchido

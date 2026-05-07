@@ -116,6 +116,8 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     aterroAcessoBebedouroIdealObs: Joi.string().allow(''),
     espacamentoBebedouroIdeal: Joi.boolean().allow(null),
     espacamentoBebedouroIdealObs: Joi.string().allow(''),
+    boiaProtecaoBoasCondicoes: Joi.boolean().allow(null),
+    boiaProtecaoBoasCondicoesObs: Joi.string().allow(''),
   }),
 
   movimentacao: Joi.object({

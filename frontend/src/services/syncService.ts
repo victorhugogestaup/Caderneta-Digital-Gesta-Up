@@ -123,6 +123,16 @@ const CADERNETA_COLUMNS_CONFIG: Record<CadernetaStore, CadernetaColumnConfig> = 
       { field: 'leituraBebedouro' },
       { field: 'numeroBebedouro' },
       { field: 'observacao' },
+      { field: 'aguaSuficiente' },
+      { field: 'aguaSuficienteObs' },
+      { field: 'vazaoBebedouroIdeal' },
+      { field: 'vazaoBebedouroIdealObs' },
+      { field: 'aterroAcessoBebedouroIdeal' },
+      { field: 'aterroAcessoBebedouroIdealObs' },
+      { field: 'espacamentoBebedouroIdeal' },
+      { field: 'espacamentoBebedouroIdealObs' },
+      { field: 'boiaProtecaoBoasCondicoes' },
+      { field: 'boiaProtecaoBoasCondicoesObs' },
     ],
   },
   movimentacao: {
@@ -432,6 +442,8 @@ function registroToSupabase(store: CadernetaStore, registro: Registro, fazendaId
         aterro_acesso_bebedouro_ideal_obs: registro.aterroAcessoBebedouroIdealObs || null,
         espacamento_bebedouro_ideal: registro.espacamentoBebedouroIdeal === 'Sim',
         espacamento_bebedouro_ideal_obs: registro.espacamentoBebedouroIdealObs || null,
+        boia_protecao_boas_condicoes: registro.boiaProtecaoBoasCondicoes === 'Sim',
+        boia_protecao_boas_condicoes_obs: registro.boiaProtecaoBoasCondicoesObs || null,
       }
     case 'movimentacao': {
       const cats = Array.isArray(registro.categorias) ? registro.categorias as string[] : []
