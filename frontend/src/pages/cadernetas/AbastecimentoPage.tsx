@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import { Button, Input, DatePicker, Radio, ValidationMessage, SearchableModal } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
 import CadernetaLayout from '../../components/CadernetaLayout'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { scrollToFirstError } from '../../utils/scrollToError'
-import { RootState } from '../../store/store'
-import { getFuncionarios } from '../../services/supabaseService'
+import { getCachedCadastroData } from '../../services/cadastroCache'
 
 const COMBUSTIVEL_OPTIONS = [
   { value: 'Álcool', label: 'ÁLCOOL' },
@@ -66,13 +64,7 @@ const makeInitial = (): FormState => ({
 })
 
 export default function AbastecimentoPage() {
-  // Scroll para o topo imediatamente (antes do render)
-  if (typeof window !== 'undefined') {
-    window.scrollTo({ top: 0, behavior: 'auto' })
-  }
-
   const navigate = useNavigate()
-  const { fazendaId } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(() => makeInitial())
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -91,31 +83,13 @@ export default function AbastecimentoPage() {
     }
   }, [form.hidrometroInicial, form.hidrometroFinal])
 
-  // Buscar funcionários da fazenda
+  // Carregar funcionários do cache
   useEffect(() => {
-    async function carregarFuncionarios() {
-      if (!fazendaId) {
-        setFuncionariosDisponiveis([])
-        return
-      }
-
-      try {
-        const funcionarios = await getFuncionarios(fazendaId)
-        if (funcionarios) {
-          const nomes = funcionarios
-            .map(f => f.nome)
-            .filter((nome): nome is string => nome !== null && nome !== undefined)
-            .sort((a, b) => a.localeCompare(b, 'pt-BR'))
-          setFuncionariosDisponiveis(nomes)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar funcionários:', error)
-        setFuncionariosDisponiveis([])
-      }
+    const cachedData = getCachedCadastroData()
+    if (cachedData?.funcionarios) {
+      setFuncionariosDisponiveis(cachedData.funcionarios)
     }
-
-    carregarFuncionarios()
-  }, [fazendaId])
+  }, [])
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))

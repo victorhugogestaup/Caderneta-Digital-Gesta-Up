@@ -19,6 +19,7 @@ import { RootState } from './store/store'
 import { checkPWARequirements, debugPWA } from './utils/pwaDebug'
 import { preventPullToRefresh, addPullToRefreshCSS } from './utils/preventPullToRefresh'
 import { initializeCadastroCache, startCadastroCachePolling, stopCadastroCachePolling } from './services/cadastroCache'
+import ScrollToTop from './components/ScrollToTop'
 
 // Componente wrapper para PWAUpdateModal com hook
 function PWAUpdateModalWrapper() {
@@ -360,6 +361,7 @@ function AppInner() {
 function App() {
   return (
     <Router basename="/Caderneta-Digital-Gesta-Up">
+      <ScrollToTop />
       <AppInner />
     </Router>
   )

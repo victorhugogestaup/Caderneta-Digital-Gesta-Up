@@ -34,6 +34,7 @@ export interface CadastroCacheData {
   causasMorte?: string[]
   bebedouros?: string[]
   fornecedores?: string[]
+  funcionarios?: string[]
   mineral?: string[]
   proteinado?: string[]
   racao?: string[]
@@ -76,6 +77,7 @@ export async function loadFromCache(): Promise<CadastroCacheData | null> {
         causasMorte: cached[CACHE_KEYS.PASTOS_LOTES]?.causasMorte || [],
         bebedouros: cached[CACHE_KEYS.PASTOS_LOTES]?.bebedouros || [],
         fornecedores: cached[CACHE_KEYS.PASTOS_LOTES]?.fornecedores || [],
+        funcionarios: cached[CACHE_KEYS.PASTOS_LOTES]?.funcionarios || [],
         pastosDetalhes: cached[CACHE_KEYS.PASTOS_LOTES]?.pastosDetalhes || {},
         lotesDetalhes: cached[CACHE_KEYS.PASTOS_LOTES]?.lotesDetalhes || {},
         mineral: cached[CACHE_KEYS.SUPLEMENTACAO]?.mineral || [],
@@ -105,6 +107,7 @@ export async function saveToCache(data: CadastroCacheData): Promise<void> {
       causasMorte: data.causasMorte || [],
       bebedouros: data.bebedouros || [],
       fornecedores: data.fornecedores || [],
+      funcionarios: data.funcionarios || [],
       pastosDetalhes: data.pastosDetalhes || {},
       lotesDetalhes: data.lotesDetalhes || {},
     })
@@ -135,13 +138,14 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
       // Buscar do Supabase
       console.log('[CadastroCache] Buscando dados do Supabase para fazenda:', fazendaId)
       
-      const [pastosData, lotesData, frigorificosData, causasMorteData, bebedourosData, fornecedoresData, mineralData, proteinadoData, racaoData, insumosData, dietasData] = await Promise.all([
+      const [pastosData, lotesData, frigorificosData, causasMorteData, bebedourosData, fornecedoresData, funcionariosData, mineralData, proteinadoData, racaoData, insumosData, dietasData] = await Promise.all([
         supabaseService.getPastos(fazendaId),
         supabaseService.getLotes(fazendaId),
         supabaseService.getFrigorificos(fazendaId),
         supabaseService.getCausasMorte(fazendaId),
         supabaseService.getBebedouros(fazendaId),
         supabaseService.getFornecedores(fazendaId),
+        supabaseService.getFuncionarios(fazendaId),
         supabaseService.getMineral(fazendaId),
         supabaseService.getProteinado(fazendaId),
         supabaseService.getRacao(fazendaId),
@@ -155,6 +159,7 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
       const causasMorte = causasMorteData?.map((c: any) => c.nome) || []
       const bebedouros = bebedourosData?.map((b: any) => b.nome) || []
       const fornecedores = fornecedoresData?.map((f: any) => f.nome) || []
+      const funcionarios = funcionariosData?.map((f: any) => f.nome) || []
       const mineral = mineralData?.map((m: any) => m.nome) || []
       const proteinado = proteinadoData?.map((p: any) => p.nome) || []
       const racao = racaoData?.map((r: any) => r.nome) || []
@@ -168,6 +173,7 @@ async function fetchCadastroData(cadastroSheetUrl: string, fazendaId?: string): 
         causasMorte,
         bebedouros,
         fornecedores,
+        funcionarios,
         pastosDetalhes: {},
         lotesDetalhes: {},
         mineral,
@@ -370,6 +376,7 @@ export function getCachedCadastroData(): CadastroCacheData | null {
     causasMorte: [...(cacheData.causasMorte || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
     bebedouros: [...(cacheData.bebedouros || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
     fornecedores: [...(cacheData.fornecedores || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    funcionarios: [...(cacheData.funcionarios || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
     mineral: [...(cacheData.mineral || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
     proteinado: [...(cacheData.proteinado || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
     racao: [...(cacheData.racao || [])].sort((a, b) => a.localeCompare(b, 'pt-BR')),
