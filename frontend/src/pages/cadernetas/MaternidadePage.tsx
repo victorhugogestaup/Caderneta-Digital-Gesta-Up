@@ -48,6 +48,8 @@ const RACAS = [
   { value: 'Nelore', label: 'NELORE' },
   { value: 'Angus', label: 'ANGUS' },
   { value: 'Leiteiro', label: 'LEITEIRO' },
+  { value: 'Anelorado', label: 'ANELORADO' },
+  { value: 'SRD', label: 'SRD' },
   { value: 'Outros', label: 'OUTROS' },
 ]
 

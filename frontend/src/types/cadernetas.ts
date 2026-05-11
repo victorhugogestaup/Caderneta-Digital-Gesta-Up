@@ -123,34 +123,18 @@ export interface RegistroMovimentacao extends Registro {
 }
 
 export interface RegistroEnfermaria extends Registro {
-  pasto: string
   lote: string
   brincoChip: string
   categoria: string
   tratamento: string
   tratamentoOutros: string
-  problemaCasco: 'S' | 'N'
-  problemaCascoObs: string
-  sintomasPneumonia: 'S' | 'N'
-  sintomasPneumoniaObs: string
-  picadoCobra: 'S' | 'N'
-  picadoCobraObs: string
-  incoordenacaoTremores: 'S' | 'N'
-  incoordenacaoTremoresObs: string
-  febreAlta: 'S' | 'N'
-  febreAltaObs: string
-  presencaSangue: 'S' | 'N'
-  presencaSangueObs: string
-  fraturas: 'S' | 'N'
-  fraturasObs: string
-  desordensDigestivas: 'S' | 'N'
-  desordensDigestivasObs: string
-  cegueira: 'S' | 'N'
-  cegueiraObs: string
-  andarCambaleante: 'S' | 'N'
-  andarCambaleanteObs: string
-  bicheira: 'S' | 'N'
-  bicheiraObs: string
+  diagnosticos: {
+    [key: string]: {
+      valor: boolean | null | 'S' | 'N'
+      observacao: string | null
+    }
+  }
+  observacao: string
 }
 
 export interface RegistroEntradaInsumos extends Registro {
@@ -203,20 +187,12 @@ export interface RegistroMorte extends Registro {
   pesoVivo: number | null
   causaMorte: string
   causaMorteOutros: string
-  secrecaoOrificios: 'S' | 'N'
-  secrecaoOrificiosObs: string
-  sintomasPneumonia: 'S' | 'N'
-  sintomasPneumoniaObs: string
-  inchaco: 'S' | 'N'
-  inchacoObs: string
-  incoordenacaoTremores: 'S' | 'N'
-  incoordenacaoTremoresObs: string
-  apatiaFraqueza: 'S' | 'N'
-  apatiaFraquezaObs: string
-  presencaSangue: 'S' | 'N'
-  presencaSangueObs: string
-  desordensDigestivas: 'S' | 'N'
-  desordensDigestivasObs: string
+  diagnosticos: {
+    [key: string]: {
+      valor: string | null
+      observacao: string
+    }
+  }
 }
 
 export interface RegistroProblemas extends Registro {

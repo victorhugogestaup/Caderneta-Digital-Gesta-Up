@@ -129,28 +129,13 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     categoria: Joi.string().required(),
     tratamento: Joi.string().allow(''),
     observacaoTratamento: Joi.string().allow(''),
-    problemaCasco: Joi.string().valid('S', 'N').allow(null),
-    problemaCascoObs: Joi.string().allow(''),
-    sintomasPneumonia: Joi.string().valid('S', 'N').allow(null),
-    sintomasPneumoniaObs: Joi.string().allow(''),
-    picadoCobra: Joi.string().valid('S', 'N').allow(null),
-    picadoCobraObs: Joi.string().allow(''),
-    incoordenacaoTremores: Joi.string().valid('S', 'N').allow(null),
-    incoordenacaoTremoresObs: Joi.string().allow(''),
-    febreAlta: Joi.string().valid('S', 'N').allow(null),
-    febreAltaObs: Joi.string().allow(''),
-    presencaSangue: Joi.string().valid('S', 'N').allow(null),
-    presencaSangueObs: Joi.string().allow(''),
-    fraturas: Joi.string().valid('S', 'N').allow(null),
-    fraturasObs: Joi.string().allow(''),
-    desordensDigestivas: Joi.string().valid('S', 'N').allow(null),
-    desordensDigestivasObs: Joi.string().allow(''),
-    cegueira: Joi.string().valid('S', 'N').allow(null),
-    cegueiraObs: Joi.string().allow(''),
-    andarCambaleante: Joi.string().valid('S', 'N').allow(null),
-    andarCambaleanteObs: Joi.string().allow(''),
-    bicheira: Joi.string().valid('S', 'N').allow(null),
-    bicheiraObs: Joi.string().allow(''),
+    diagnosticos: Joi.object().pattern(
+      /\S/,
+      Joi.object({
+        valor: Joi.alternatives().try(Joi.boolean(), Joi.string().valid('S', 'N').allow(null), Joi.valid(null)),
+        observacao: Joi.string().allow('', null)
+      })
+    ).default({}),
   }),
 
   movimentacao: Joi.object({
@@ -180,20 +165,13 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     pesoVivo: Joi.number().min(0).allow(null),
     causaMorte: Joi.string().required(),
     causaMorteOutros: Joi.string().allow(''),
-    secrecaoOrificios: Joi.string().valid('S', 'N').required(),
-    secrecaoOrificiosObs: Joi.string().allow(''),
-    sintomasPneumonia: Joi.string().valid('S', 'N').required(),
-    sintomasPneumoniaObs: Joi.string().allow(''),
-    inchaco: Joi.string().valid('S', 'N').required(),
-    inchacoObs: Joi.string().allow(''),
-    incoordenacaoTremores: Joi.string().valid('S', 'N').required(),
-    incoordenacaoTremoresObs: Joi.string().allow(''),
-    apatiaFraqueza: Joi.string().valid('S', 'N').required(),
-    apatiaFraquezaObs: Joi.string().allow(''),
-    presencaSangue: Joi.string().valid('S', 'N').required(),
-    presencaSangueObs: Joi.string().allow(''),
-    desordensDigestivas: Joi.string().valid('S', 'N').required(),
-    desordensDigestivasObs: Joi.string().allow(''),
+    diagnosticos: Joi.object().pattern(
+      /\S/,
+      Joi.object({
+        valor: Joi.alternatives().try(Joi.boolean(), Joi.string().valid('S', 'N').allow(null), Joi.valid(null)),
+        observacao: Joi.string().allow('', null)
+      })
+    ).default({}),
   }),
   clima: Joi.object({
     data: Joi.string().pattern(/^\d{2}\/\d{2}\/\d{4}$/).required(),

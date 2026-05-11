@@ -29,14 +29,14 @@ const TRATAMENTOS = [
 ]
 
 const DIAGNOSTICOS = [
-  { campo: 'problemaCasco', label: 'PROBLEMA DE CASCO?' },
-  { campo: 'sintomasPneumonia', label: 'SINTOMAS PNEUMONIA?' },
+  { campo: 'pododermiteCascos', label: 'PODODERMITE DOS CASCOS?' },
+  { campo: 'sintomasPneumonia', label: 'SINTOMAS DE PNEUMONIA?' },
   { campo: 'picadoCobra', label: 'PICADO POR COBRA?' },
   { campo: 'incoordenacaoTremores', label: 'INCOORDENAÇÃO E TREMORES MUSCULARES?' },
   { campo: 'febreAlta', label: 'FEBRE ALTA?' },
-  { campo: 'presencaSangue', label: 'PRESENÇA DE SANGUE?' },
-  { campo: 'fraturas', label: 'FRATURAS?' },
-  { campo: 'desordensDigestivas', label: 'DESORDENS DIGESTIVAS?' },
+  { campo: 'presencaSangue', label: 'EXISTE ALGUM SANGRAMENTO?' },
+  { campo: 'fraturas', label: 'ALGUMA FRATURA / DESLOCAMENTO DE MEMBROS?' },
+  { campo: 'desordensDigestivas', label: 'DESORDENS DIGESTIVAS / TIMPANISMO / DIARREIA?' },
   { campo: 'cegueira', label: 'CEGUEIRA?' },
   { campo: 'andarCambaleante', label: 'ANDAR CAMBALEANTE?' },
   { campo: 'bicheira', label: 'TEM BICHEIRA?' },
@@ -80,28 +80,12 @@ interface FormState {
   outrosTexto: string
   tratamentos: string[]
   tratamentoOutros: string
-  problemaCasco: string
-  problemaCascoObs: string
-  sintomasPneumonia: string
-  sintomasPneumoniaObs: string
-  picadoCobra: string
-  picadoCobraObs: string
-  incoordenacaoTremores: string
-  incoordenacaoTremoresObs: string
-  febreAlta: string
-  febreAltaObs: string
-  presencaSangue: string
-  presencaSangueObs: string
-  fraturas: string
-  fraturasObs: string
-  desordensDigestivas: string
-  desordensDigestivasObs: string
-  cegueira: string
-  cegueiraObs: string
-  andarCambaleante: string
-  andarCambaleanteObs: string
-  bicheira: string
-  bicheiraObs: string
+  diagnosticos: {
+    [key: string]: {
+      valor: string | null
+      observacao: string
+    }
+  }
   observacaoTratamento: string
 }
 
@@ -115,28 +99,10 @@ const makeInitial = (): FormState => ({
   outrosTexto: '',
   tratamentos: [],
   tratamentoOutros: '',
-  problemaCasco: '',
-  problemaCascoObs: '',
-  sintomasPneumonia: '',
-  sintomasPneumoniaObs: '',
-  picadoCobra: '',
-  picadoCobraObs: '',
-  incoordenacaoTremores: '',
-  incoordenacaoTremoresObs: '',
-  febreAlta: '',
-  febreAltaObs: '',
-  presencaSangue: '',
-  presencaSangueObs: '',
-  fraturas: '',
-  fraturasObs: '',
-  desordensDigestivas: '',
-  desordensDigestivasObs: '',
-  cegueira: '',
-  cegueiraObs: '',
-  andarCambaleante: '',
-  andarCambaleanteObs: '',
-  bicheira: '',
-  bicheiraObs: '',
+  diagnosticos: DIAGNOSTICOS.reduce((acc, { campo }) => {
+    acc[campo] = { valor: null, observacao: '' }
+    return acc
+  }, {} as FormState['diagnosticos']),
   observacaoTratamento: '',
 })
 
@@ -154,6 +120,24 @@ export default function EnfermariaPage() {
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const setDiagnosticoValor = (campo: string) => (val: string) =>
+    setForm((p) => ({
+      ...p,
+      diagnosticos: {
+        ...p.diagnosticos,
+        [campo]: { ...p.diagnosticos[campo], valor: val }
+      }
+    }))
+
+  const setDiagnosticoObs = (campo: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((p) => ({
+      ...p,
+      diagnosticos: {
+        ...p.diagnosticos,
+        [campo]: { ...p.diagnosticos[campo], observacao: e.target.value }
+      }
+    }))
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
 
@@ -250,28 +234,7 @@ export default function EnfermariaPage() {
       brinco: form.brinco,
       chip: form.chip,
       categoria: categoriasString,
-      problemaCasco: form.problemaCasco,
-      problemaCascoObs: form.problemaCascoObs,
-      sintomasPneumonia: form.sintomasPneumonia,
-      sintomasPneumoniaObs: form.sintomasPneumoniaObs,
-      picadoCobra: form.picadoCobra,
-      picadoCobraObs: form.picadoCobraObs,
-      incoordenacaoTremores: form.incoordenacaoTremores,
-      incoordenacaoTremoresObs: form.incoordenacaoTremoresObs,
-      febreAlta: form.febreAlta,
-      febreAltaObs: form.febreAltaObs,
-      presencaSangue: form.presencaSangue,
-      presencaSangueObs: form.presencaSangueObs,
-      fraturas: form.fraturas,
-      fraturasObs: form.fraturasObs,
-      desordensDigestivas: form.desordensDigestivas,
-      desordensDigestivasObs: form.desordensDigestivasObs,
-      cegueira: form.cegueira,
-      cegueiraObs: form.cegueiraObs,
-      andarCambaleante: form.andarCambaleante,
-      andarCambaleanteObs: form.andarCambaleanteObs,
-      bicheira: form.bicheira,
-      bicheiraObs: form.bicheiraObs,
+      diagnosticos: form.diagnosticos,
       tratamento: tratamentoFinal,
       observacaoTratamento: form.observacaoTratamento,
     })
@@ -442,17 +405,21 @@ export default function EnfermariaPage() {
                 name={campo}
                 label={label}
                 options={SN_OPTIONS}
-                value={form[campo as keyof FormState] as string}
-                onChange={(val) => setForm((p) => ({ ...p, [campo]: val }))}
+                value={form.diagnosticos[campo]?.valor || ''}
+                onChange={setDiagnosticoValor(campo)}
                 error={getError(campo)}
                 gridCols={2}
               />
-              <Input
-                placeholder="Adicionar observação (opcional)"
-                value={(form as any)[`${campo}Obs`]}
-                onChange={(e) => setForm((p) => ({ ...p, [`${campo}Obs`]: e.target.value }))}
-                className="mt-2"
-              />
+              {form.diagnosticos[campo]?.valor === 'S' && (
+                <Input
+                  label="OBSERVAÇÃO"
+                  placeholder="Descreva observações..."
+                  value={form.diagnosticos[campo]?.observacao || ''}
+                  onChange={setDiagnosticoObs(campo)}
+                  error={getError(`${campo}Obs`)}
+                  className="mt-3"
+                />
+              )}
             </div>
           ))}
         </div>

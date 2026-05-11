@@ -14,8 +14,8 @@ import * as supabaseService from './supabaseService'
 
 interface ColumnMapping {
   field: keyof Registro
-  defaultValue?: string | number
-  transform?: (value: any) => string | number | null
+  defaultValue?: string | number | object
+  transform?: (value: any) => string | number | null | object
 }
 
 interface CadernetaColumnConfig {
@@ -208,28 +208,7 @@ const CADERNETA_COLUMNS_CONFIG: Record<CadernetaStore, CadernetaColumnConfig> = 
       { field: 'lote' },
       { field: 'brincoChip' },
       { field: 'categoria' },
-      { field: 'problemaCasco' },
-      { field: 'problemaCascoObs', defaultValue: '' },
-      { field: 'sintomasPneumonia' },
-      { field: 'sintomasPneumoniaObs', defaultValue: '' },
-      { field: 'picadoCobra' },
-      { field: 'picadoCobraObs', defaultValue: '' },
-      { field: 'incoordenacaoTremores' },
-      { field: 'incoordenacaoTremoresObs', defaultValue: '' },
-      { field: 'febreAlta' },
-      { field: 'febreAltaObs', defaultValue: '' },
-      { field: 'presencaSangue' },
-      { field: 'presencaSangueObs', defaultValue: '' },
-      { field: 'fraturas' },
-      { field: 'fraturasObs', defaultValue: '' },
-      { field: 'desordensDigestivas' },
-      { field: 'desordensDigestivasObs', defaultValue: '' },
-      { field: 'cegueira' },
-      { field: 'cegueiraObs', defaultValue: '' },
-      { field: 'andarCambaleante' },
-      { field: 'andarCambaleanteObs', defaultValue: '' },
-      { field: 'bicheira' },
-      { field: 'bicheiraObs', defaultValue: '' },
+      { field: 'diagnosticos', defaultValue: {} },
       { field: 'tratamento' },
       { field: 'observacaoTratamento', defaultValue: '' },
     ],
@@ -240,34 +219,16 @@ const CADERNETA_COLUMNS_CONFIG: Record<CadernetaStore, CadernetaColumnConfig> = 
       { field: 'pasto' },
       { field: 'lote' },
       { field: 'brincoChip' },
-      { field: 'vaca' },
-      { field: 'touro' },
-      { field: 'boiGordo' },
-      { field: 'boiMagro' },
-      { field: 'garrote' },
-      { field: 'bezerro' },
-      { field: 'novilha' },
-      { field: 'tropa' },
-      { field: 'outros' },
+      { field: 'categoria' },
+      { field: 'categoriaOutros' },
       { field: 'sexo' },
       { field: 'raca' },
+      { field: 'racaOutros' },
       { field: 'idade' },
       { field: 'pesoVivo' },
       { field: 'causaMorte' },
-      { field: 'secrecaoOrificios' },
-      { field: 'secrecaoOrificiosObs', defaultValue: '' },
-      { field: 'sintomasPneumonia' },
-      { field: 'sintomasPneumoniaObs', defaultValue: '' },
-      { field: 'inchaco' },
-      { field: 'inchacoObs', defaultValue: '' },
-      { field: 'incoordenacaoTremores' },
-      { field: 'incoordenacaoTremoresObs', defaultValue: '' },
-      { field: 'apatiaFraqueza' },
-      { field: 'apatiaFraquezaObs', defaultValue: '' },
-      { field: 'presencaSangue' },
-      { field: 'presencaSangueObs', defaultValue: '' },
-      { field: 'desordensDigestivas' },
-      { field: 'desordensDigestivasObs', defaultValue: '' },
+      { field: 'causaMorteOutros' },
+      { field: 'diagnosticos', defaultValue: {} },
     ],
   },
   'entrada-insumos': {
@@ -333,7 +294,7 @@ const CADERNETA_COLUMNS_CONFIG: Record<CadernetaStore, CadernetaColumnConfig> = 
   },
 }
 
-function getColumnValues(store: CadernetaStore, registro: Registro): (string | number | null)[] {
+function getColumnValues(store: CadernetaStore, registro: Registro): (string | number | null | object)[] {
   const config = CADERNETA_COLUMNS_CONFIG[store]
   return config.columns.map((mapping) => {
     const value = registro[mapping.field]
@@ -343,7 +304,7 @@ function getColumnValues(store: CadernetaStore, registro: Registro): (string | n
     if (value === undefined || value === null || value === '') {
       return mapping.defaultValue ?? ''
     }
-    return value as string | number
+    return value as string | number | object
   })
 }
 
@@ -367,7 +328,7 @@ export async function enqueueRegistro(
 const USE_SUPABASE = import.meta.env.VITE_USE_SUPABASE === 'true'
 
 // Mapeamento de CadernetaStore para tabelas do Supabase
-const CADERNETA_TO_SUPABASE_TABLE: Record<CadernetaStore, string> = {
+const CADERNETA_TO_SUPABASE_TABLE: Record<CadernetaStore, string | string[]> = {
   maternidade: 'registros_maternidade',
   pastagens: 'registros_pastagens',
   rodeio: 'registros_rodeio',
@@ -562,28 +523,7 @@ function registroToSupabase(store: CadernetaStore, registro: Registro, fazendaId
         brinco: registro.brinco || null,
         chip: registro.chip || null,
         categoria: registro.categoria || null,
-        problema_casco: registro.problemaCasco === 'S' || registro.problemaCasco === 'Sim',
-        problema_casco_obs: registro.problemaCascoObs || null,
-        sintomas_pneumonia: registro.sintomasPneumonia === 'S' || registro.sintomasPneumonia === 'Sim',
-        sintomas_pneumonia_obs: registro.sintomasPneumoniaObs || null,
-        picado_cobra: registro.picadoCobra === 'S' || registro.picadoCobra === 'Sim',
-        picado_cobra_obs: registro.picadoCobraObs || null,
-        incoordenacao_tremores: registro.incoordenacaoTremores === 'S' || registro.incoordenacaoTremores === 'Sim',
-        incoordenacao_tremores_obs: registro.incoordenacaoTremoresObs || null,
-        febre_alta: registro.febreAlta === 'S' || registro.febreAlta === 'Sim',
-        febre_alta_obs: registro.febreAltaObs || null,
-        presenca_sangue: registro.presencaSangue === 'S' || registro.presencaSangue === 'Sim',
-        presenca_sangue_obs: registro.presencaSangueObs || null,
-        fraturas: registro.fraturas === 'S' || registro.fraturas === 'Sim',
-        fraturas_obs: registro.fraturasObs || null,
-        desordens_digestivas: registro.desordensDigestivas === 'S' || registro.desordensDigestivas === 'Sim',
-        desordens_digestivas_obs: registro.desordensDigestivasObs || null,
-        cegueira: registro.cegueira === 'S' || registro.cegueira === 'Sim',
-        cegueira_obs: registro.cegueiraObs || null,
-        andar_cambaleante: registro.andarCambaleante === 'S' || registro.andarCambaleante === 'Sim',
-        andar_cambaleante_obs: registro.andarCambaleanteObs || null,
-        bicheira: registro.bicheira === 'S' || registro.bicheira === 'Sim',
-        bicheira_obs: registro.bicheiraObs || null,
+        diagnosticos: registro.diagnosticos || {},
         tratamento: registro.tratamento || null,
         tratamento_obs: registro.observacaoTratamento || null,
       }
@@ -602,20 +542,7 @@ function registroToSupabase(store: CadernetaStore, registro: Registro, fazendaId
         idade: registro.idade || null,
         peso_vivo: registro.pesoVivo ? Number(registro.pesoVivo) : null,
         causa_morte: registro.causaMorte || null,
-        secrecao_orificios: registro.secrecaoOrificios === 'S' || registro.secrecaoOrificios === 'Sim',
-        secrecao_orificios_obs: registro.secrecaoOrificiosObs || null,
-        sintomas_pneumonia: registro.sintomasPneumonia === 'S' || registro.sintomasPneumonia === 'Sim',
-        sintomas_pneumonia_obs: registro.sintomasPneumoniaObs || null,
-        inchaco: registro.inchaco === 'S' || registro.inchaco === 'Sim',
-        inchaco_obs: registro.inchacoObs || null,
-        incoordenacao_tremores: registro.incoordenacaoTremores === 'S' || registro.incoordenacaoTremores === 'Sim',
-        incoordenacao_tremores_obs: registro.incoordenacaoTremoresObs || null,
-        apatia_fraqueza: registro.apatiaFraqueza === 'S' || registro.apatiaFraqueza === 'Sim',
-        apatia_fraqueza_obs: registro.apatiaFraquezaObs || null,
-        presenca_sangue: registro.presencaSangue === 'S' || registro.presencaSangue === 'Sim',
-        presenca_sangue_obs: registro.presencaSangueObs || null,
-        desordens_digestivas: registro.desordensDigestivas === 'S' || registro.desordensDigestivas === 'Sim',
-        desordens_digestivas_obs: registro.desordensDigestivasObs || null,
+        diagnosticos: registro.diagnosticos || {},
       }
     case 'clima':
       return {

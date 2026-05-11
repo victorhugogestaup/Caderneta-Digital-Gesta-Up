@@ -54,13 +54,14 @@ const CATEGORIAS = [
 ]
 
 const DIAGNOSTICOS = [
-  { campo: 'secrecaoOrificios', label: 'SECREÇÃO NOS ORIFÍCIOS?' },
-  { campo: 'sintomasPneumonia', label: 'SINTOMAS PNEUMONIA?' },
-  { campo: 'inchaco', label: 'INCHAÇO?' },
-  { campo: 'incoordenacaoTremores', label: 'INCOORDENAÇÃO E TREMORES MUSCULARES?' },
+  { campo: 'secrecaoOrificios', label: 'ALGUMA SECREÇÃO NOS ORIFÍCIOS?' },
+  { campo: 'sintomasPneumonia', label: 'SINTOMAS DE PNEUMONIA?' },
+  { campo: 'inchaco', label: 'EXISTE ALGUM SANGRAMENTO?' },
+  { campo: 'incoordenacaoTremores', label: 'INCOORDENAÇÃO / PEDALAGEM E TREMORES MUSCULARES DA MORTE?' },
   { campo: 'apatiaFraqueza', label: 'APATIA OU FRAQUEZA?' },
-  { campo: 'presencaSangue', label: 'PRESENÇA DE SANGUE?' },
-  { campo: 'desordensDigestivas', label: 'DESORDENS DIGESTIVAS?' },
+  { campo: 'desordensDigestivas', label: 'DESORDENS DIGESTIVAS / TIMPANISMO / DIARREIA?' },
+  { campo: 'fraturas', label: 'ALGUMA FRATURA / DESLOCAMENTO DE MEMBROS?' },
+  { campo: 'decomposicao', label: 'ANIMAL EM DECOMPOSIÇÃO / PUTREFAÇÃO?' },
 ]
 
 interface FormState {
@@ -78,20 +79,12 @@ interface FormState {
   pesoVivo: string
   causaMorte: string
   causaMorteOutros: string
-  secrecaoOrificios: string
-  secrecaoOrificiosObs: string
-  sintomasPneumonia: string
-  sintomasPneumoniaObs: string
-  inchaco: string
-  inchacoObs: string
-  incoordenacaoTremores: string
-  incoordenacaoTremoresObs: string
-  apatiaFraqueza: string
-  apatiaFraquezaObs: string
-  presencaSangue: string
-  presencaSangueObs: string
-  desordensDigestivas: string
-  desordensDigestivasObs: string
+  diagnosticos: {
+    [key: string]: {
+      valor: string | null
+      observacao: string
+    }
+  }
 }
 
 const makeInitial = (): FormState => ({
@@ -109,20 +102,10 @@ const makeInitial = (): FormState => ({
   pesoVivo: '',
   causaMorte: '',
   causaMorteOutros: '',
-  secrecaoOrificios: '',
-  secrecaoOrificiosObs: '',
-  sintomasPneumonia: '',
-  sintomasPneumoniaObs: '',
-  inchaco: '',
-  inchacoObs: '',
-  incoordenacaoTremores: '',
-  incoordenacaoTremoresObs: '',
-  apatiaFraqueza: '',
-  apatiaFraquezaObs: '',
-  presencaSangue: '',
-  presencaSangueObs: '',
-  desordensDigestivas: '',
-  desordensDigestivasObs: '',
+  diagnosticos: DIAGNOSTICOS.reduce((acc, { campo }) => {
+    acc[campo] = { valor: '', observacao: '' }
+    return acc
+  }, {} as FormState['diagnosticos']),
 })
 
 export default function MortePage() {
@@ -140,6 +123,24 @@ export default function MortePage() {
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
+
+  const setDiagnosticoValor = (campo: string) => (val: string) =>
+    setForm((p) => ({
+      ...p,
+      diagnosticos: {
+        ...p.diagnosticos,
+        [campo]: { ...p.diagnosticos[campo], valor: val }
+      }
+    }))
+
+  const setDiagnosticoObs = (campo: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((p) => ({
+      ...p,
+      diagnosticos: {
+        ...p.diagnosticos,
+        [campo]: { ...p.diagnosticos[campo], observacao: e.target.value }
+      }
+    }))
 
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
 
@@ -240,20 +241,7 @@ export default function MortePage() {
       idade: form.idade,
       pesoVivo: form.pesoVivo ? Number(form.pesoVivo) : null,
       causaMorte: causaMorteFinal,
-      secrecaoOrificios: form.secrecaoOrificios,
-      secrecaoOrificiosObs: form.secrecaoOrificiosObs,
-      sintomasPneumonia: form.sintomasPneumonia,
-      sintomasPneumoniaObs: form.sintomasPneumoniaObs,
-      inchaco: form.inchaco,
-      inchacoObs: form.inchacoObs,
-      incoordenacaoTremores: form.incoordenacaoTremores,
-      incoordenacaoTremoresObs: form.incoordenacaoTremoresObs,
-      apatiaFraqueza: form.apatiaFraqueza,
-      apatiaFraquezaObs: form.apatiaFraquezaObs,
-      presencaSangue: form.presencaSangue,
-      presencaSangueObs: form.presencaSangueObs,
-      desordensDigestivas: form.desordensDigestivas,
-      desordensDigestivasObs: form.desordensDigestivasObs,
+      diagnosticos: form.diagnosticos,
     })
 
     setSalvando(false)
@@ -516,17 +504,21 @@ export default function MortePage() {
                 name={campo}
                 label={label}
                 options={SN_OPTIONS}
-                value={form[campo as keyof FormState] as string}
-                onChange={(val) => setForm((p) => ({ ...p, [campo]: val }))}
+                value={form.diagnosticos[campo]?.valor || ''}
+                onChange={setDiagnosticoValor(campo)}
                 error={getError(campo)}
                 gridCols={2}
               />
-              <Input
-                placeholder="Adicionar observação (opcional)"
-                value={(form as any)[`${campo}Obs`]}
-                onChange={(e) => setForm((p) => ({ ...p, [`${campo}Obs`]: e.target.value }))}
-                className="mt-2"
-              />
+              {form.diagnosticos[campo]?.valor === 'S' && (
+                <Input
+                  label="OBSERVAÇÃO"
+                  placeholder="Adicionar observação (opcional)"
+                  value={form.diagnosticos[campo]?.observacao || ''}
+                  onChange={setDiagnosticoObs(campo)}
+                  error={getError(`${campo}Obs`)}
+                  className="mt-3"
+                />
+              )}
             </div>
           ))}
         </div>

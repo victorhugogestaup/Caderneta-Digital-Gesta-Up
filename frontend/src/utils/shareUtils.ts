@@ -561,7 +561,25 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'chip',
       'categoria',
       'tratamento',
-      'problemaCasco',
+    ]
+    
+    ordemEnfermaria.forEach(key => {
+      const value = registro[key]
+      if (value !== null && value !== undefined && value !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = formatFieldValue(key, value)
+        texto += `${label}: *${valorFormatado}*\n`
+      }
+    })
+
+    // Adicionar observação do tratamento
+    if (registro.observacaoTratamento && registro.observacaoTratamento !== '') {
+      texto += `OBSERVAÇÃO: *${registro.observacaoTratamento}*\n`
+    }
+
+    // Iterar sobre diagnosticos na ordem específica
+    const ordemDiagnosticos = [
+      'pododermiteCascos',
       'sintomasPneumonia',
       'picadoCobra',
       'incoordenacaoTremores',
@@ -573,20 +591,19 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'andarCambaleante',
       'bicheira'
     ]
+
+    texto += '\nDIAGNÓSTICOS:\n'
     
-    ordemEnfermaria.forEach(key => {
-      const value = registro[key]
-      if (value !== null && value !== undefined && value !== '') {
+    ordemDiagnosticos.forEach(key => {
+      const data = (registro.diagnosticos as any)?.[key]
+      if (data && data.valor !== null && data.valor !== undefined && data.valor !== '') {
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-        const valorFormatado = formatFieldValue(key, value)
+        const valorFormatado = data.valor === 'S' || data.valor === true ? 'Sim' : 'Não'
         texto += `${label}: *${valorFormatado}*\n`
-      }
-      
-      // Adicionar observação imediatamente após o campo principal
-      const obsField = `${key}Obs`
-      if (registro[obsField] && registro[obsField] !== '') {
-        const label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-        texto += `${label} - OBSERVAÇÃO: *${registro[obsField]}*\n`
+        
+        if (data.observacao && data.observacao !== '') {
+          texto += `OBSERVAÇÃO: *${data.observacao}*\n`
+        }
       }
     })
   } else if (caderneta === 'morte') {
@@ -603,13 +620,6 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'idade',
       'pesoVivo',
       'causaMorte',
-      'secrecaoOrificios',
-      'sintomasPneumonia',
-      'inchaco',
-      'incoordenacaoTremores',
-      'apatiaFraqueza',
-      'presencaSangue',
-      'desordensDigestivas'
     ]
     
     ordemMorte.forEach(key => {
@@ -624,18 +634,7 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         return
       }
       
-      if (['secrecaoOrificios', 'sintomasPneumonia', 'inchaco', 'incoordenacaoTremores', 'apatiaFraqueza', 'presencaSangue', 'desordensDigestivas'].includes(key)) {
-        // Para campos booleanos de diagnóstico, sempre incluir mostrando Sim/Não
-        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-        const valorFormatado = value === true || value === 'S' ? 'Sim' : 'Não'
-        texto += `${label}: *${valorFormatado}*\n`
-        
-        // Adicionar observação imediatamente após o campo principal (apenas texto OBSERVAÇÃO)
-        const obsField = `${key}Obs`
-        if (registro[obsField] && registro[obsField] !== '') {
-          texto += `OBSERVAÇÃO: *${registro[obsField]}*\n`
-        }
-      } else if (value !== null && value !== undefined && value !== '') {
+      if (value !== null && value !== undefined && value !== '') {
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
         const valorFormatado = formatFieldValue(key, value)
         texto += `${label}: *${valorFormatado}*\n`
@@ -648,6 +647,33 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         // Adicionar quebra de linha após causa da morte
         if (key === 'causaMorte') {
           texto += `\n`
+        }
+      }
+    })
+
+    // Iterar sobre diagnosticos na ordem específica
+    const ordemDiagnosticos = [
+      'secrecaoOrificios',
+      'sintomasPneumonia',
+      'inchaco',
+      'incoordenacaoTremores',
+      'apatiaFraqueza',
+      'desordensDigestivas',
+      'fraturas',
+      'decomposicao'
+    ]
+
+    texto += '\nDIAGNÓSTICOS:\n'
+    
+    ordemDiagnosticos.forEach(key => {
+      const data = (registro.diagnosticos as any)?.[key]
+      if (data && data.valor !== null && data.valor !== undefined && data.valor !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = data.valor === 'S' || data.valor === true ? 'Sim' : 'Não'
+        texto += `${label}: *${valorFormatado}*\n`
+        
+        if (data.observacao && data.observacao !== '') {
+          texto += `OBSERVAÇÃO: *${data.observacao}*\n`
         }
       }
     })
