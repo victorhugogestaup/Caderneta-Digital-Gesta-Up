@@ -177,7 +177,6 @@ export function validateRodeio(data: Record<string, unknown>): ValidationResult 
   if (categoriasError) errors.push(categoriasError)
 
   const avaliacoesSN: Record<string, string> = {
-    escoreGadoIdeal: 'Escore do gado ideal',
     bebedourosCochos: 'Bebedouros / Cochos',
     pastagensTaxaLotacao: 'Pastagens / Taxa de lotação',
     animaisMachucadosDoentesBichados: 'Animais machucados / doentes / bichados',
@@ -187,7 +186,8 @@ export function validateRodeio(data: Record<string, unknown>): ValidationResult 
     animalMorto: 'Animal morto',
   }
   Object.entries(avaliacoesSN).forEach(([campo, label]) => {
-    if (!isSnBoolean(data[campo]))
+    const valor = (data.diagnosticos as any)?.[campo]?.valor
+    if (!isSnBoolean(valor))
       errors.push({ field: campo, message: `${label}: selecione SIM ou NÃO` })
   })
 

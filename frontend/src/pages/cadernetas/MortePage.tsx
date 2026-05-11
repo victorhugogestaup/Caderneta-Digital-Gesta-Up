@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { Button, Input, DatePicker, ValidationMessage, SearchableModal, Radio } from '../../components/ui'
 import SuccessModal from '../../components/SuccessModal'
+import PdfModal from '../../components/PdfModal'
 import { salvarRegistro } from '../../services/api'
 import { todayBR } from '../../utils/formatDate'
 import { RootState } from '../../store/store'
@@ -13,6 +14,8 @@ import { scrollToFirstError } from '../../utils/scrollToError'
 import LoteDetalhesCard from '../../components/LoteDetalhesCard'
 import { eventBus, CADASTRO_CACHE_UPDATED } from '../../utils/eventBus'
 import { supabase } from '../../services/supabaseClient'
+
+const BASE = import.meta.env.BASE_URL
 
 const SEXO = [
   { value: 'Macho', label: 'MACHO', icon: '♂️' },
@@ -62,6 +65,27 @@ const DIAGNOSTICOS = [
   { campo: 'desordensDigestivas', label: 'DESORDENS DIGESTIVAS / TIMPANISMO / DIARREIA?' },
   { campo: 'fraturas', label: 'ALGUMA FRATURA / DESLOCAMENTO DE MEMBROS?' },
   { campo: 'decomposicao', label: 'ANIMAL EM DECOMPOSIÇÃO / PUTREFAÇÃO?' },
+  { campo: 'doencasPrevias', label: 'HAVIA DOENÇAS PRÉVIAS?' },
+  { campo: 'medicamentosRecentes', label: 'RECEBEU MEDICAMENTOS RECENTEMENTE?' },
+  { campo: 'morteSubita', label: 'A MORTE FOI SÚBITA?' },
+  { campo: 'animalSozinho', label: 'ANIMAL MORREU SOZINHO?' },
+  { campo: 'salivacaoExcessiva', label: 'SALIVAÇÃO EXCESSIVA?' },
+  { campo: 'sinaisIntoxicacao', label: 'EXISTEM SINAIS DE INTOXICAÇÃO?' },
+  { campo: 'carrapatosMoscas', label: 'PRESENÇA DE CARRAPATOS / MOSCAS?' },
+  { campo: 'encontradoVivo', label: 'ANIMAL FOI ENCONTRADO VIVO?' },
+  { campo: 'medicado', label: 'ANIMAL CHEGOU A SER MEDICADO?' },
+]
+
+const ESCORES = [
+  { value: '1', label: '1', color: 'bg-red-500' },
+  { value: '1.5', label: '1.5', color: 'bg-red-500' },
+  { value: '2', label: '2', color: 'bg-yellow-400' },
+  { value: '2.5', label: '2.5', color: 'bg-yellow-400' },
+  { value: '3', label: '3', color: 'bg-green-500' },
+  { value: '3.5', label: '3.5', color: 'bg-green-500' },
+  { value: '4', label: '4', color: 'bg-yellow-400' },
+  { value: '4.5', label: '4.5', color: 'bg-yellow-400' },
+  { value: '5', label: '5', color: 'bg-red-500' },
 ]
 
 interface FormState {
@@ -79,6 +103,9 @@ interface FormState {
   pesoVivo: string
   causaMorte: string
   causaMorteOutros: string
+  escore: string
+  nutricaoAtual: string
+  nutricaoAnterior: string
   diagnosticos: {
     [key: string]: {
       valor: string | null
@@ -102,6 +129,9 @@ const makeInitial = (): FormState => ({
   pesoVivo: '',
   causaMorte: '',
   causaMorteOutros: '',
+  escore: '',
+  nutricaoAtual: '',
+  nutricaoAnterior: '',
   diagnosticos: DIAGNOSTICOS.reduce((acc, { campo }) => {
     acc[campo] = { valor: '', observacao: '' }
     return acc
@@ -115,11 +145,13 @@ export default function MortePage() {
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showEscoreModal, setShowEscoreModal] = useState(false)
   const [registroSalvo, setRegistroSalvo] = useState<any>(null)
   const [pastosDisponiveis, setPastosDisponiveis] = useState<string[]>([])
   const [lotesDisponiveis, setLotesDisponiveis] = useState<string[]>([])
   const [detalhesLote, setDetalhesLote] = useState<any>(null)
   const [causasMorte, setCausasMorte] = useState<{ value: string; label: string }[]>([])
+  const [dietas, setDietas] = useState<{ value: string; label: string }[]>([])
 
   const setInput = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }))
@@ -221,6 +253,39 @@ export default function MortePage() {
     carregarCausasMorte()
   }, [fazendaId])
 
+  // Buscar dietas do Supabase
+  useEffect(() => {
+    async function carregarDietas() {
+      if (!fazendaId) return
+
+      try {
+        const { data, error } = await supabase
+          .from('dietas')
+          .select('nome')
+          .eq('fazenda_id', fazendaId)
+          .eq('ativo', true)
+          .order('nome')
+
+        if (error) {
+          console.error('Erro ao buscar dietas:', error)
+          return
+        }
+
+        if (data) {
+          const dietasList = data.map(d => ({
+            value: d.nome,
+            label: d.nome.toUpperCase()
+          }))
+          setDietas(dietasList)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dietas:', error)
+      }
+    }
+
+    carregarDietas()
+  }, [fazendaId])
+
   const handleSalvar = async () => {
     setSalvando(true)
     setErrors([])
@@ -241,6 +306,9 @@ export default function MortePage() {
       idade: form.idade,
       pesoVivo: form.pesoVivo ? Number(form.pesoVivo) : null,
       causaMorte: causaMorteFinal,
+      escore: form.escore ? Number(form.escore) : null,
+      nutricaoAtual: form.nutricaoAtual || null,
+      nutricaoAnterior: form.nutricaoAnterior || null,
       diagnosticos: form.diagnosticos,
     })
 
@@ -521,6 +589,77 @@ export default function MortePage() {
               )}
             </div>
           ))}
+
+          {dietas.length > 0 ? (
+            <>
+              <SearchableModal
+                label="NUTRIÇÃO ATUAL"
+                value={form.nutricaoAtual}
+                onChange={(val) => setForm((p) => ({ ...p, nutricaoAtual: val }))}
+                error={getError('nutricaoAtual')}
+                options={dietas.map(d => d.value)}
+                placeholder="Buscar nutrição atual..."
+                id="nutricaoAtual"
+                name="nutricaoAtual"
+              />
+              <SearchableModal
+                label="NUTRIÇÃO ANTERIOR"
+                value={form.nutricaoAnterior}
+                onChange={(val) => setForm((p) => ({ ...p, nutricaoAnterior: val }))}
+                error={getError('nutricaoAnterior')}
+                options={dietas.map(d => d.value)}
+                placeholder="Buscar nutrição anterior..."
+                id="nutricaoAnterior"
+                name="nutricaoAnterior"
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                label="NUTRIÇÃO ATUAL"
+                placeholder="Carregando..."
+                value={form.nutricaoAtual}
+                onChange={setInput('nutricaoAtual')}
+                error={getError('nutricaoAtual')}
+                disabled
+                id="nutricaoAtual"
+              />
+              <Input
+                label="NUTRIÇÃO ANTERIOR"
+                placeholder="Carregando..."
+                value={form.nutricaoAnterior}
+                onChange={setInput('nutricaoAnterior')}
+                error={getError('nutricaoAnterior')}
+                disabled
+                id="nutricaoAnterior"
+              />
+            </>
+          )}
+        </div>
+
+        {/* Seção 8: Escore Corporal */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
+          <h2 className="text-lg font-black text-gray-900 tracking-tight">8. ESCORE CORPORAL</h2>
+          <button
+            onClick={() => setShowEscoreModal(true)}
+            className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors"
+          >
+            <span className="text-xl">📄</span>
+            <span>POP ESCORE CORPORAL</span>
+          </button>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {ESCORES.map((escore) => (
+              <button
+                key={escore.value}
+                onClick={() => setForm((p) => ({ ...p, escore: escore.value }))}
+                className={`py-3 px-4 rounded-xl font-bold transition-all transform hover:scale-105 ${
+                  form.escore === escore.value ? `${escore.color} text-black` : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                {escore.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">
@@ -541,6 +680,14 @@ export default function MortePage() {
         cadernetaName="Morte"
         registro={registroSalvo}
         caderneta="morte"
+      />
+
+      <PdfModal
+        isOpen={showEscoreModal}
+        onClose={() => setShowEscoreModal(false)}
+        images={[
+          `${BASE}docs/ECC/POP_ECC.jpeg`
+        ]}
       />
     </div>
   )

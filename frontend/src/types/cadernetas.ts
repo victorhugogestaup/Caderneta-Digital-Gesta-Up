@@ -52,26 +52,17 @@ export interface RegistroRodeio extends Registro {
   garrote: number
   novilha: number
   totalCabecas: number
-  escoreGadoIdeal: 'S' | 'N'
-  escoreGadoIdealObs: string
-  bebedourosCochos: 'S' | 'N'
-  bebedourosCochosObs: string
-  pastagensTaxaLotacao: 'S' | 'N'
-  pastagensTaxaLotacaoObs: string
-  animaisMachucadosDoentesBichados: 'S' | 'N'
-  animaisMachucadosDoentesBichadosObs: string
-  cercasCochosPorteiras: 'S' | 'N'
-  cercasCochosPorteirasObs: string
-  carrapatosMoscas: 'S' | 'N'
-  carrapatosMoscasObs: string
-  animaisEntrevero: 'S' | 'N'
-  animaisEntreveroObs: string
-  animalMorto: 'S' | 'N'
-  animalMortoObs: string
+  diagnosticos: {
+    [key: string]: {
+      valor: string | boolean | null
+      observacao: string | null
+    }
+  }
   animaisTratados: number
   escoreFezes: number | null
   equipe: number | null
   procedimentos: string[]
+  escoreGado: number | null
 }
 
 export interface RegistroSuplementacao extends Registro {
@@ -190,6 +181,9 @@ export interface RegistroMorte extends Registro {
   pesoVivo: number | null
   causaMorte: string
   causaMorteOutros: string
+  escore: number | null
+  nutricaoAtual: string | null
+  nutricaoAnterior: string | null
   diagnosticos: {
     [key: string]: {
       valor: string | null

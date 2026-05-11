@@ -27,6 +27,49 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
     }
   }, [isOpen])
 
+  // Adicionar event listener de touchmove com passive: false
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleTouchMoveWithPassive = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault()
+        const touch1 = e.touches[0]
+        const touch2 = e.touches[1]
+        const distance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        )
+        const initialDistance = parseFloat(container.dataset.initialDistance || '0')
+        const initialZoom = parseFloat(container.dataset.initialZoom || '1')
+        const initialPositionX = parseFloat(container.dataset.initialPositionX || '0')
+        const initialPositionY = parseFloat(container.dataset.initialPositionY || '0')
+        const pinchCenterX = parseFloat(container.dataset.pinchCenterX || '0')
+        const pinchCenterY = parseFloat(container.dataset.pinchCenterY || '0')
+
+        if (initialDistance > 0) {
+          const scale = Math.min(Math.max(distance / initialDistance * initialZoom, 0.5), 4)
+          const scaleChange = scale / initialZoom
+          const newPositionX = pinchCenterX - (pinchCenterX - initialPositionX) * scaleChange
+          const newPositionY = pinchCenterY - (pinchCenterY - initialPositionY) * scaleChange
+          setZoom(scale)
+          setPosition({ x: newPositionX, y: newPositionY })
+        }
+      } else if (e.touches.length === 1 && isDragging && zoom > 1) {
+        e.preventDefault()
+        const newX = e.touches[0].clientX - dragStart.x
+        const newY = e.touches[0].clientY - dragStart.y
+        setPosition({ x: newX, y: newY })
+      }
+    }
+
+    container.addEventListener('touchmove', handleTouchMoveWithPassive, { passive: false })
+    return () => {
+      container.removeEventListener('touchmove', handleTouchMoveWithPassive)
+    }
+  }, [isDragging, zoom, dragStart])
+
   // Fechar modal com ESC
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -96,41 +139,6 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
         x: e.touches[0].clientX - position.x,
         y: e.touches[0].clientY - position.y,
       })
-    }
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      e.preventDefault()
-      const touch1 = e.touches[0]
-      const touch2 = e.touches[1]
-      const distance = Math.hypot(
-        touch2.clientX - touch1.clientX,
-        touch2.clientY - touch1.clientY
-      )
-      const initialDistance = parseFloat((e.currentTarget as HTMLElement).dataset.initialDistance || '0')
-      const initialZoom = parseFloat((e.currentTarget as HTMLElement).dataset.initialZoom || '1')
-      const initialPositionX = parseFloat((e.currentTarget as HTMLElement).dataset.initialPositionX || '0')
-      const initialPositionY = parseFloat((e.currentTarget as HTMLElement).dataset.initialPositionY || '0')
-      const pinchCenterX = parseFloat((e.currentTarget as HTMLElement).dataset.pinchCenterX || '0')
-      const pinchCenterY = parseFloat((e.currentTarget as HTMLElement).dataset.pinchCenterY || '0')
-
-      if (initialDistance > 0) {
-        const scale = Math.min(Math.max(distance / initialDistance * initialZoom, 0.5), 4)
-        
-        // Calcular nova posição para zoom no ponto da pinça
-        const scaleChange = scale / initialZoom
-        const newPositionX = pinchCenterX - (pinchCenterX - initialPositionX) * scaleChange
-        const newPositionY = pinchCenterY - (pinchCenterY - initialPositionY) * scaleChange
-        
-        setZoom(scale)
-        setPosition({ x: newPositionX, y: newPositionY })
-      }
-    } else if (e.touches.length === 1 && isDragging && zoom > 1) {
-      e.preventDefault()
-      const newX = e.touches[0].clientX - dragStart.x
-      const newY = e.touches[0].clientY - dragStart.y
-      setPosition({ x: newX, y: newY })
     }
   }
 
@@ -221,7 +229,6 @@ export default function PdfModal({ isOpen, onClose, images }: PdfModalProps) {
         className="w-full h-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}

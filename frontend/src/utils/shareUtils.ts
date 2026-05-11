@@ -100,6 +100,10 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       if (caderneta === 'morte' && key.endsWith('Obs')) {
         return // Não incluir campos de observação separadamente
       }
+      // Filtrar campos de observação no rodeio (serão agrupados com o campo principal)
+      if (caderneta === 'rodeio' && key.endsWith('Obs')) {
+        return // Não incluir campos de observação separadamente
+      }
       if (caderneta === 'movimentacao') {
         // Campos de categoria individual
         if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa'].includes(key)) {
@@ -652,6 +656,9 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'idade',
       'pesoVivo',
       'causaMorte',
+      'escore',
+      'nutricaoAtual',
+      'nutricaoAnterior',
     ]
     
     ordemMorte.forEach(key => {
@@ -692,7 +699,16 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'apatiaFraqueza',
       'desordensDigestivas',
       'fraturas',
-      'decomposicao'
+      'decomposicao',
+      'doencasPrevias',
+      'medicamentosRecentes',
+      'morteSubita',
+      'animalSozinho',
+      'salivacaoExcessiva',
+      'sinaisIntoxicacao',
+      'carrapatosMoscas',
+      'encontradoVivo',
+      'medicado',
     ]
 
     texto += 'DIAGNÓSTICOS:\n'
@@ -753,14 +769,6 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       'tropa',
       'outros',
       'totalCabecas',
-      'escoreGadoIdeal',
-      'bebedourosCochos',
-      'pastagensTaxaLotacao',
-      'animaisMachucadosDoentesBichados',
-      'cercasCochosPorteiras',
-      'carrapatosMoscas',
-      'animaisEntreverados',
-      'animalMorto',
       'escoreFezes',
       'equipe',
       'escoreGado'
@@ -775,17 +783,6 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
           const valorFormatado = formatFieldValue(key, value)
           texto += `${label}: *${valorFormatado}*\n`
         }
-      } else if (['escoreGadoIdeal', 'bebedourosCochos', 'pastagensTaxaLotacao', 'animaisMachucadosDoentesBichados', 'cercasCochosPorteiras', 'carrapatosMoscas', 'animaisEntreverados', 'animalMorto'].includes(key)) {
-        // Para campos booleanos de avaliação, sempre incluir mostrando Sim/Não
-        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
-        const valorFormatado = value === true ? 'Sim' : (value === false ? 'Não' : formatFieldValue(key, value))
-        texto += `${label}: *${valorFormatado}*\n`
-        
-        // Adicionar observação imediatamente após o campo principal (apenas texto OBSERVAÇÃO)
-        const obsField = `${key}Obs`
-        if (registro[obsField] && registro[obsField] !== '') {
-          texto += `OBSERVAÇÃO: *${registro[obsField]}*\n`
-        }
       } else if (value !== null && value !== undefined && value !== '') {
         let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
         const valorFormatado = formatFieldValue(key, value)
@@ -794,6 +791,32 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         // Adicionar quebra de linha após totalCabecas
         if (key === 'totalCabecas') {
           texto += `\n`
+        }
+      }
+    })
+
+    // Iterar sobre diagnosticos na ordem específica
+    const ordemDiagnosticos = [
+      'bebedourosCochos',
+      'pastagensTaxaLotacao',
+      'animaisMachucadosDoentesBichados',
+      'cercasCochosPorteiras',
+      'carrapatosMoscas',
+      'animaisEntreverados',
+      'animalMorto',
+    ]
+
+    texto += 'AVALIAÇÃO GERAL:\n'
+    
+    ordemDiagnosticos.forEach(key => {
+      const data = (registro.diagnosticos as any)?.[key]
+      if (data && data.valor !== null && data.valor !== undefined && data.valor !== '') {
+        let label = LABELS_BY_CADERNETA[caderneta]?.[key] || key.toUpperCase()
+        const valorFormatado = data.valor === 'S' || data.valor === true ? 'Sim' : 'Não'
+        texto += `${label}: *${valorFormatado}*\n`
+        
+        if (data.observacao && data.observacao !== '') {
+          texto += `OBSERVAÇÃO: *${data.observacao}*\n`
         }
       }
     })
