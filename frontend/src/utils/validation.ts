@@ -465,7 +465,7 @@ export function validateOperacoesMaquinas(data: Record<string, unknown>): Valida
   return { isValid: errors.length === 0, errors }
 }
 
-function validateProblemas(data: Record<string, unknown>): ValidationResult {
+export function validateProblemas(data: Record<string, unknown>): ValidationResult {
   const errors: { field: string; message: string }[] = []
 
   // Validar data
@@ -511,7 +511,43 @@ function validateProblemas(data: Record<string, unknown>): ValidationResult {
   return { isValid: errors.length === 0, errors }
 }
 
-export type CadernetaType = 'maternidade' | 'pastagens' | 'rodeio' | 'suplementacao' | 'bebedouros' | 'movimentacao' | 'enfermaria' | 'morte' | 'clima' | 'abastecimento' | 'cantina' | 'limpeza' | 'operacoes-maquinas' | 'problemas'
+export function validateManutencaoMaquinas(data: Record<string, unknown>): ValidationResult {
+  const errors: { field: string; message: string }[] = []
+
+  if (!isValidDate(data.data as string))
+    errors.push({ field: 'data', message: 'Data inválida. Use DD/MM/AAAA' })
+  if (!isNonEmptyString(data.responsavelChecklist))
+    errors.push({ field: 'responsavelChecklist', message: 'Responsável checklist é obrigatório' })
+  if (!isNonEmptyString(data.veiculoTrator))
+    errors.push({ field: 'veiculoTrator', message: 'Veículo/Trator é obrigatório' })
+
+  const checklistPerguntas = [
+    'abastecimentoRealizado',
+    'lavagemRealizada',
+    'vidrosPerfeitos',
+    'freiosBons',
+    'bateriaBoa',
+    'conferiuEletrica',
+    'maquinaEngraxada',
+    'nivelAguaIdeal',
+    'conferiuNivelOleo',
+    'calibrouPneus',
+    'limpouRadiador',
+    'tapetesBons',
+    'assentoBom',
+  ]
+
+  const checklist = data.checklist as Record<string, { valor: string | null; observacao: string }> | undefined
+  checklistPerguntas.forEach(campo => {
+    const valor = checklist?.[campo]?.valor
+    if (valor !== 'S' && valor !== 'N')
+      errors.push({ field: campo, message: 'Selecione SIM ou NÃO' })
+  })
+
+  return { isValid: errors.length === 0, errors }
+}
+
+export type CadernetaType = 'maternidade' | 'pastagens' | 'rodeio' | 'suplementacao' | 'bebedouros' | 'movimentacao' | 'enfermaria' | 'morte' | 'clima' | 'abastecimento' | 'cantina' | 'limpeza' | 'operacoes-maquinas' | 'manutencao-maquinas' | 'problemas'
 
 const validators: Record<CadernetaType, (data: Record<string, unknown>) => ValidationResult> = {
   maternidade: validateMaternidade,
@@ -527,6 +563,7 @@ const validators: Record<CadernetaType, (data: Record<string, unknown>) => Valid
   cantina: validateCantina,
   limpeza: validateLimpeza,
   'operacoes-maquinas': validateOperacoesMaquinas,
+  'manutencao-maquinas': validateManutencaoMaquinas,
   problemas: validateProblemas,
 }
 

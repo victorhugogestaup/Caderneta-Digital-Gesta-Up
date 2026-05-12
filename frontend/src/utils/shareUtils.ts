@@ -845,6 +845,47 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
         }
       })
     }
+  } else if (caderneta === 'manutencao-maquinas') {
+    // Seção: Dados Principais
+    texto += `RESPONSÁVEL CHECKLIST: *${registro.responsavelChecklist || '—'}*\n`
+    texto += `OPERADOR/MOTORISTA: *${registro.operadorMotorista || '—'}*\n`
+    texto += `VEÍCULO/TRATOR: *${registro.veiculoTrator || '—'}*\n`
+    texto += `PLACA: *${registro.placa || '—'}*\n`
+    texto += `ODÔMETRO: *${registro.odometro || '—'}*\n\n`
+
+    // Seção: Checklist
+    const checklistPerguntas = [
+      { campo: 'abastecimentoRealizado', label: 'ABASTECIMENTO REALIZADO?' },
+      { campo: 'lavagemRealizada', label: 'LAVAGEM REALIZADA?' },
+      { campo: 'vidrosPerfeitos', label: 'VIDROS ESTÃO PERFEITOS?' },
+      { campo: 'freiosBons', label: 'FREIOS ESTÃO BONS?' },
+      { campo: 'bateriaBoa', label: 'BATERIA ESTÁ BOA?' },
+      { campo: 'conferiuEletrica', label: 'CONFERIU ELÉTRICA?' },
+      { campo: 'maquinaEngraxada', label: 'MÁQUINA ENGRAXADA?' },
+      { campo: 'nivelAguaIdeal', label: 'NÍVEL DE ÁGUA IDEAL?' },
+      { campo: 'conferiuNivelOleo', label: 'CONFERIU NÍVEL DO ÓLEO?' },
+      { campo: 'calibrouPneus', label: 'CALIBROU OS PNEUS?' },
+      { campo: 'limpouRadiador', label: 'LIMPOU O RADIADOR?' },
+      { campo: 'tapetesBons', label: 'TAPETES ESTÃO BONS?' },
+      { campo: 'assentoBom', label: 'ASSENTO ESTÁ BOM?' },
+    ]
+
+    texto += `CHECKLIST\n`
+    checklistPerguntas.forEach(({ campo, label }) => {
+      const valor = (registro.checklist as any)?.[campo]?.valor
+      const observacao = (registro.checklist as any)?.[campo]?.observacao
+      if (valor === 'S' || valor === 'N') {
+        const valorFormatado = valor === 'S' ? 'Sim' : 'Não'
+        texto += `${label}: *${valorFormatado}*\n`
+      }
+      if (observacao && observacao !== '') {
+        texto += `OBSERVAÇÃO: *${observacao}*\n`
+      }
+    })
+
+    if (registro.observacao && registro.observacao !== '') {
+      texto += `\nOBSERVAÇÃO: *${registro.observacao}*\n`
+    }
   } else if (caderneta === 'problemas') {
     // Seção: Localização
     texto += `LOCALIZAÇÃO\n`

@@ -1256,13 +1256,71 @@ export async function getRegistrosOperacoesMaquinas(fazendaId: string, dataInici
   if (dataInicio) {
     query = query.gte('data', dataInicio)
   }
+
   if (dataFim) {
     query = query.lte('data', dataFim)
   }
 
   const { data, error } = await query
+
   if (error) throw error
   return data
+}
+
+// ==================== REGISTROS MANUTENÇÃO MÁQUINAS ====================
+
+export async function getRegistrosManutencaoMaquinas(fazendaId: string, dataInicio?: string, dataFim?: string) {
+  let query = supabase
+    .from('registros_manutencao_maquinas')
+    .select('*')
+    .eq('fazenda_id', fazendaId)
+    .is('deleted_at', null)
+    .order('data', { ascending: false })
+
+  if (dataInicio) {
+    query = query.gte('data', dataInicio)
+  }
+
+  if (dataFim) {
+    query = query.lte('data', dataFim)
+  }
+
+  const { data, error } = await query
+
+  if (error) throw error
+  return data
+}
+
+export async function createRegistroManutencaoMaquinas(registro: any) {
+  const { data, error } = await supabase
+    .from('registros_manutencao_maquinas')
+    .insert(registro)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updateRegistroManutencaoMaquinas(id: string, registro: any) {
+  const { data, error } = await supabase
+    .from('registros_manutencao_maquinas')
+    .update(registro)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deleteRegistroManutencaoMaquinas(id: string) {
+  const { error } = await supabase
+    .from('registros_manutencao_maquinas')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) throw error
 }
 
 export async function createRegistroOperacoesMaquinas(registro: any) {

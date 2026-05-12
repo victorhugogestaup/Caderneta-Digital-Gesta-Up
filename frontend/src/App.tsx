@@ -74,6 +74,8 @@ const LimpezaPage = lazy(() => import('./pages/cadernetas/LimpezaPage'))
 const LimpezaListaPage = lazy(() => import('./pages/cadernetas/LimpezaListaPage'))
 const OperacoesMaquinasPage = lazy(() => import('./pages/cadernetas/OperacoesMaquinasPage'))
 const OperacoesMaquinasListaPage = lazy(() => import('./pages/cadernetas/OperacoesMaquinasListaPage'))
+const ManutencaoMaquinasPage = lazy(() => import('./pages/cadernetas/ManutencaoMaquinasPage'))
+const ManutencaoMaquinasListaPage = lazy(() => import('./pages/cadernetas/ManutencaoMaquinasListaPage'))
 const ProblemasPage = lazy(() => import('./pages/cadernetas/ProblemasPage'))
 const ProblemasListaPage = lazy(() => import('./pages/cadernetas/ProblemasListaPage'))
 
@@ -339,6 +341,10 @@ function AppInner() {
             {/* Operações de Máquinas */}
             <Route path="/caderneta/operacoes-maquinas" element={<OperacoesMaquinasPage />} />
             <Route path="/caderneta/operacoes-maquinas/lista" element={<OperacoesMaquinasListaPage />} />
+
+            {/* Manutenção de Máquinas */}
+            <Route path="/caderneta/manutencao-maquinas" element={<ManutencaoMaquinasPage />} />
+            <Route path="/caderneta/manutencao-maquinas/lista" element={<ManutencaoMaquinasListaPage />} />
 
             {/* Problemas */}
             <Route path="/caderneta/problemas" element={<ProblemasPage />} />

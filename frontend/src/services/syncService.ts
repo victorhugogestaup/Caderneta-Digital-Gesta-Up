@@ -292,6 +292,18 @@ const CADERNETA_COLUMNS_CONFIG: Record<CadernetaStore, CadernetaColumnConfig> = 
       { field: 'prioridade' },
     ],
   },
+  'manutencao-maquinas': {
+    columns: [
+      { field: 'data' },
+      { field: 'responsavelChecklist' },
+      { field: 'operadorMotorista' },
+      { field: 'veiculoTrator' },
+      { field: 'placa' },
+      { field: 'odometro' },
+      { field: 'checklist' },
+      { field: 'observacao', defaultValue: '' },
+    ],
+  },
 }
 
 function getColumnValues(store: CadernetaStore, registro: Registro): (string | number | null | object)[] {
@@ -342,6 +354,7 @@ const CADERNETA_TO_SUPABASE_TABLE: Record<CadernetaStore, string | string[]> = {
   cantina: 'registros_cantina',
   limpeza: 'registros_limpeza',
   'operacoes-maquinas': 'registros_operacoes_maquinas',
+  'manutencao-maquinas': 'registros_manutencao_maquinas',
   'entrada-insumos': 'registros_entrada_insumos',
   'saida-insumos': 'registros_saida_insumos',
   'insumos-por-saida': 'insumos_por_saida',
@@ -638,6 +651,18 @@ function registroToSupabase(store: CadernetaStore, registro: Registro, fazendaId
         destino_producao: registro.destinoProducao || null,
         total_produzido: registro.totalProduzido ? Number(registro.totalProduzido) : null,
       }
+    case 'manutencao-maquinas':
+      return {
+        ...baseData,
+        data: registro.data,
+        responsavel_checklist: registro.responsavelChecklist || null,
+        operador_motorista: registro.operadorMotorista || null,
+        veiculo_trator: registro.veiculoTrator || null,
+        placa: registro.placa || null,
+        odometro: registro.odometro || null,
+        checklist: registro.checklist || null,
+        observacao: registro.observacao || null,
+      }
     case 'problemas':
       return {
         ...baseData,
@@ -711,6 +736,9 @@ async function syncToSupabase(store: CadernetaStore, registro: Registro, fazenda
         case 'registros_operacoes_maquinas':
           await supabaseService.createRegistroOperacoesMaquinas(data)
           break
+        case 'registros_manutencao_maquinas':
+          await supabaseService.createRegistroManutencaoMaquinas(data)
+          break
         case 'registros_entrada_insumos':
           await supabaseService.createRegistroEntradaInsumos(data)
           break
@@ -763,6 +791,9 @@ async function syncToSupabase(store: CadernetaStore, registro: Registro, fazenda
           break
         case 'registros_operacoes_maquinas':
           await supabaseService.updateRegistroOperacoesMaquinas(supabaseId, data)
+          break
+        case 'registros_manutencao_maquinas':
+          await supabaseService.updateRegistroManutencaoMaquinas(supabaseId, data)
           break
         case 'registros_entrada_insumos':
           await supabaseService.updateRegistroEntradaInsumos(supabaseId, data)

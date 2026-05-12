@@ -221,6 +221,23 @@ const schemas: Record<string, Joi.ObjectSchema> = {
     observacao: Joi.string().allow(''),
   }),
 
+  'manutencao-maquinas': Joi.object({
+    data: Joi.string().pattern(/^\d{2}\/\d{2}\/\d{4}$/).required(),
+    responsavelChecklist: Joi.string().required(),
+    operadorMotorista: Joi.string().allow(''),
+    veiculoTrator: Joi.string().required(),
+    placa: Joi.string().allow(''),
+    odometro: Joi.string().allow(''),
+    checklist: Joi.object().pattern(
+      /\S/,
+      Joi.object({
+        valor: Joi.alternatives().try(Joi.boolean(), Joi.string().valid('S', 'N').allow(null), Joi.valid(null)),
+        observacao: Joi.string().allow('', null)
+      })
+    ).default({}),
+    observacao: Joi.string().allow(''),
+  }),
+
   problemas: Joi.object({
     data: Joi.string().pattern(/^\d{2}\/\d{2}\/\d{4}$/).required(),
     setor: Joi.string().valid('Gado', 'Máquinas', 'ADM', 'Fábrica', 'Manutenção', 'Terceirizado').required(),
@@ -269,7 +286,7 @@ export function validateSyncRequest(req: Request, res: Response, next: NextFunct
     planilhaUrl: Joi.string().uri().required(),
     registros: Joi.array().items(Joi.object({
       id: Joi.string().required(),
-      caderneta: Joi.string().valid('maternidade', 'pastagens', 'rodeio', 'suplementacao', 'bebedouros', 'movimentacao', 'morte', 'clima', 'abastecimento', 'cantina', 'problemas', 'enfermaria').required(),
+      caderneta: Joi.string().valid('maternidade', 'pastagens', 'rodeio', 'suplementacao', 'bebedouros', 'movimentacao', 'morte', 'clima', 'abastecimento', 'cantina', 'problemas', 'enfermaria', 'manutencao-maquinas').required(),
       operacao: Joi.string().valid('create', 'update', 'delete').required(),
       dados: Joi.object().required(),
     })).min(1).required(),

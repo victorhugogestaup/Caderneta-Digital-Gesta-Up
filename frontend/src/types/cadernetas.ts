@@ -210,3 +210,38 @@ export interface RegistroProblemas extends Registro {
   tipoProblemaObs: string
   prioridade: string
 }
+
+export interface RegistroManutencaoMaquinas extends Registro {
+  responsavelChecklist: string
+  operadorMotorista: string
+  veiculoTrator: string
+  placa: string
+  odometro: string
+  abastecimentoRealizado: boolean
+  abastecimentoRealizadoObs: string
+  lavagemRealizada: boolean
+  lavagemRealizadaObs: string
+  vidrosPerfeitos: boolean
+  vidrosPerfeitosObs: string
+  freiosBons: boolean
+  freiosBonsObs: string
+  bateriaBoa: boolean
+  bateriaBoaObs: string
+  conferiuEletrica: boolean
+  conferiuEletricaObs: string
+  maquinaEngraxada: boolean
+  maquinaEngraxadaObs: string
+  nivelAguaIdeal: boolean
+  nivelAguaIdealObs: string
+  conferiuNivelOleo: boolean
+  conferiuNivelOleoObs: string
+  calibrouPneus: boolean
+  calibrouPneusObs: string
+  limpouRadiador: boolean
+  limpouRadiadorObs: string
+  tapetesBons: boolean
+  tapetesBonsObs: string
+  assentoBom: boolean
+  assentoBomObs: string
+  observacao: string
+}
