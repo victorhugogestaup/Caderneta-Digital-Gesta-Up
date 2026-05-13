@@ -104,10 +104,6 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       if (caderneta === 'rodeio' && key.endsWith('Obs')) {
         return // Não incluir campos de observação separadamente
       }
-      // Filtrar itens do almoxarifado (serão tratados separadamente)
-      if (caderneta === 'almoxarifado' && key === 'itens') {
-        return // Não incluir itens separadamente
-      }
       if (caderneta === 'movimentacao') {
         // Campos de categoria individual
         if (['vaca', 'touro', 'boiGordo', 'boiMagro', 'garrote', 'bezerro', 'novilha', 'tropa'].includes(key)) {
@@ -729,6 +725,73 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
     }
 
     // Adicionar observação no final
+    if (registro.observacao && registro.observacao !== '') {
+      texto += `\nOBSERVAÇÃO: *${registro.observacao}*\n`
+    }
+  } else if (caderneta === 'almoxarifado') {
+    // Para almoxarifado, exibir quem entregou e quem pegou
+    texto += `QUEM ENTREGOU: *${registro.quemEntregou || '—'}*\n`
+    texto += `QUEM PEGOU: *${registro.quemPegou || '—'}*\n\n`
+
+    // Mapear tipos de itens para labels legíveis
+    const tipoItemLabelMap: Record<string, string> = {
+      ferramenta: 'FERRAMENTA',
+      medicamento: 'MEDICAMENTO',
+      parafusos: 'PARAFUSOS',
+      porcas: 'PORCAS',
+      'barra rosca': 'BARRA ROSCA',
+      inseticida: 'INSETICIDA',
+      herbicida: 'HERBICIDA',
+      fungicida: 'FUNGICIDA',
+      vermífugo: 'VERMÍFUGO',
+      filtro: 'FILTRO',
+      'óleo lubrificante': 'ÓLEO LUBRIFICANTE',
+      eletrodo: 'ELETRODO',
+      cruzeta: 'CRUZETA',
+      mancal: 'MANCAL',
+      rolamento: 'ROLAMENTO',
+      mangueira: 'MANGUEIRA',
+      detergente: 'DETERGENTE',
+      conexões: 'CONEXÕES',
+      pregos: 'PREGOS',
+      torneira: 'TORNEIRA',
+      lâmpada: 'LÂMPADA',
+      fios: 'FIOS',
+      epi: 'EPI',
+      calçados: 'CALÇADOS',
+    }
+
+    // Exibir itens
+    if (registro.itens && Array.isArray(registro.itens) && registro.itens.length > 0) {
+      texto += 'ITENS\n'
+      registro.itens.forEach((item: any, index: number) => {
+        const tipoLabel = tipoItemLabelMap[item.tipo] || item.tipo?.toUpperCase() || '—'
+        texto += `${index + 1}. ${tipoLabel} - *${item.quantidade || '—'}*\n`
+
+        // Classificação (se preenchida)
+        if (item.tipoClassificacao && item.tipoClassificacao !== '') {
+          texto += `   Classificação: *${item.tipoClassificacao}*\n`
+        }
+
+        // Setor
+        if (item.setor && item.setor !== '') {
+          texto += `   Setor: *${item.setor}*\n`
+        }
+
+        // Devolução
+        if (item.necessitaDevolucao === 'S') {
+          const prazoLabel = item.prazoDevolucao || '—'
+          texto += `   Devolução: Sim (*${prazoLabel}*)\n`
+        } else {
+          texto += `   Devolução: Não\n`
+        }
+
+        // Quebra de linha após cada item
+        texto += '\n'
+      })
+    }
+
+    // Observação
     if (registro.observacao && registro.observacao !== '') {
       texto += `\nOBSERVAÇÃO: *${registro.observacao}*\n`
     }

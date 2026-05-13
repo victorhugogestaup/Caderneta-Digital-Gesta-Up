@@ -618,8 +618,6 @@ export function validateAlmoxarifado(data: Record<string, unknown>): ValidationR
           errors.push({ field: `itens[${index}].tipo`, message: 'Tipo do item é obrigatório' })
         if (!isPositiveNumber(item.quantidade))
           errors.push({ field: `itens[${index}].quantidade`, message: 'Quantidade deve ser maior que zero' })
-        if (!isNonEmptyString(item.tipoClassificacao))
-          errors.push({ field: `itens[${index}].tipoClassificacao`, message: 'Classificação é obrigatória' })
         if (!isNonEmptyString(item.setor))
           errors.push({ field: `itens[${index}].setor`, message: 'Setor é obrigatório' })
         if (item.necessitaDevolucao === 'S' && !isNonEmptyString(item.prazoDevolucao))
