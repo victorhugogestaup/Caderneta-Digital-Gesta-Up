@@ -402,12 +402,7 @@ export default function EntradaInsumosPage() {
 
             {/* Seção 2: Itens da Entrada */}
             <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100 flex flex-col gap-5">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">2. ITENS DA ENTRADA</h2>
-                <span className="text-sm text-gray-600">
-                  Total: R$ {getValorTotalEntrada()}
-                </span>
-              </div>
+              <h2 className="text-lg font-black text-gray-900 tracking-tight">2. ITENS DA ENTRADA</h2>
               
               {form.itens.map((item, index) => (
                 <div key={item.id} className="border border-gray-200 rounded-xl p-4 flex flex-col gap-3">
@@ -467,6 +462,10 @@ export default function EntradaInsumosPage() {
                   </div>
                 </div>
               ))}
+              
+              <span className="text-base text-gray-600">
+                Total: R$ {getValorTotalEntrada()}
+              </span>
               
               <Button 
                 onClick={addItem} 

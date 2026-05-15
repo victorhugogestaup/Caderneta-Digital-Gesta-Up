@@ -28,7 +28,6 @@ export default function FarmLogo({
   borderRadius = BORDER_RADIUS,
   farmBorderRadius,
   className = '',
-  gap = 'gap-12',
   middleText,
 }: FarmLogoProps) {
   const sizeConfig = SIZES[size]
@@ -39,7 +38,7 @@ export default function FarmLogo({
   const farmRadius = farmBorderRadius || (isSirio ? 'rounded-full' : borderRadius)
 
   return (
-    <div className={`flex items-center ${gap} ${className}`}>
+    <div className={`flex items-center ${className}`}>
       {type !== 'farm' && (
         <img
           src={LOGO_URL}
@@ -48,7 +47,7 @@ export default function FarmLogo({
         />
       )}
       {middleText && (
-        <div className="flex flex-col items-center justify-center gap-1">
+        <div className="flex-1 flex flex-col items-center justify-center gap-1">
           <span className="text-xl font-bold text-white leading-none">Manej'Us</span>
           <span className="text-xl font-bold text-yellow-400 leading-none">360</span>
         </div>
