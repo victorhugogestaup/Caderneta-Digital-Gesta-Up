@@ -14,7 +14,13 @@ const config: CapacitorConfig = {
       backgroundColor: "#1a3a2a",
       showSpinner: true,
       spinnerStyle: "large",
-      spinnerColor: "#ffffff"
+      spinnerColor: "#ffffff",
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      androidSpinnerStyle: "large",
+      iosSpinnerStyle: "small",
+      imageScale: "aspectFit",
+      backgroundColor: "#1a3a2a"
     },
     App: {
       statusBarStyle: 'LIGHT'

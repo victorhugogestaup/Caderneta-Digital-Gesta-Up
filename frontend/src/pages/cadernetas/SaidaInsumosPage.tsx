@@ -10,6 +10,7 @@ import { loadCadastroData } from '../../services/cadastroData'
 import { BACKEND_URL } from '../../utils/constants'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { getDietasNomes } from '../../services/supabaseService'
 
 interface FormState {
   dataProducao: string
@@ -29,7 +30,7 @@ const makeInitial = (): FormState => ({
 
 export default function SaidaInsumosPage() {
   const navigate = useNavigate()
-  const { fazenda, cadastroSheetUrl, logoUrl } = useSelector((state: RootState) => state.config)
+  const { fazenda, fazendaId, cadastroSheetUrl, logoUrl } = useSelector((state: RootState) => state.config)
   const [form, setForm] = useState<FormState>(makeInitial())
   const [errors, setErrors] = useState<{ field: string; message: string }[]>([])
   const [salvando, setSalvando] = useState(false)
@@ -39,6 +40,8 @@ export default function SaidaInsumosPage() {
   const [suplementacaoData, setSuplementacaoData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [loadingSuplementacao, setLoadingSuplementacao] = useState(false)
+  const [dietasDisponiveis, setDietasDisponiveis] = useState<string[]>([])
+  const [loadingDietas, setLoadingDietas] = useState(false)
 
   const set = (field: keyof FormState) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }))
@@ -46,6 +49,30 @@ export default function SaidaInsumosPage() {
   const getError = (field: string) => errors.find((e) => e.field === field)?.message
 
   const DESTINOS = ['Cria', 'Recria', 'Engorda', 'Tropa', 'Outros Animais']
+
+  // Carregar dietas do Supabase
+  useEffect(() => {
+    const loadDietas = async () => {
+      if (!fazendaId) {
+        setDietasDisponiveis([])
+        setLoadingDietas(false)
+        return
+      }
+
+      setLoadingDietas(true)
+      try {
+        const dietas = await getDietasNomes(fazendaId)
+        setDietasDisponiveis(dietas)
+      } catch (error) {
+        console.error('Erro ao carregar dietas:', error)
+        setDietasDisponiveis([])
+      } finally {
+        setLoadingDietas(false)
+      }
+    }
+
+    loadDietas()
+  }, [fazendaId])
 
   useEffect(() => {
     const loadData = async () => {
@@ -228,22 +255,22 @@ export default function SaidaInsumosPage() {
                 onChange={set('dataProducao')}
                 error={getError('dataProducao')}
               />
-              {suplementacaoData?.dietas && suplementacaoData.dietas.length > 0 ? (
+              {dietasDisponiveis.length > 0 ? (
                 <SearchableModal
                   label="DIETA PRODUZIDA *"
                   value={form.dietaProduzida}
                   onChange={set('dietaProduzida')}
                   error={getError('dietaProduzida')}
-                  options={suplementacaoData.dietas}
+                  options={dietasDisponiveis}
                   placeholder="Buscar dieta..."
-                  disabled={loadingSuplementacao}
+                  disabled={loadingDietas}
                   id="dietaProduzida"
                   name="dietaProduzida"
                 />
               ) : (
                 <Input
                   label="DIETA PRODUZIDA *"
-                  placeholder={loadingSuplementacao ? 'Carregando...' : 'Digite a dieta'}
+                  placeholder={loadingDietas ? 'Carregando dietas...' : 'Digite a dieta'}
                   value={form.dietaProduzida}
                   onChange={(e) => set('dietaProduzida')(e.target.value)}
                   error={getError('dietaProduzida')}
