@@ -218,8 +218,7 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
     // Seção: Informações Básicas
     texto += `RESPONSÁVEL: *${registro.responsavel || '—'}*\n`
     texto += `PASTO: *${registro.pasto || '—'}*\n`
-    texto += `NÚMERO LOTE: *${registro.numeroLote || '—'}*\n`
-    texto += `CATEGORIA: *${registro.categoria || '—'}*\n\n`
+    texto += `NÚMERO LOTE: *${registro.numeroLote || '—'}*\n\n`
     
     // Seção: Inspeção Atual
     if (registro.numeroBebedouro) {
@@ -277,6 +276,21 @@ export const formatarRegistroComoTexto = (registro: Registro, caderneta: string)
       if (registro.metaIntervaloLimpeza) {
         texto += `META INTERVALO LIMPEZA: *${registro.metaIntervaloLimpeza}*\n`
       }
+      // Status do intervalo
+      if (registro.tempoDesdeLimpeza && registro.metaIntervaloLimpeza) {
+        const tempoDesde = parseInt(registro.tempoDesdeLimpeza) || 0
+        const meta = parseInt(registro.metaIntervaloLimpeza) || 0
+        if (tempoDesde > meta) {
+          texto += `STATUS INTERVALO: *Atrasado (${tempoDesde - meta} dias)*\n`
+        } else {
+          texto += `STATUS INTERVALO: *Dentro da meta*\n`
+        }
+      }
+    }
+    
+    // Capacidade do bebedouro
+    if (registro.capacidadeLitros) {
+      texto += `\nCAPACIDADE: *${registro.capacidadeLitros} Litros*\n`
     }
   } else if (caderneta === 'abastecimento') {
     // Seção: Dados do Abastecimento

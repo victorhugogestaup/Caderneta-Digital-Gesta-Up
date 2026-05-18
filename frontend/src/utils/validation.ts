@@ -231,8 +231,6 @@ export function validateBebedouros(data: Record<string, unknown>): ValidationRes
     errors.push({ field: 'responsavel', message: 'Responsável é obrigatório' })
   if (!isNonEmptyString(data.pasto))
     errors.push({ field: 'pasto', message: 'Pasto é obrigatório' })
-  if (!isNonEmptyString(data.categoria))
-    errors.push({ field: 'categoria', message: 'Categoria é obrigatória' })
   if (!isScaleValue(data.leituraBebedouro, 1, 3, true))
     errors.push({ field: 'leituraBebedouro', message: 'Leitura do bebedouro deve ser entre 1 e 3' })
 
